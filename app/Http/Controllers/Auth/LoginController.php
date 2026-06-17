@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Models\User;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Auth;
@@ -61,62 +62,89 @@ class LoginController extends Controller
      */
     public function handleProviderCallback($provider)
     {
-        $user = Socialite::driver($provider)->user();
-        $authUser = $this->findUser($user);
+        $socialUser = Socialite::driver($provider)->user();
 
-        if($authUser)
-        {
+        $authUser = $this->findOrLinkUser($socialUser, $provider);
+
+        if ($authUser) {
             Auth::login($authUser, true);
             return redirect($this->redirectTo);
         }
 
-        $validator = $this->validateSocialUser($user);
+        $validator = $this->validateSocialUser($socialUser);
 
-        if(gettype($validator) === "object")
-        {
+        if (gettype($validator) === "object") {
             return redirect('login')
                 ->withErrors($validator)
                 ->withInput();
         }
 
-
-        $registered_user = $this->createUser($user, $provider);
+        $registered_user = $this->createUser($socialUser, $provider);
         Auth::login($registered_user, true);
+
         return redirect($this->redirectTo);
-
-
-    }
-
-    private function findUser($user)
-    {
-
-        $authUser = User::where('provider_id', $user->id)->first();
-        if ($authUser) return $authUser;
-
-
     }
 
     /**
-     * If a user has registered before using social auth, return the user
-     * else, create a new user object.
-     * @param  $user Socialite user object
-     * @param $provider Social auth provider
-     * @return  User
+     * Resolve an existing account for the social user. Match first on the
+     * provider id, then fall back to linking by the provider-supplied email
+     * (so a user who originally registered with that email is not duplicated).
+     * The lookup + linking runs in a transaction to avoid races.
      */
-    public function createUser($user, $provider)
+    private function findOrLinkUser($socialUser, string $provider): ?User
     {
+        return DB::transaction(function () use ($socialUser, $provider) {
+            $authUser = User::where('provider_id', $socialUser->id)
+                ->where('provider', $provider)
+                ->first();
 
-        $username = $this->get_user_name($user->email);
+            if ($authUser) {
+                return $authUser;
+            }
 
-        return User::create([
-            'name'        => $user->name,
-            'email'       => $user->email,
-            'provider'    => $provider,
-            'provider_id' => $user->id,
-            'username'    => $username
-        ]);
+            if (empty($socialUser->email)) {
+                return null;
+            }
 
+            $existing = User::where('email', $socialUser->email)->first();
 
+            if ($existing) {
+                // Link the social identity to the existing account. Provider
+                // fields are set explicitly (they are not mass assignable).
+                $existing->provider = $provider;
+                $existing->provider_id = $socialUser->id;
+                $existing->save();
+
+                return $existing;
+            }
+
+            return null;
+        });
+    }
+
+    /**
+     * Create a brand new user from the social profile. Provider identity
+     * fields are assigned explicitly rather than mass assigned, and privileged
+     * fields (role_id) are left to their database default.
+     *
+     * @param  object  $user      Socialite user object
+     * @param  string  $provider  Social auth provider key
+     */
+    public function createUser($user, string $provider): User
+    {
+        return DB::transaction(function () use ($user, $provider) {
+            $newUser = new User([
+                'name'     => $user->name,
+                'email'    => $user->email,
+                'username' => $this->get_user_name($user->email),
+            ]);
+
+            $newUser->provider = $provider;
+            $newUser->provider_id = $user->id;
+            $newUser->save();
+
+            return $newUser;
+        });
     }
 
     private function validateSocialUser($data)

@@ -19,6 +19,7 @@ use App\Http\Models\Comments;
 use App\Http\Models\Menu;
 use App\Http\Models\CPanel\CPanelSiteOptions;
 use App\Http\Models\CPanel\CPanelGeneralSettings;
+use App\Http\Models\CPanel\CPanelSeoSettings;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\QueryException;
 use Doctrine\DBAL\Driver\PDOException;
@@ -90,7 +91,7 @@ function get_post_list($fields = []):object
 
     if(empty($fields)) $fields = ['posts.id', 'post_translations.title', 'post_translations.slug'];
     $posts = Post::join('post_translations', 'posts.id', '=','post_translations.post_id')
-        ->select($fields)->orderBy('id', 'ASC')->where('locale', $locale)->get();
+        ->select($fields)->orderBy('posts.id', 'ASC')->where('locale', $locale)->get();
 
     return $posts;
 
@@ -102,7 +103,7 @@ function get_pages_list($fields = []):object
 
     if(empty($fields)) $fields = ['pages.id', 'post_translations.title', 'post_translations.slug'];
     $pages = Page::join('page_translations', 'pages.id', '=','page_translations.page_id')
-        ->select($fields)->orderBy('id', 'ASC')->where('locale', $locale)->get();
+        ->select($fields)->orderBy('pages.id', 'ASC')->where('locale', $locale)->get();
 
     return $pages;
 
@@ -405,7 +406,7 @@ function render_menu($menu_data, $params)
 
     $locale = get_current_lang();
 
-    if($locale === env("LOCALE"))
+    if($locale === config('app.locale'))
     {
         $locale = null;
     }
@@ -427,28 +428,35 @@ function render_menu($menu_data, $params)
 
         $slug  = $menu_item->slug === "/" ? " " : $menu_item->slug;
 
-        $link_part = strpos($slug, "https") !== false ? $type.$slug : env("APP_URL").'/'.$type.$slug;
+        $link_part = strpos($slug, "https") !== false ? $type.$slug : config('app.url').'/'.$type.$slug;
 
         $link = $route_name === "cpanel_edit_menu" ? "javascript:void()": $link_part;
 
-        $label = $route_name === "cpanel_edit_menu" ? "<span>{$menu_item->title}</span>" : $menu_item->title;
+        // Menu titles/slugs/types are user supplied; escape everything that is
+        // interpolated into HTML or HTML attributes to prevent stored XSS.
+        $safe_title = e($menu_item->title);
+        $safe_type  = e($menu_item->type);
+        $safe_slug  = e($menu_item->slug);
+        $safe_link  = e($link);
+
+        $label = $route_name === "cpanel_edit_menu" ? "<span>{$safe_title}</span>" : $safe_title;
 
         if($route_name === "cpanel_edit_menu")
         {
-            $html .= $menu_type === "list" ? "<li class='$item_class' data-type='$menu_item->type' data-title='$menu_item->title' data-link='$menu_item->slug'>" : null;
-            $html.= "<a href='$link' class='$link_class'>".$label;
+            $html .= $menu_type === "list" ? "<li class='$item_class' data-type='$safe_type' data-title='$safe_title' data-link='$safe_slug'>" : null;
+            $html.= "<a href='$safe_link' class='$link_class'>".$label;
         }
         else
         {
             if(isset($menu_item->children) && is_array($menu_item->children) && !empty($menu_item->children))
             {
                 $html .= $menu_type === "list" ? "<li class='$item_class $item_class_with_submenu'>" : null;
-                $html.= "<a href='$link' class='$link_class $item_link_class_with_submenu'>".$label;
+                $html.= "<a href='$safe_link' class='$link_class $item_link_class_with_submenu'>".$label;
             }
             else
             {
                 $html .= $menu_type === "list" ? "<li class='$item_class'>" : null;
-                $html.= "<a href='$link' class='$link_class'>".$label;
+                $html.= "<a href='$safe_link' class='$link_class'>".$label;
             }
         }
 
@@ -619,6 +627,65 @@ function get_general_settings($key = null)
     return $data;
 }
 
+/**
+ * Phase 7 (SEO/GEO): read the global SEO settings singleton (row id = 1).
+ *
+ * Returns the whole model when $key is null, otherwise the single attribute.
+ * Tolerant of a missing table/row (e.g. before the migration runs in some
+ * edge cases) so the public theme never fatals on it.
+ *
+ * @param  string|null  $key
+ * @return mixed
+ */
+function get_seo_settings($key = null)
+{
+    // Reads go through genealabs/model-caching (Cachable on the model): cached
+    // in production, fresh in tests where the cache is disabled. No local
+    // static cache — that would leak stale state across requests in-process.
+    try {
+        $settings = CPanelSeoSettings::first();
+    } catch (\Throwable $e) {
+        $settings = null;
+    }
+
+    if (is_null($settings)) {
+        return null;
+    }
+
+    if (is_null($key)) {
+        return $settings;
+    }
+
+    return $settings->$key ?? null;
+}
+
+/**
+ * Phase 7 (SEO/GEO): render a schema.org JSON-LD block.
+ *
+ * Encodes with flags that keep slashes/unicode readable and escapes the
+ * closing </script> sequence so structured data can never break out of the
+ * <script type="application/ld+json"> element.
+ *
+ * @param  array  $data
+ * @return string
+ */
+function json_ld(array $data): string
+{
+    $json = json_encode(
+        $data,
+        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT
+    );
+
+    if ($json === false) {
+        return '';
+    }
+
+    // Prevent any user-supplied value from terminating the script element.
+    $json = str_replace('<', '<', $json);
+
+    return '<script type="application/ld+json">' . $json . '</script>';
+}
+
 function get_translated_data_params($entity)
 {
     $data = [];
@@ -737,11 +804,11 @@ function get_category_posts_count(int $category_id)
 {
     if(!$category_id) return false;
 
-    $data = Category::select('id')->with('posts:title')->where('id', $category_id)->get();
+    $category = Category::withCount('posts')->find($category_id);
 
-    $count = count($data[0]->posts);
+    if(is_null($category)) return 0;
 
-    return $count;
+    return $category->posts_count;
 }
 
 function pretty_url($links)
@@ -878,11 +945,14 @@ function get_translation_links()
             $type = '';
             break;
         case 'posts':
+        case 'posts_localized':
             $model = new PostTranslation;
             $field_name = 'post_id';
             $type = 'posts/';
             break;
         case 'categories_first_page':
+        case 'categories_display_pages':
+        case 'categories_localized':
             $model = new CategoryTranslation;
             $field_name = 'category_id';
             $type = 'category/';
@@ -928,7 +998,7 @@ function get_translation_links()
             if($slug != "/") $updated_key .='/';
         }
 
-        $result[$key]['url'] = env('APP_URL').'/'.$updated_key.$type.$translated_slug;
+        $result[$key]['url'] = config('app.url').'/'.$updated_key.$type.$translated_slug;
 
 
     }
@@ -941,7 +1011,7 @@ function get_current_lang_prefix()
 {
     $current_lang = get_current_lang();
 
-    if($current_lang === env('LOCALE'))
+    if($current_lang === config('app.locale'))
     {
         $current_lang = null;
     }

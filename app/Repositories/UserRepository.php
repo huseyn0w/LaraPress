@@ -51,22 +51,34 @@ class UserRepository extends BaseRepository
         $this->logged_user_id = get_logged_user_id();
     }
 
+    /**
+     * Update the user's own profile from validated input.
+     *
+     * Only whitelisted (validated) fields are applied, and privileged columns
+     * (role_id, provider, provider_id) are stripped so a front-end user can
+     * never escalate their role or hijack a social identity through this path.
+     *
+     * @param  int  $id
+     * @param  \Illuminate\Foundation\Http\FormRequest  $request
+     * @return bool
+     */
     public function update(int $id, $request)
     {
+        $data = $request->validated();
 
-        $data = $request->all();
+        unset($data['role_id'], $data['provider'], $data['provider_id']);
 
-        if($request->hasFile('avatar')){
-            $data = $request->except(['avatar']);
-            $data['avatar'] = uploadImage($request->avatar);
+        // The validated avatar (when present) is an uploaded file; replace it
+        // with the stored image path before persisting.
+        if ($request->hasFile('avatar')) {
+            $data['avatar'] = uploadImage($request->file('avatar'));
+        } else {
+            unset($data['avatar']);
         }
 
         $user = $this->model->findOrFail($id);
 
-        $result = $user->update($data) ? true : false;
-
-
-        return $result;
+        return (bool) $user->update($data);
     }
 
 

@@ -26,6 +26,17 @@ class ValidatePostData extends LaravellaRequest
     }
 
     /**
+     * Phase 7: normalise the per-entity noindex checkbox to a real boolean so
+     * an unchecked box persists as false rather than being dropped.
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('meta_noindex')) {
+            $this->merge(['meta_noindex' => $this->boolean('meta_noindex')]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array
@@ -37,8 +48,12 @@ class ValidatePostData extends LaravellaRequest
             'title'             => ['string', 'required', 'max:20'],
             'slug'              => ['required', 'string', 'max:20'],
             'content'           => 'nullable|string',
+            'preview'           => 'nullable|string',
+            'author_id'         => 'required|integer|exists:users,id',
             'meta_keywords'     => 'required|string',
             'meta_description'  => 'required|string',
+            'canonical_url'     => 'nullable|url|max:255',
+            'meta_noindex'      => 'sometimes|boolean',
             'created_at'        => 'sometimes|required|string',
             'updated_at'        => 'sometimes|required|string',
             'category'          => 'required|array',

@@ -26,7 +26,7 @@ class ChangePasswordRequest extends FormRequest
     public function rules()
     {
         return [
-            'g-recaptcha-response'          => 'required|captcha',
+            'g-recaptcha-response'          => ['nullable', 'captcha'],
             'password'                      => 'string|min:8|same:password_confirmation',
             'password_confirmation'         => 'string|min:8',
         ];

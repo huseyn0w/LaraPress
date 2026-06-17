@@ -1,0 +1,35 @@
+# Keep any future image build lean. Most of these are bind-mounted or
+# regenerated inside the container during local dev.
+.git
+.gitignore
+.gitattributes
+
+# Dependencies / build output (installed/built inside the container or on host)
+vendor
+node_modules
+public/build
+public/hot
+public/storage
+
+# Secrets & local environment
+.env
+.env.backup
+*.key
+storage/*.key
+
+# Docker / local tooling
+docker
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+.dockerignore
+
+# Caches / logs / IDE
+.phpunit.result.cache
+storage/logs/*.log
+npm-debug.log
+yarn-error.log
+.idea
+.vscode
+_ide_helper.php
+.phpstorm.meta.php

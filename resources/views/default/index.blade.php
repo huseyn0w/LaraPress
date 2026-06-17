@@ -6,8 +6,8 @@
  * Date: 19.07.2019
  */
 ?>
-@include(env('TEMPLATE_NAME').'.header')
+@include(config('app.template_name').'.header')
 
 @yield('content')
 
-@include(env('TEMPLATE_NAME').'.footer')
+@include(config('app.template_name').'.footer')

@@ -1,0 +1,516 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ |----------------------------------------------------------------------------
+ | Laravella admin — scoped Tailwind reset (.theme-admin)
+ |----------------------------------------------------------------------------
+ | Tailwind Preflight stays disabled GLOBALLY (tailwind.config.js) so the
+ | public theme's own `.theme-default` reset is never double-applied. The admin
+ | now ships its OWN scoped reset under `.theme-admin`, added to the admin
+ | <body>. The public theme never receives `.theme-admin`, and vice-versa, so
+ | the two surfaces are fully isolated. Bootstrap CSS is no longer loaded.
+ */
+@layer base {
+    .theme-admin *,
+    .theme-admin *::before,
+    .theme-admin *::after {
+        box-sizing: border-box;
+        border-width: 0;
+        border-style: solid;
+        border-color: theme('colors.ink.200');
+    }
+
+    .theme-admin {
+        margin: 0;
+        background-color: theme('colors.ink.50');
+        color: theme('colors.ink.800');
+        font-family: theme('fontFamily.sans');
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    .theme-admin h1,
+    .theme-admin h2,
+    .theme-admin h3,
+    .theme-admin h4,
+    .theme-admin h5,
+    .theme-admin h6,
+    .theme-admin p,
+    .theme-admin figure,
+    .theme-admin blockquote {
+        margin: 0;
+    }
+
+    /* Admin headings use the same sans family as the UI — no display serif in a
+       dense product context. Hierarchy comes from weight + size, not voice. */
+    .theme-admin h1,
+    .theme-admin h2,
+    .theme-admin h3,
+    .theme-admin h4 {
+        font-family: theme('fontFamily.sans');
+        font-weight: 600;
+        letter-spacing: -0.011em;
+        color: theme('colors.ink.900');
+        text-wrap: balance;
+    }
+
+    .theme-admin a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .theme-admin img,
+    .theme-admin svg,
+    .theme-admin video {
+        display: block;
+        max-width: 100%;
+        height: auto;
+    }
+
+    .theme-admin svg {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .theme-admin ul,
+    .theme-admin ol {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .theme-admin button {
+        font-family: inherit;
+        font-size: 100%;
+        line-height: inherit;
+        color: inherit;
+        margin: 0;
+        padding: 0;
+        background: none;
+        cursor: pointer;
+    }
+
+    .theme-admin input,
+    .theme-admin textarea,
+    .theme-admin select {
+        font-family: inherit;
+        font-size: 100%;
+        color: inherit;
+    }
+
+    .theme-admin :focus-visible {
+        outline: 2px solid theme('colors.brand.600');
+        outline-offset: 2px;
+    }
+
+    .theme-admin [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    /* ---------------------------------------------------------------------
+     | Form controls
+     | --------------------------------------------------------------------- */
+    .theme-admin .field {
+        @apply mb-4;
+    }
+
+    .theme-admin .field-label,
+    .theme-admin .card-body label {
+        @apply mb-1.5 block text-sm font-medium text-ink-700;
+    }
+
+    /* `.form-control` is the legacy hook used across every admin form. We keep
+       the class name so server markup and validation stay identical, and just
+       restyle it as a clean Tailwind input. */
+    .theme-admin .form-control,
+    .theme-admin input[type='text'],
+    .theme-admin input[type='email'],
+    .theme-admin input[type='password'],
+    .theme-admin input[type='number'],
+    .theme-admin input[type='url'],
+    .theme-admin input[type='search'],
+    .theme-admin textarea,
+    .theme-admin select {
+        @apply block w-full rounded-lg border border-ink-200 bg-surface px-3.5 py-2.5
+            text-sm text-ink-900 placeholder:text-ink-400 shadow-sm
+            transition duration-150 ease-out-expo
+            focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25
+            disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-400;
+    }
+
+    .theme-admin textarea {
+        @apply min-h-[7rem] leading-relaxed;
+    }
+
+    .theme-admin select[multiple] {
+        @apply min-h-[8rem] py-1.5;
+    }
+
+    .theme-admin .field-desc p {
+        @apply mt-1.5 text-xs leading-relaxed text-ink-500;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Buttons — one consistent vocabulary across the panel.
+     | The legacy `.btn` / `.btn-fill` / `.btn-info` classes are mapped so the
+     | existing markup keeps working while looking modern.
+     | --------------------------------------------------------------------- */
+    .theme-admin .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+            text-sm font-semibold leading-none
+            transition duration-150 ease-out-expo
+            focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600
+            active:translate-y-px disabled:cursor-not-allowed disabled:opacity-60 disabled:active:translate-y-0;
+    }
+
+    /* Primary action = brand. Maps the dozens of `.btn-info .btn-fill` CTAs. */
+    .theme-admin .btn-info,
+    .theme-admin .btn-primary,
+    .theme-admin .btn-fill {
+        @apply bg-brand-600 text-white shadow-sm hover:bg-brand-700;
+    }
+
+    .theme-admin .btn-success {
+        @apply bg-success-600 text-white shadow-sm hover:bg-success-700;
+    }
+
+    .theme-admin .btn-warning {
+        @apply bg-warning-600 text-white shadow-sm hover:bg-warning-700;
+    }
+
+    .theme-admin .btn-danger {
+        @apply bg-danger-600 text-white shadow-sm hover:bg-danger-700;
+    }
+
+    /* Neutral / secondary outline button. */
+    .theme-admin .btn-ghost,
+    .theme-admin .btn-link.btn-simple {
+        @apply border border-ink-200 bg-surface text-ink-700 hover:border-ink-300 hover:bg-ink-50;
+    }
+
+    .theme-admin .btn-link {
+        @apply text-brand-700 hover:text-brand-800;
+    }
+
+    /* The LFM "choose image" trigger. */
+    .theme-admin .choose-image {
+        @apply inline-flex cursor-pointer items-center gap-2 rounded-lg border border-ink-200
+            bg-surface px-3.5 py-2 text-sm font-medium text-ink-700 shadow-sm
+            transition hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Cards / panels
+     | --------------------------------------------------------------------- */
+    .theme-admin .card {
+        @apply rounded-xl border border-ink-200/70 bg-surface shadow-card;
+    }
+
+    .theme-admin .card-header {
+        @apply border-b border-ink-100 px-5 py-4;
+    }
+
+    .theme-admin .card-title {
+        @apply text-base font-semibold text-ink-900;
+    }
+
+    .theme-admin .card-header p {
+        @apply mt-1 text-xs text-ink-500;
+    }
+
+    .theme-admin .card-body {
+        @apply p-5;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Alerts (validation / flash)
+     | --------------------------------------------------------------------- */
+    .theme-admin .alert {
+        @apply mb-4 flex gap-3 rounded-lg border px-4 py-3 text-sm;
+    }
+
+    .theme-admin .alert ul {
+        @apply space-y-1;
+    }
+
+    .theme-admin .alert-success {
+        @apply border-success-100 bg-success-50 text-success-700;
+    }
+
+    .theme-admin .alert-danger {
+        @apply border-danger-100 bg-danger-50 text-danger-700;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Data tables
+     | --------------------------------------------------------------------- */
+    .theme-admin .data-table {
+        @apply w-full border-collapse text-left text-sm;
+    }
+
+    .theme-admin .data-table thead th {
+        @apply whitespace-nowrap border-b border-ink-200 px-4 py-3 text-xs font-semibold
+            uppercase tracking-wide text-ink-500;
+    }
+
+    .theme-admin .data-table tbody td {
+        @apply border-b border-ink-100 px-4 py-3 align-middle text-ink-700;
+    }
+
+    .theme-admin .data-table tbody tr {
+        @apply transition-colors hover:bg-ink-50/60;
+    }
+
+    /* Inline row actions (edit / delete links shown under the title). */
+    .theme-admin .user_actions {
+        @apply mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs;
+    }
+
+    .theme-admin .user_actions a,
+    .theme-admin .user_actions button {
+        @apply font-medium text-ink-500 transition-colors hover:text-brand-700;
+    }
+
+    .theme-admin .user_actions .delete_user,
+    .theme-admin .user_actions .delete_post,
+    .theme-admin .user_actions .destroy_post,
+    .theme-admin .user_actions .delete_page,
+    .theme-admin .user_actions .delete_category,
+    .theme-admin .user_actions .delete_menu,
+    .theme-admin .user_actions .delete_role,
+    .theme-admin .user_actions .delete_comment {
+        @apply hover:text-danger-600;
+    }
+
+    /* Native-checkbox styling via @tailwindcss/forms; brand-tinted when checked. */
+    .theme-admin input[type='checkbox'],
+    .theme-admin input[type='radio'] {
+        @apply h-4 w-4 rounded border-ink-300 text-brand-600 shadow-sm
+            focus:ring-2 focus:ring-brand-500/30 focus:ring-offset-0;
+    }
+
+    .theme-admin input[type='radio'] {
+        @apply rounded-full;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Bulk-action toolbar above lists
+     | --------------------------------------------------------------------- */
+    .theme-admin .select-cover {
+        @apply mb-4 flex flex-wrap items-center gap-2;
+    }
+
+    .theme-admin .select-cover select {
+        @apply w-auto min-w-[10rem];
+    }
+
+    /* ---------------------------------------------------------------------
+     | Status badge
+     | --------------------------------------------------------------------- */
+    .theme-admin .badge {
+        @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium;
+    }
+    .theme-admin .badge-success {
+        @apply bg-success-50 text-success-700;
+    }
+    .theme-admin .badge-muted {
+        @apply bg-ink-100 text-ink-600;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Bootstrap-style modal replacement (driven by resources/js/admin.js).
+     | We keep the .modal / #id structure the custom-fields JS expects, but the
+     | show/hide is handled by our own lightweight controller. `.is-open` is
+     | toggled instead of relying on bootstrap.js.
+     | --------------------------------------------------------------------- */
+    .theme-admin .modal {
+        @apply fixed inset-0 z-modal hidden items-center justify-center p-4;
+    }
+    .theme-admin .modal.is-open {
+        @apply flex;
+    }
+    .theme-admin .modal-backdrop-el {
+        @apply fixed inset-0 z-backdrop bg-ink-950/40 backdrop-blur-sm;
+    }
+    .theme-admin .modal-dialog {
+        @apply relative z-modal w-full max-w-md;
+    }
+    .theme-admin .modal-content {
+        @apply overflow-hidden rounded-xl border border-ink-200 bg-surface shadow-lift;
+        animation: admin-modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .theme-admin .modal-body {
+        @apply p-5;
+    }
+    .theme-admin .modal-footer {
+        @apply flex items-center justify-end gap-2 border-t border-ink-100 bg-ink-50/50 px-5 py-3.5;
+    }
+
+    @keyframes admin-modal-in {
+        from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* ---------------------------------------------------------------------
+     | Collapse (left-nav submenus + menu accordion). admin.js toggles
+     | `.is-open`; CSS animates the grid-rows trick for smooth height.
+     | --------------------------------------------------------------------- */
+    .theme-admin .collapse {
+        @apply grid grid-rows-[0fr] transition-[grid-template-rows] duration-300 ease-out-expo;
+    }
+    .theme-admin .collapse.is-open {
+        @apply grid-rows-[1fr];
+    }
+    .theme-admin .collapse > * {
+        @apply overflow-hidden;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Menu builder (server-rendered nested-sortable list). The markup comes
+     | from render_menu() + menu.js; we style the generated <li><a> structure.
+     | --------------------------------------------------------------------- */
+    .theme-admin .menu-box {
+        @apply min-h-[18rem] rounded-lg border border-dashed border-ink-300 bg-ink-50/40 p-3;
+    }
+    .theme-admin .menu-list,
+    .theme-admin .menu-list ul {
+        @apply space-y-2;
+    }
+    .theme-admin .menu-list ul {
+        @apply ml-6 mt-2;
+    }
+    .theme-admin .menu-list li > a {
+        @apply flex cursor-grab items-center justify-between gap-2 rounded-lg border border-ink-200
+            bg-surface px-3.5 py-2.5 text-sm font-medium text-ink-800 shadow-sm
+            transition hover:border-brand-300 active:cursor-grabbing;
+    }
+    .theme-admin .menu-list .remove_menu_item {
+        @apply ml-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full
+            bg-ink-100 text-xs font-bold text-ink-500 transition hover:bg-danger-100 hover:text-danger-600;
+    }
+    .theme-admin .menu-highlight {
+        @apply rounded-lg border-2 border-dashed border-brand-400 bg-brand-50;
+    }
+
+    /* Accordion (menu sidebar source lists). */
+    .theme-admin .accordion .card {
+        @apply mb-2 overflow-hidden rounded-lg border border-ink-200 shadow-none;
+    }
+    .theme-admin .accordion .card-header {
+        @apply border-b-0 p-0;
+    }
+    .theme-admin .accordion .card-header button {
+        @apply flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium text-ink-800 hover:bg-ink-50;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Custom-fields builder
+     | --------------------------------------------------------------------- */
+    .theme-admin .custom-field-btn {
+        @apply inline-flex items-center gap-1.5 rounded-lg border border-ink-200 bg-surface
+            px-3 py-1.5 text-xs font-medium text-ink-700 shadow-sm transition
+            hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700;
+    }
+    .theme-admin .custom-form-group {
+        @apply relative mb-3 rounded-lg border border-ink-100 bg-ink-50/50 p-3;
+    }
+    .theme-admin .inputRow .remove_field,
+    .theme-admin .remove_thumbnail {
+        @apply absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full
+            bg-ink-100 text-xs font-bold text-ink-500 transition hover:bg-danger-100 hover:text-danger-600;
+    }
+    .theme-admin .repeater_cover {
+        @apply mb-4 rounded-lg border border-ink-200 bg-surface p-4;
+    }
+    .theme-admin .group_headline {
+        @apply mb-3 flex flex-wrap items-center gap-2 border-b border-ink-100 pb-3;
+    }
+    .theme-admin .group_headline h4 {
+        @apply mr-auto text-sm font-semibold;
+    }
+    .theme-admin .repeater_content_cover {
+        @apply mb-3 rounded-lg border border-ink-100 bg-ink-50/40 p-3;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Avatar card (profile)
+     | --------------------------------------------------------------------- */
+    .theme-admin .card-user .avatar {
+        @apply mx-auto h-24 w-24 rounded-full border-2 border-ink-100 object-cover shadow-sm;
+    }
+    .theme-admin .card-user .button-container {
+        @apply flex flex-wrap items-center justify-center gap-2 px-5 pb-5;
+    }
+    .theme-admin .card-user .button-container a {
+        @apply inline-flex h-9 w-9 items-center justify-center rounded-full border border-ink-200
+            text-ink-500 transition hover:border-brand-300 hover:text-brand-700;
+    }
+
+    /* ---------------------------------------------------------------------
+     | Toast notifications (replaces bootstrap-notify; rendered by admin.js)
+     | --------------------------------------------------------------------- */
+    .theme-admin .toast-stack {
+        @apply pointer-events-none fixed right-4 top-4 z-toast flex w-80 max-w-[calc(100vw-2rem)] flex-col gap-2;
+    }
+    .theme-admin .toast-item {
+        @apply pointer-events-auto flex items-start gap-3 rounded-lg border bg-surface px-4 py-3 text-sm shadow-lift;
+        animation: admin-toast-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .theme-admin .toast-item.is-leaving {
+        animation: admin-toast-out 0.2s ease-in both;
+    }
+    .theme-admin .toast-success {
+        @apply border-success-100 text-success-700;
+    }
+    .theme-admin .toast-error {
+        @apply border-danger-100 text-danger-700;
+    }
+    .theme-admin .toast-info {
+        @apply border-info-100 text-info-700;
+    }
+
+    @keyframes admin-toast-in {
+        from { opacity: 0; transform: translateX(16px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes admin-toast-out {
+        from { opacity: 1; transform: translateX(0); }
+        to   { opacity: 0; transform: translateX(16px); }
+    }
+
+    /* TinyMCE 4 — soften the iframe chrome so it sits in our forms cleanly. */
+    .theme-admin .mce-tinymce {
+        @apply overflow-hidden rounded-lg border border-ink-200 shadow-sm;
+    }
+}
+
+/* The jQuery air-datepicker popup renders at <body> level (outside
+   .theme-admin children sometimes), so give it a small lift here too. */
+.datepickers-container .datepicker {
+    border-radius: 0.625rem;
+    border: 1px solid theme('colors.ink.200');
+    box-shadow: theme('boxShadow.lift');
+    font-family: theme('fontFamily.sans');
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-admin *,
+    .theme-admin *::before,
+    .theme-admin *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}

@@ -20,6 +20,7 @@ return [
     'settings'          => 'Settings',
     'general_settings'  => 'General',
     'site_options'      => 'Site Options',
+    'seo_settings'      => 'SEO',
     'menus'             => 'Menus',
     'user_roles'        => 'User Roles'
 

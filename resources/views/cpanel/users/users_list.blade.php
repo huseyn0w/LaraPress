@@ -13,130 +13,94 @@
 @endpush
 
 @section('content')
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/users.list_headline')</h1>
+            <a href="{{route('cpanel_add_new_user')}}" class="btn btn-info">
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1Z"/></svg>
+                @lang('cpanel/users.add_new_user')
+            </a>
+        </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card strpied-tabled-with-hover">
-                    <div class="card-header ">
-                        <h4 class="card-title">@lang('cpanel/users.list_headline')</h4>
-                    </div>
-                    <div class="card-body table-full-width table-responsive">
-                        @if ($errors->any())
-                            <div class="col-12">
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
-                        @if ($update_message = Session::get('message'))
-                            <div class="col-12">
-                                @if ($update_message)
-                                    <div class="alert alert-success">
-                                        <strong>@lang('cpanel/users.bulky_deleted_message')</strong>
-                                    </div>
-                                @else
-                                    <div class="alert alert-danger">
-                                        <strong>@lang('cpanel/users.bulky_deleted_error_message')</strong>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                        @if ($update_message = Session::get('user_added'))
-                            <div class="col-12">
-                                @if ($update_message)
-                                    <div class="alert alert-success">
-                                        <strong>@lang('cpanel/users.user_added')</strong>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                        <form method="POST" action="{{route('cpanel_users_bulk_delete')}}">
-                            @csrf
-                            @method('DELETE')
-                            <div class="select-cover">
-                                <select id="inputState" name="users_action" required="" class="form-control">
-                                    <option selected="selected">@lang('cpanel/users.bulk_action_label')</option>
-                                    <option value="delete">@lang('cpanel/users.bulk_action_delete_label')</option>
-                                </select>
-                                <button type="submit" class="btn btn-info btn-fill">@lang('cpanel/users.bulk_action_apply')</button>
-                            </div>
-                            <table class="table table-hover table-striped users-table">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                           <div class="form-check">
-                                               <label for="selectAll" class="form-check-label form-checkbox">
-                                                   <input class="form-check-input" id="selectAll" name="allusers" type="checkbox" >
-                                                   <span class="form-check-sign"></span>
-                                               </label>
-                                           </div>
-                                        </th>
-                                        <th>№</th>
-                                        <th>@lang('cpanel/users.table_username')</th>
-                                        <th>@lang('cpanel/users.table_email')</th>
-                                        <th>@lang('cpanel/users.table_name')</th>
-                                        <th>@lang('cpanel/users.table_surname')</th>
-                                        <th>@lang('cpanel/users.table_country')</th>
-                                        <th>@lang('cpanel/users.table_city')</th>
-                                        <th>@lang('cpanel/users.table_role')</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                @php($users_count = 0)
-                                @forelse($users_list as $user)
-                                    @php($users_count++)
-                                    <tr>
-                                        <td>
-                                            <div class="form-check">
-                                                <label for="user_{{$user->id}}" class="form-check-label form-checkbox">
-                                                    <input class="form-check-input users-checkbox-input" id="user_{{$user->id}}" name="users[]" type="checkbox" value="{{$user->id}}" >
-                                                    <span class="form-check-sign"></span>
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td>{{$users_count}}</td>
-                                        <td>
-                                            {{$user->username}}
+        @include('cpanel.core.flash')
+        @if ($update_message = Session::get('message'))
+            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}">
+                <strong>{{ $update_message ? __('cpanel/users.bulky_deleted_message') : __('cpanel/users.bulky_deleted_error_message') }}</strong>
+            </div>
+        @endif
+        @if (Session::get('user_added'))
+            <div class="alert alert-success"><strong>@lang('cpanel/users.user_added')</strong></div>
+        @endif
 
-                                            <span class="user_actions">
-                                             @if (Auth::user()->can('manage_users', 'App\Http\Models\UserRoles'))
-                                                <a href="{{route('cpanel_edit_user_profile', $user->id)}}" target="_blank">@lang('cpanel/users.edit_user')</a>
-                                                <input type="hidden" class="deleted_user_id" value="{{$user->id}}" name="deleted_user_id">
-                                                <button type="button" class="delete_user">@lang('cpanel/users.delete_user')</button>
-                                             @endif
-                                            </span>
-
-                                        </td>
-                                        <td>{{$user->email}}</td>
-                                        <td>{{$user->name}}</td>
-                                        <td>{{$user->surname}}</td>
-                                        <td>{{$user->country}}</td>
-                                        <td>{{$user->city}}</td>
-                                        <td>{{$user->role->name}}</td>
-                                    </tr>
-                                @empty
-                                    <td colspan="7">@lang('cpanel/users.not_found')</td>
-                                @endforelse
-                                </tbody>
-                            </table>
-                        </form>
-                        <div class="col-md-12">
-                            {{ $users_list->links() }}
-                        </div>
-                        <div class="col-md-12">
-                            <a href="{{route('cpanel_add_new_user')}}" class="btn btn-info btn-fill pull-right">@lang('cpanel/users.add_new_user')</a>
-                        </div>
+        <div class="card overflow-hidden">
+            <form method="POST" action="{{route('cpanel_users_bulk_delete')}}">
+                @csrf
+                @method('DELETE')
+                <div class="border-b border-ink-100 px-5 py-4">
+                    <div class="select-cover mb-0">
+                        <select id="inputState" name="users_action" required class="form-control">
+                            <option selected="selected">@lang('cpanel/users.bulk_action_label')</option>
+                            <option value="delete">@lang('cpanel/users.bulk_action_delete_label')</option>
+                        </select>
+                        <button type="submit" class="btn btn-ghost">@lang('cpanel/users.bulk_action_apply')</button>
                     </div>
                 </div>
+
+                <div class="overflow-x-auto">
+                    <table class="data-table users-table">
+                        <thead>
+                            <tr>
+                                <th class="w-10">
+                                    <input class="form-check-input" id="selectAll" name="allusers" type="checkbox" aria-label="Select all">
+                                </th>
+                                <th class="w-12">№</th>
+                                <th>@lang('cpanel/users.table_username')</th>
+                                <th>@lang('cpanel/users.table_email')</th>
+                                <th>@lang('cpanel/users.table_name')</th>
+                                <th>@lang('cpanel/users.table_surname')</th>
+                                <th>@lang('cpanel/users.table_country')</th>
+                                <th>@lang('cpanel/users.table_city')</th>
+                                <th>@lang('cpanel/users.table_role')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @php($users_count = 0)
+                        @forelse($users_list as $user)
+                            @php($users_count++)
+                            <tr>
+                                <td>
+                                    <input class="form-check-input users-checkbox-input" id="user_{{$user->id}}" name="users[]" type="checkbox" value="{{$user->id}}" aria-label="Select user">
+                                </td>
+                                <td class="text-ink-400">{{$users_count}}</td>
+                                <td>
+                                    <span class="font-medium text-ink-900">{{$user->username}}</span>
+                                    <span class="user_actions">
+                                        @if (Auth::user()->can('manage_users', 'App\Http\Models\UserRoles'))
+                                            <a href="{{route('cpanel_edit_user_profile', $user->id)}}" target="_blank">@lang('cpanel/users.edit_user')</a>
+                                            <input type="hidden" class="deleted_user_id" value="{{$user->id}}" name="deleted_user_id">
+                                            <button type="button" class="delete_user">@lang('cpanel/users.delete_user')</button>
+                                        @endif
+                                    </span>
+                                </td>
+                                <td>{{$user->email}}</td>
+                                <td>{{$user->name}}</td>
+                                <td>{{$user->surname}}</td>
+                                <td>{{$user->country}}</td>
+                                <td>{{$user->city}}</td>
+                                <td><span class="badge badge-muted">{{$user->role->name}}</span></td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="9" class="py-10 text-center text-ink-400">@lang('cpanel/users.not_found')</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            <div class="border-t border-ink-100 px-5 py-4">
+                {{ $users_list->links() }}
             </div>
         </div>
     </div>
-
 @endsection
 
 @push('finalscripts')

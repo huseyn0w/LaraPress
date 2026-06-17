@@ -1,7 +1,7 @@
 <?php
 /**
  * Laravella CMS
- * File: users_list.blade.php
+ * File: roles_list.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 09.08.2019
  */
@@ -13,83 +13,60 @@
 @endpush
 
 @section('content')
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/roles.list_headline')</h1>
+            <a href="{{route('cpanel_add_user_role')}}" class="btn btn-info">
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1Z"/></svg>
+                @lang('cpanel/roles.add_new_role')
+            </a>
+        </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card strpied-tabled-with-hover">
-                    <div class="card-header ">
-                        <h4 class="card-title">@lang('cpanel/roles.list_headline')</h4>
-                    </div>
-                    <div class="card-body table-full-width table-responsive">
-                        @if ($errors->any())
-                            <div class="col-12">
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
-                        @if ($update_message = Session::get('role_added'))
-                            <div class="col-12">
-                                @if ($update_message)
-                                    <div class="alert alert-success">
-                                        <strong>@lang('cpanel/roles.role_added')</strong>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                        <table class="table table-hover table-striped users-table">
-                            <thead>
-                                <tr>
-                                    <th>№</th>
-                                    <th>@lang('cpanel/roles.table_name')</th>
-                                    <th>@lang('cpanel/roles.table_action')</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            @php($roles_count = 0)
-                            @forelse($roles_list as $role)
-                                @php($roles_count++)
-                                <tr>
-                                    <td>
-                                        {{$roles_count}}
-                                    </td>
-                                    <td>
-                                        {{$role->name}}
-                                    </td>
-                                    <td>
-                                        <span class="user_actions">
-                                         @if (Auth::user()->can('manage_user_roles', 'App\Http\Models\UserRoles'))
-                                                <a href="{{route('cpanel_edit_user_role', $role->id)}}" target="_blank">@lang('cpanel/roles.edit')</a>
-                                                @if($role->id !== 1 && $role->id !== 2)
-                                                <input type="hidden" class="deleted_role_id" value="{{$role->id}}" name="deleted_role_id">
-                                                <button type="button" class="delete_role">@lang('cpanel/roles.delete')</button>
-                                                @endif
-                                         @endif
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <td colspan="7">@lang('cpanel/roles.not_found')</td>
-                            @endforelse
-                            </tbody>
-                        </table>
-                        <div class="col-md-12">
-                            {{ $roles_list->links() }}
-                        </div>
-                        <div class="col-md-12">
-                            <a href="{{route('cpanel_add_user_role')}}" class="btn btn-info btn-fill pull-right">@lang('cpanel/roles.add_new_role')</a>
-                        </div>
-                    </div>
-                </div>
+        @include('cpanel.core.flash')
+        @if (Session::get('role_added'))
+            <div class="alert alert-success"><strong>@lang('cpanel/roles.role_added')</strong></div>
+        @endif
+
+        <div class="card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="data-table users-table">
+                    <thead>
+                        <tr>
+                            <th class="w-12">№</th>
+                            <th>@lang('cpanel/roles.table_name')</th>
+                            <th>@lang('cpanel/roles.table_action')</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @php($roles_count = 0)
+                    @forelse($roles_list as $role)
+                        @php($roles_count++)
+                        <tr>
+                            <td class="text-ink-400">{{$roles_count}}</td>
+                            <td class="font-medium text-ink-900">{{$role->name}}</td>
+                            <td>
+                                <span class="user_actions">
+                                    @if (Auth::user()->can('manage_user_roles', 'App\Http\Models\UserRoles'))
+                                        <a href="{{route('cpanel_edit_user_role', $role->id)}}" target="_blank">@lang('cpanel/roles.edit')</a>
+                                        @if($role->id !== 1 && $role->id !== 2)
+                                            <input type="hidden" class="deleted_role_id" value="{{$role->id}}" name="deleted_role_id">
+                                            <button type="button" class="delete_role">@lang('cpanel/roles.delete')</button>
+                                        @endif
+                                    @endif
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3" class="py-10 text-center text-ink-400">@lang('cpanel/roles.not_found')</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="border-t border-ink-100 px-5 py-4">
+                {{ $roles_list->links() }}
             </div>
         </div>
     </div>
-
 @endsection
 
 @push('finalscripts')

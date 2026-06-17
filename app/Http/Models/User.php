@@ -2,6 +2,7 @@
 
 namespace App\Http\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,7 +11,19 @@ use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
+    use HasFactory;
     use Notifiable;
+
+    /**
+     * Create a new factory instance for the model.
+     *
+     * The model lives in a non-standard namespace (App\Http\Models), so the
+     * default factory name guesser cannot resolve it automatically.
+     */
+    protected static function newFactory(): \Database\Factories\UserFactory
+    {
+        return \Database\Factories\UserFactory::new();
+    }
 
 
     /**
@@ -27,15 +40,22 @@ class User extends Authenticatable
         'username',
         'city',
         'country',
+        'gender',
         'avatar',
         'about_me',
         'linkedin_url',
         'xing_url',
-        'provider',
-        'provider_id',
         'facebook_url',
+        'twitter_url',
+        'instagram_url',
         'google_url'
     ];
+
+    // NOTE: `provider`/`provider_id` are intentionally NOT mass assignable;
+    // they are owned by the social-login flow and set explicitly in
+    // LoginController::createUser(). `role_id` stays fillable so admins can
+    // assign roles on creation, but CPanelUserRepository::update() strips it
+    // from any self-service profile update.
 
     /**
      * The attributes that should be hidden for arrays.

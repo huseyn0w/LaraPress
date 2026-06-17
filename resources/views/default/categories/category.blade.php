@@ -4,90 +4,77 @@
  * File: category.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 01.11.2019
+ * Phase 4: rewritten from Bootstrap 4 to Tailwind CSS (editorial theme).
  */
 ?>
 
 @php
-
     $category_posts = $data->posts;
-
     $current_lang = get_current_lang_prefix();
-
-
 @endphp
 
-@extends(env('TEMPLATE_NAME').'/index')
+@extends(config('app.template_name').'/index')
 
 @section('content')
 
-<section class="top-section-area section-gap">
-    <div class="container">
-        <div class="row justify-content-start align-items-center d-flex">
-            <div class="col-lg-8 top-left">
-                <h1 class="text-white mb-20">{{$data->title}}</h1>
-                <ul class="breadcrumbs">
-                    <li><a href="{{env('APP_URL')}}">{{$home_page_data->title}}</a><span class="lnr lnr-arrow-right"></span></li>
-                    <li><span>{{$data->title}}</span></li>
-                </ul>
-            </div>
+@include(config('app.template_name').'.partials.banner', [
+    'title'  => $data->title,
+    'crumbs' => [
+        ['label' => $home_page_data->title, 'url' => env('APP_URL')],
+        ['label' => $data->title, 'url' => null],
+    ],
+])
+
+<section class="mx-auto max-w-4xl px-5 py-16 sm:px-8 sm:py-20">
+    @if(!empty($category_posts) && count($category_posts) > 0)
+        <div class="divide-y divide-ink-100">
+            @foreach($category_posts as $post)
+                @php
+                    $comments_count = get_post_comments_count($post->id);
+                    $post_thumbnail = $post->thumbnail;
+                    if(!$post_thumbnail) $post_thumbnail = asset('front/'.config('app.template_name').'/img/asset/l2.jpg');
+                    $post_url = env('APP_URL').'/'.$current_lang.'posts/'.$post->slug;
+                @endphp
+                <article x-data="reveal({{ $loop->index * 60 }})" class="reveal-init group flex flex-col gap-6 py-8 sm:flex-row">
+                    <a href="{{$post_url}}" class="relative block shrink-0 overflow-hidden rounded-2xl bg-ink-100 shadow-card sm:w-56">
+                        <img src="{{$post_thumbnail}}" alt="{{$post->title}}" width="448" height="280" loading="lazy"
+                             class="aspect-[16/10] h-full w-full object-cover transition duration-700 ease-out-expo group-hover:scale-[1.04]">
+                        <div class="absolute left-3 top-3 rounded-lg bg-paper/90 px-2.5 py-1.5 text-center shadow-card backdrop-blur">
+                            <div class="font-serif text-lg font-medium leading-none text-ink-900">{{Carbon\Carbon::parse($post->updated_at)->format('d')}}</div>
+                            <div class="text-[10px] font-medium uppercase tracking-wider text-ink-500">{{Carbon\Carbon::parse($post->updated_at)->format('M')}}</div>
+                        </div>
+                    </a>
+                    <div class="min-w-0 flex-1">
+                        <h2 class="font-serif text-2xl font-medium leading-snug text-ink-900 transition-colors group-hover:text-brand-700">
+                            <a href="{{$post_url}}">{{$post->title}}</a>
+                        </h2>
+                        <div class="mt-2 line-clamp-3 text-base text-ink-500">{!! $post->preview !!}</div>
+                        <div class="mt-4 flex items-center gap-5 text-sm text-ink-400">
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="h-4 w-4 text-brand-500" viewBox="0 0 20 20" fill="currentColor"><path d="M10 17.5 3.5 11a4 4 0 1 1 6.5-4.6A4 4 0 1 1 16.5 11z"/></svg>
+                                {{$post->likes}} {{trans('default/category.likes')}}
+                            </span>
+                            <span class="inline-flex items-center gap-1.5">
+                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h12v8H8l-4 3z" stroke-linejoin="round"/></svg>
+                                {{$comments_count}} @lang('default/category.comments')
+                            </span>
+                        </div>
+                    </div>
+                </article>
+            @endforeach
         </div>
-    </div>
+
+        <div class="mt-12">
+            @php
+                $links = $category_posts->links();
+                echo pretty_url($links);
+            @endphp
+        </div>
+    @else
+        <div class="py-20 text-center">
+            <h2 class="text-2xl font-medium text-ink-500">@lang('default/category.not_found')</h2>
+        </div>
+    @endif
 </section>
 
-<div class="post-wrapper pt-100">
-    <!-- Start post Area -->
-    <section class="post-area">
-        <div class="container">
-            <div class="row justify-content-center d-flex">
-                <div class="col-lg-12">
-                    <div class="post-lists search-list">
-                    @if(!empty($category_posts))
-                        @foreach($category_posts as $post)
-                            @php
-                                $comments_count = get_post_comments_count($post->id);
-                                $post_thumbnail = $post->thumbnail;
-
-                                if(!$post_thumbnail) $post_thumbnail = asset('front/'.env('TEMPLATE_NAME').'/img/asset/l2.jpg');
-                            @endphp
-                            <div class="single-list flex-row d-flex salam">
-                                <div class="thumb">
-                                    <div class="date">
-                                        <span>{{Carbon\Carbon::parse($post->updated_at)->format('d')}}</span><br>{{Carbon\Carbon::parse($post->updated_at)->format('M')}}
-                                    </div>
-                                    <img src="{{$post_thumbnail}}" alt="{{$post->title}}">
-                                </div>
-                                <div class="detail">
-                                    <a href="{{env('APP_URL')}}/{{$current_lang}}posts/{{$post->slug}}"><h4 class="pb-20">{{$post->title}}</h4></a>
-                                    {!! $post->preview !!}
-                                    <p class="footer pt-20">
-                                        <i class="fa fa-heart-o" aria-hidden="true"></i>
-                                        <span>{{$post->likes}} {{$post->likes > 1 ? trans('default/category.likes') : trans('default/category.likes')}}</span>     <i class="ml-20 fa fa-comment-o" aria-hidden="true"></i>{{$comments_count}}<span> @lang('default/category.comments')</span>
-                                    </p>
-                                </div>
-                            </div>
-                        @endforeach
-                        <div class="pagination_cover">
-                            @php
-                                $links = $category_posts->links();
-
-
-                                $paginate_links = pretty_url($links);
-                                echo $paginate_links;
-
-                            @endphp
-                        </div>
-                    @else
-                        <div class="no-posts mb-100">
-                            <h2>@lang('default/category.not_found')</h2>
-                        </div>
-                    @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- End post Area -->
-</div>
-
 @endsection
-

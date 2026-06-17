@@ -7,31 +7,22 @@
  */
 ?>
 
-<!--   Core JS Files   -->
+{{-- jQuery is still required by the admin module scripts (custom-fields, menu
+     builder, bulk-delete, LFM, TinyMCE init in laravella.js). Bootstrap,
+     Popper, Chartist, bootstrap-notify and the Light Bootstrap Dashboard theme
+     scripts are no longer loaded — their behaviour is replaced by the Tailwind
+     admin bundle (resources/js/admin.js). --}}
 <script src="{{asset('admin')}}/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
-<script src="{{asset('admin')}}/js/core/popper.min.js" type="text/javascript"></script>
-<script src="{{asset('admin')}}/js/core/bootstrap.min.js" type="text/javascript"></script>
-<!--  Plugin for Switches, full documentation here: http://www.jque.re/plugins/version3/bootstrap.switch/ -->
-<script src="{{asset('admin')}}/js/plugins/bootstrap-switch.js"></script>
-<!--  Google Maps Plugin    -->
-{{--<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>--}}
-<!--  Chartist Plugin  -->
-<script src="{{asset('admin')}}/js/plugins/chartist.min.js"></script>
-<!--  Notifications Plugin    -->
-<script src="{{asset('admin')}}/js/plugins/bootstrap-notify.js"></script>
-<!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
-<script src="{{asset('admin')}}/js/light-bootstrap-dashboard.js?v=2.0.0 " type="text/javascript"></script>
-<!-- Light Bootstrap Dashboard DEMO methods, don't include it in your project! -->
-<script src="{{asset('admin')}}/js/demo.js"></script>
+
+{{-- Per-view third-party deps (TinyMCE CDN, datepicker, jquery-ui, LFM,
+     nestedSortable) load here — BEFORE laravella.js so its tinymce.init() /
+     datepicker() calls find them, preserving the original load order. --}}
 @stack('extrascripts')
+
+{{-- laravella.js defines url_slug(), showNotification() (now backed by the
+     Tailwind toast via the $.notify shim) and the TinyMCE/datepicker init. --}}
 <script src="{{asset('admin')}}/js/laravella.js"></script>
+
 @stack('finalscripts')
-<script type="text/javascript">
-    // $(document).ready(function() {
-    //     // Javascript method's body can be found in assets/js/demos.js
-    //     demo.initDashboardPageCharts();
-    //
-    //     // demo.showNotification();
-    //
-    // });
-</script>
+</body>
+</html>

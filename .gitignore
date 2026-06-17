@@ -1,10 +1,8 @@
 /node_modules
 /public/hot
 /public/storage
-/config
 /storage/*.key
 /vendor
-/tests
 /.idea
 .env
 .editorconfig

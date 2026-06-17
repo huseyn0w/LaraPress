@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Phase 4: the public theme is Tailwind. Use Laravel's Tailwind
+        // paginator so ->links() (and the pretty_url()/pretty_search_url()
+        // helpers that wrap it) emit Tailwind markup instead of Bootstrap.
+        Paginator::useTailwind();
+
         view()->composer('*', function ($view)
         {
             $view->with('current_user', \Auth::user());

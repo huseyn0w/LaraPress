@@ -15,6 +15,17 @@ Auth::routes();
 
 Route::get('/logout', '\App\Http\Controllers\Auth\LoginController@logout')->name('cpanel-logout');
 
+/*
+|--------------------------------------------------------------------------
+| Phase 7 (SEO/GEO): public SEO endpoints
+|--------------------------------------------------------------------------
+| Registered before the front-end catch-all ({locale?}/{slug?}) so they are
+| not swallowed by the page router.
+*/
+Route::get('/sitemap.xml', 'SeoController@sitemap')->name('sitemap');
+Route::get('/robots.txt', 'SeoController@robots')->name('robots');
+Route::get('/llms.txt', 'SeoController@llms')->name('llms');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -38,6 +49,14 @@ Route::prefix('laravella-admin')->middleware(['auth', 'see_admin_panel'])->names
         Route::post('/', 'CPanelSiteOptionsController@store')->name('cpanel_update_site_options');
     });
 
+    Route::prefix('seo-settings')->middleware('manage_general_settings')->group(function(){
+        Route::get('/', 'CPanelSeoSettingsController@index')->name('cpanel_seo_settings');
+        Route::post('/', 'CPanelSeoSettingsController@store')->name('cpanel_update_seo_settings');
+    });
+
+    // The profile controller resolves the user from Auth when no id is
+    // supplied (see CPanelUserController::editUser), so this route can only
+    // ever surface the authenticated user's own profile.
     Route::prefix('myprofile')->group(function(){
         Route::get('/', 'CPanelUserController@editUser')->name('cpanel_myprofile');
     });
@@ -90,10 +109,8 @@ Route::prefix('laravella-admin')->middleware(['auth', 'see_admin_panel'])->names
         Route::get('/{id}/restore', 'CPanelPostController@restore')->name('cpanel_restore_post')->where('id', '[0-9]+');
         Route::delete('/{id}/destroy', 'CPanelPostController@destroyAjax')->name('cpanel_destroy_post')->where('id', '[0-9]+');
         Route::delete('/multipleDelete', 'CPanelPostController@multipleDelete')->name('cpanel_posts_bulk_delete');
-        //Route::delete('/multipleDestroy', 'CPanelPostController@multipleDestroy')->name('cpanel_posts_bulk_action');
         Route::post('/multiple', 'CPanelPostController@multipleActions')->name('cpanel_posts_bulk_action');
         Route::delete('/{id}/delete', 'CPanelPostController@deleteAjax')->name('cpanel_ajax_soft_delete_post')->where('id', '[0-9]+');
-        Route::delete('/multipleDelete', 'CPanelPostController@multipleDelete')->name('cpanel_posts_bulk_delete');
         Route::get('/new', 'CPanelPostController@addPost')->name('cpanel_add_new_post');
         Route::post('/new/{id?}', 'CPanelPostController@createPost')->name('cpanel_save_new_post')->where('id', '[0-9]+');
     });
@@ -116,10 +133,12 @@ Route::prefix('laravella-admin')->middleware(['auth', 'see_admin_panel'])->names
         Route::delete('/multipleDelete', 'CPanelCommentController@multipleDelete')->name('cpanel_comments_bulk_delete');
     });
 
-    Route::prefix('media')->group(function(){
+    // Media management is gated behind general-settings permission. There is
+    // no dedicated manage_media permission yet; settings is the closest
+    // admin-only capability. TODO(phase-4): introduce a manage_media permission
+    // (seeder + roles) and switch this guard to it.
+    Route::prefix('media')->middleware('manage_general_settings')->group(function(){
         Route::get('/', 'CPanelMediaController@index')->name('cpanel_all_media');
-//        Route::delete('/{id}/delete', 'CPanelMediaController@deleteAjax')->name('cpanel_delete_media')->where('id', '[0-9]+');
-//        Route::post('/new', 'CPanelMediaController@store')->name('cpanel_upload_media');
     });
 
 });
@@ -141,7 +160,7 @@ Route::group([], function () {
         Route::get('/query/{searchstring}/filter/{searchtype}/page/{page}', 'PageController@paginatedResult')->name('search_result_paginated');
     });
 
-    Route::get('/{locale?}/posts/{slug}', 'PostController@languageIndex')->name('posts');
+    Route::get('/{locale?}/posts/{slug}', 'PostController@languageIndex')->name('posts_localized');
 
     Route::prefix('/posts')->group(function(){
 
@@ -156,7 +175,7 @@ Route::group([], function () {
 
     Route::post('/contact/sendform', 'PageController@sendMail')->name('sendform');
 
-    Route::get('/{locale?}/category/{slug}', 'CategoryController@languageIndex')->name('categories_first_page');
+    Route::get('/{locale?}/category/{slug}', 'CategoryController@languageIndex')->name('categories_localized');
 
     Route::prefix('/category')->group(function(){
         Route::get('/{slug}', 'CategoryController@index')->name('categories_first_page');

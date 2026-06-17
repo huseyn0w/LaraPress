@@ -9,8 +9,10 @@ namespace App\Repositories;
 
 use Image;
 use App\Http\Models\User;
+use App\Http\Models\UserRoles;
 use Illuminate\Database\QueryException;
 use Doctrine\DBAL\Driver\PDOException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class CPanelUserRepository extends BaseRepository
@@ -74,15 +76,42 @@ class CPanelUserRepository extends BaseRepository
         return $data;
     }
 
+    /**
+     * Update a user from a validated request.
+     *
+     * Privileged columns (role_id, provider, provider_id) are stripped unless
+     * the acting user is explicitly allowed to manage users, so they can never
+     * be set through a self-service profile update.
+     *
+     * @param  int  $id
+     * @param  \Illuminate\Foundation\Http\FormRequest|array  $updatedRequest
+     * @return bool
+     */
     public function update($id, $updatedRequest)
     {
-        $updatedRequest->request->remove('password_confirmation');
-        if(empty($updatedRequest->password) || is_null($updatedRequest->password)){
-            $updatedRequest->request->remove('password');
+        $data = is_array($updatedRequest) ? $updatedRequest : $updatedRequest->validated();
+
+        unset($data['password_confirmation']);
+
+        if (empty($data['password'])) {
+            unset($data['password']);
         }
 
+        if (!$this->canManageUsers()) {
+            unset($data['role_id']);
+        }
 
-        return parent::update($id, $updatedRequest);
+        // Provider fields are owned by the social-login flow only.
+        unset($data['provider'], $data['provider_id']);
+
+        return parent::update($id, $data);
+    }
+
+    private function canManageUsers(): bool
+    {
+        $user = Auth::user();
+
+        return $user && $user->can('manage_users', UserRoles::class);
     }
 
 

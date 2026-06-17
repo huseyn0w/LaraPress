@@ -1,0 +1,106 @@
+<?php
+
+namespace Tests\Feature\Admin;
+
+use App\Http\Middleware\VerifyCsrfToken;
+use App\Http\Models\PageTranslation;
+use App\Http\Models\User;
+use App\Http\Models\UserRoles;
+use Database\Seeders\DatabaseSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+/**
+ * Full admin CRUD round-trip for pages (translatable, content lives in
+ * `page_translations`). The PageObserver json-encodes custom_fields and
+ * sanitises content on the way in.
+ */
+class PageCrudTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private User $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+        $this->seed(DatabaseSeeder::class);
+        $this->admin = User::where('username', 'admin')->firstOrFail();
+    }
+
+    private function payload(array $overrides = []): array
+    {
+        return array_merge([
+            'title'            => 'About Page',
+            'slug'             => 'about-page',
+            'author_id'        => (string) $this->admin->id,
+            'content'          => 'page body',
+            'meta_keywords'    => 'kw',
+            'meta_description' => 'md',
+            'template'         => 'default',
+            'status'           => 1,
+        ], $overrides);
+    }
+
+    public function test_admin_can_create_a_page(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->post('/laravella-admin/pages/new', $this->payload());
+
+        $response->assertSessionHasNoErrors();
+        $response->assertRedirect();
+
+        $translation = PageTranslation::where('slug', 'about-page')->first();
+        $this->assertNotNull($translation);
+        $this->assertSame('About Page', $translation->title);
+        $this->assertSame('en', $translation->locale);
+    }
+
+    public function test_admin_can_update_a_page(): void
+    {
+        $this->actingAs($this->admin)->post('/laravella-admin/pages/new', $this->payload());
+        $translation = PageTranslation::where('slug', 'about-page')->firstOrFail();
+
+        $response = $this->actingAs($this->admin)
+            ->put('/laravella-admin/pages/' . $translation->page_id . '/update', $this->payload([
+                'content' => 'updated page body',
+            ]));
+
+        $response->assertSessionHasNoErrors();
+        $fresh = PageTranslation::where('slug', 'about-page')->firstOrFail();
+        $this->assertStringContainsString('updated page body', $fresh->content);
+    }
+
+    public function test_admin_can_delete_a_page(): void
+    {
+        $this->actingAs($this->admin)->post('/laravella-admin/pages/new', $this->payload());
+        $translation = PageTranslation::where('slug', 'about-page')->firstOrFail();
+
+        $this->actingAs($this->admin)
+            ->delete('/laravella-admin/pages/' . $translation->page_id . '/delete')
+            ->assertOk();
+
+        $this->assertSame(0, PageTranslation::where('slug', 'about-page')->count());
+    }
+
+    public function test_validation_blocks_invalid_page(): void
+    {
+        $response = $this->actingAs($this->admin)
+            ->from('/laravella-admin/pages/new')
+            ->post('/laravella-admin/pages/new', ['title' => '']);
+
+        $response->assertSessionHasErrors(['title', 'slug', 'author_id', 'template']);
+    }
+
+    public function test_user_with_panel_access_but_no_page_permission_is_blocked(): void
+    {
+        $role = UserRoles::create([
+            'name'        => 'PanelNoPages',
+            'permissions' => json_encode(['see_admin_panel' => 1, 'manage_pages' => 0]),
+        ]);
+        $user = User::factory()->create(['role_id' => $role->id]);
+
+        $this->actingAs($user)->get('/laravella-admin/pages')->assertStatus(401);
+    }
+}

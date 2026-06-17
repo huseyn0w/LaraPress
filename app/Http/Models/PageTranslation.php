@@ -21,6 +21,8 @@ class PageTranslation extends Model
         'custom_fields',
         'content',
         'meta_description',
-        'meta_keywords'
+        'meta_keywords',
+        'canonical_url',
+        'meta_noindex'
     ];
 }

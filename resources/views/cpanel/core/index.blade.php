@@ -7,20 +7,35 @@
  */
 ?>
 @include('cpanel.core.header')
-<body>
-<div class="wrapper">
-    <div class="sidebar" data-image="{{asset('admin')}}/img/sidebar-5.jpg">
-        <!--
-    Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
+<body class="theme-admin">
+<div
+    class="min-h-screen lg:grid lg:grid-cols-[16rem_1fr]"
+    x-data="{ sidebarOpen: false }"
+    @keydown.escape.window="sidebarOpen = false"
+>
+    {{-- Mobile backdrop --}}
+    <div
+        x-cloak
+        x-show="sidebarOpen"
+        x-transition.opacity
+        @click="sidebarOpen = false"
+        class="fixed inset-0 z-backdrop bg-ink-950/40 backdrop-blur-sm lg:hidden"
+    ></div>
 
-    Tip 2: you can also add an image using data-image tag
--->
-     @include('cpanel.nav.left-nav')
-    </div>
-    <div class="main-panel">
+    {{-- Sidebar: off-canvas drawer below lg, static rail at lg+. --}}
+    <aside
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+        class="fixed inset-y-0 left-0 z-sidebar w-64 transform overflow-y-auto border-r border-ink-800/60 bg-ink-900 transition-transform duration-300 ease-out-expo lg:static lg:transform-none"
+    >
+        @include('cpanel.nav.left-nav')
+    </aside>
+
+    {{-- Main column --}}
+    <div class="flex min-h-screen flex-col">
         @include('cpanel.nav.top-nav')
-        <!-- End Navbar -->
-        <div class="content">
+        <main class="flex-1 px-4 py-6 sm:px-6 lg:px-8">
             @yield('content')
-        </div>
-@include('cpanel.core.footer')
+        </main>
+        @include('cpanel.core.footer')
+    </div>
+</div>

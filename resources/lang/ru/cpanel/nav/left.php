@@ -20,6 +20,7 @@ return [
     'settings'          => 'Настройки',
     'general_settings'  => 'Основные',
     'site_options'      => 'Опции сайта',
+    'seo_settings'      => 'SEO',
     'menus'             => 'Меню',
     'user_roles'        => 'Статусы'
 

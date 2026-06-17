@@ -1,6 +1,9 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use App\Http\Models\User;
 
 class UsersTableSeeder extends Seeder
@@ -59,6 +62,6 @@ class UsersTableSeeder extends Seeder
             ]
         );
 
-        factory(User::class, 30)->create();
+        User::factory()->count(30)->create();
     }
 }

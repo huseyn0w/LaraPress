@@ -10,192 +10,76 @@
 @extends('cpanel.core.index')
 
 @push('extrastyles')
-    <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
 @endpush
 
 @php
-
     $menu_params = [
         'menu_type' => "list",
         'menu_class' => "menu-list sortable ui-sortable",
     ];
-
     $existing_menu = render_menu(json_decode($entity->content), $menu_params);
-
 @endphp
 
 @section('content')
+    <div class="mx-auto max-w-6xl">
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/menus.edit_menu_headline')</h1>
+        </div>
 
-    <form action="{{ route('cpanel_update_menu',['id' => $entity->id]) }}" id="add_menu_form" method="POST">
-        @csrf
-        @method("PUT")
-        <div class="container-fluid">
-            <div class="row">
-                @if ($errors->any())
-                    <div class="col-12">
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-                @endif
-                @if ($update_message = Session::get('message'))
-                    <div class="col-12">
-                        @if ($update_message)
-                            <div class="alert alert-success">
-                                <strong>@lang('cpanel/menus.menu_updated')</strong>
-                            </div>
-                        @else
-                            <div class="alert alert-danger">
-                                <strong>@lang('cpanel/menus.menu_error')</strong>
-                            </div>
-                        @endif
-                    </div>
-                @endif
-                <div class="col-xs-12 col-md-4">
+        @include('cpanel.core.flash')
+        @if (($update_message = Session::get('message')) !== null)
+            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/menus.menu_updated') : __('cpanel/menus.menu_error') }}</strong></div>
+        @endif
+
+        <form action="{{ route('cpanel_update_menu',['id' => $entity->id]) }}" id="add_menu_form" method="POST">
+            @csrf
+            @method("PUT")
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                {{-- Source panel --}}
+                <div class="lg:col-span-1">
                     <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">@lang('cpanel/menus.edit_menu_headline')</h4>
-                        </div>
+                        <div class="card-header"><h2 class="card-title">@lang('cpanel/menus.edit_menu_headline')</h2></div>
                         <div class="card-body">
-                            <div class="row">
-                                @include('cpanel.core.translation')
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="menu_title">@lang('cpanel/menus.menu_name')</label>
-                                        <input type="text" id="menu_title" required class="form-control" name="title" value="{{ old('title',$entity->title) }}" >
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="cpanel_slug">@lang('cpanel/menus.menu_slug')</label>
-                                        <input type="text" required class="form-control" name="slug" value="{{ old('slug', $entity->slug) }}">
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="accordion" id="menusAccordion">
-                                        <div class="card">
-                                            <div class="card-header" id="headingOne">
-                                                <h2 class="mb-0">
-                                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#pages_tab" aria-expanded="false" aria-controls="collapseOne">
-                                                        @lang('cpanel/menus.pages')
-                                                    </button>
-                                                </h2>
-                                            </div>
-
-                                            <div id="pages_tab" class="collapse" aria-labelledby="headingOne" data-parent="#menusAccordion">
-                                                <div class="card-body">
-                                                    <div class="form-group">
-                                                        <select name="pages" multiple class="form-control multiple_list menu_item" id="pages_list" data-type="pages">
-                                                            @forelse($terms_list['pages'] as $page)
-                                                                <option value="{{$page->slug}}">{{$page->title}}</option>
-                                                            @empty
-                                                                @lang('cpanel/menus.no_pages')
-                                                            @endforelse
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="card">
-                                            <div class="card-header" id="headingTwo">
-                                                <h2 class="mb-0">
-                                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#posts_tab" aria-expanded="false" aria-controls="collapseTwo">
-                                                        @lang('cpanel/menus.posts')
-                                                    </button>
-                                                </h2>
-                                            </div>
-                                            <div id="posts_tab" class="collapse" aria-labelledby="headingTwo" data-parent="#menusAccordion">
-                                                <div class="card-body">
-                                                    <select name="posts" multiple class="form-control multiple_list menu_item" id="posts_list" data-type="posts">
-                                                        @forelse($terms_list['posts'] as $post)
-                                                            <option value="{{$post->slug}}">{{$post->title}}</option>
-                                                        @empty
-                                                            @lang('cpanel/menus.no_posts')
-                                                        @endforelse
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="card">
-                                            <div class="card-header" id="headingThree">
-                                                <h2 class="mb-0">
-                                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#categories_tab" aria-expanded="false" aria-controls="collapseThree">
-                                                        @lang('cpanel/menus.categories')
-                                                    </button>
-                                                </h2>
-                                            </div>
-                                            <div id="categories_tab" class="collapse" aria-labelledby="headingThree" data-parent="#menusAccordion">
-                                                <div class="card-body">
-                                                    <div class="form-group">
-                                                        <select name="category" multiple class="form-control multiple_list menu_item" id="categories_list" data-type="categories">
-                                                            @forelse($terms_list['categories'] as $category)
-                                                                <option value="{{$category->slug}}">{{$category->title}}</option>
-                                                            @empty
-                                                                @lang('cpanel/menus.no_categories')
-                                                            @endforelse
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="card">
-                                            <div class="card-header" id="headingFour">
-                                                <h2 class="mb-0">
-                                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#custom_link_tap" aria-expanded="false" aria-controls="collapseFour">
-                                                        @lang('cpanel/menus.custom_link')
-                                                    </button>
-                                                </h2>
-                                            </div>
-                                            <div id="custom_link_tap" class="collapse" aria-labelledby="headingFour" data-parent="#menusAccordion">
-                                                <div class="card-body">
-                                                    <div class="form-group">
-                                                        <label for="link_label">@lang('cpanel/menus.custom_link_label')</label>
-                                                        <input type="text" id="link_label" class="form-control menu_item" name="link_label" >
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="link_url">@lang('cpanel/menus.custom_link_url')</label>
-                                                        <input type="text" id="link_url" class="form-control menu_item" name="link_url" >
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            @include('cpanel.core.translation')
+                            <div class="field">
+                                <label for="menu_title" class="field-label">@lang('cpanel/menus.menu_name')</label>
+                                <input type="text" id="menu_title" required class="form-control" name="title" value="{{ old('title',$entity->title) }}">
                             </div>
-                            <button type="button" class="btn btn-info btn-fill pull-right add_menu_item">@lang('cpanel/menus.add_to_menu')</button>
-                            <div class="clearfix"></div>
+                            <div class="field">
+                                <label for="cpanel_slug" class="field-label">@lang('cpanel/menus.menu_slug')</label>
+                                <input type="text" required class="form-control" name="slug" value="{{ old('slug', $entity->slug) }}">
+                            </div>
+
+                            @include('cpanel.menus.partials.source-accordion')
+
+                            <button type="button" class="btn btn-ghost add_menu_item mt-4 w-full">@lang('cpanel/menus.add_to_menu')</button>
                         </div>
                     </div>
                 </div>
-                <div class="col-xs-12 col-md-8">
+
+                {{-- Builder canvas --}}
+                <div class="lg:col-span-2">
                     <div class="card">
+                        <div class="card-header"><h2 class="card-title">@lang('cpanel/menus.list_headline')</h2></div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="menu-box">
-                                        @if($existing_menu)
-                                        {!! $existing_menu !!}
-                                        @else
-                                        <ul class="menu-list sortable" id="sortable">
-                                        </ul>
-                                        @endif
-                                    </div>
-                                </div>
+                            <div class="menu-box">
+                                @if($existing_menu)
+                                    {!! $existing_menu !!}
+                                @else
+                                    <ul class="menu-list sortable" id="sortable"></ul>
+                                @endif
                             </div>
                             <input type="hidden" name="content" id="menuContent">
-                            <button type="submit" class="btn btn-info btn-fill pull-right create_menu">@lang('cpanel/menus.update_menu')</button>
-                            <div class="clearfix"></div>
+                        </div>
+                        <div class="flex justify-end border-t border-ink-100 px-5 py-4">
+                            <button type="submit" class="btn btn-info create_menu">@lang('cpanel/menus.update_menu')</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </form>
-
+        </form>
+    </div>
 @endsection
 
 @push('extrascripts')

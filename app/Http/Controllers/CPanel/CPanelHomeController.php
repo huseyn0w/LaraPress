@@ -29,7 +29,9 @@ class CPanelHomeController extends CPanelBaseController
 
     private function getPosts($count)
     {
-        $posts = Post::listsTranslations('title')->orderBy('id', 'desc')->take($count)->get();
+        // listsTranslations() joins post_translations, so `id` must be
+        // qualified to avoid an ambiguous-column error.
+        $posts = Post::listsTranslations('title')->orderBy('posts.id', 'desc')->take($count)->get();
         return $posts;
     }
 

@@ -10,267 +10,179 @@
 @extends('cpanel.core.index')
 
 @section('content')
+    <div class="mx-auto max-w-6xl">
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/users.profile_headline')</h1>
+        </div>
 
-    <form action="{{ route('cpanel_update_user_profile', ['id' => $user->id]) }}" method="POST" enctype="multipart/form-data">
-        @method('PUT')
-        @csrf
-    <div class="container-fluid">
-        <div class="row">
-            @if ($errors->any())
-                <div class="col-12">
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            @endif
-            @if ($update_message = Session::get('message'))
-            <div class="col-12">
-                @if ($update_message)
-                    <div class="alert alert-success">
-                        <strong>@lang('cpanel/users.updated_success')</strong>
-                    </div>
-                @else
-                    <div class="alert alert-danger">
-                        <strong>@lang('cpanel/users.updated_error')</strong>
-                    </div>
-                @endif
-            </div>
-            @endif
+        @include('cpanel.core.flash')
+        @if (($update_message = Session::get('message')) !== null)
+            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/users.updated_success') : __('cpanel/users.updated_error') }}</strong></div>
+        @endif
 
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="card-title">@lang('cpanel/users.profile_headline')</h4>
-                    </div>
-                    <div class="card-body">
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.username')</label>
-                                    <p>{{$user->username}}</p>
+        <form action="{{ route('cpanel_update_user_profile', ['id' => $user->id]) }}" method="POST" enctype="multipart/form-data">
+            @method('PUT')
+            @csrf
+            <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+                {{-- Main form --}}
+                <div class="lg:col-span-2">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
+                                <div class="field">
+                                    <label class="field-label">@lang('cpanel/users.username')</label>
+                                    <p class="rounded-lg bg-ink-50 px-3.5 py-2.5 text-sm font-medium text-ink-700">{{$user->username}}</p>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="email">@lang('cpanel/users.email')</label>
+                                <div class="field">
+                                    <label for="email" class="field-label">@lang('cpanel/users.email')</label>
                                     <input type="email" id="email" class="form-control" name="email" value="{{ old('email', $user->email) }}">
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="password">@lang('cpanel/users.new_password')</label>
+                                <div class="field">
+                                    <label for="password" class="field-label">@lang('cpanel/users.new_password')</label>
                                     <input type="password" id="password" class="form-control" name="password" value="">
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="confirm_password">@lang('cpanel/users.new_password_confirmation')</label>
+                                <div class="field">
+                                    <label for="confirm_password" class="field-label">@lang('cpanel/users.new_password_confirmation')</label>
                                     <input type="password" id="confirm_password" class="form-control" name="password_confirmation" value="">
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="name">@lang('cpanel/users.name')</label>
+                                <div class="field">
+                                    <label for="name" class="field-label">@lang('cpanel/users.name')</label>
                                     <input type="text" class="form-control" id="name" name="name" value="{{ old('name', $user->name) }}">
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="surname">@lang('cpanel/users.surname')</label>
-                                    <input type="text" class="form-control" id="surname" name="surname"  value="{{ old('surname', $user->surname) }}">
+                                <div class="field">
+                                    <label for="surname" class="field-label">@lang('cpanel/users.surname')</label>
+                                    <input type="text" class="form-control" id="surname" name="surname" value="{{ old('surname', $user->surname) }}">
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.country')</label>
+                                <div class="field">
+                                    <label class="field-label">@lang('cpanel/users.country')</label>
                                     <select name="country" id="country" class="form-control">
-                                    @foreach($countries as $country)
-                                        @if($country['name'] === $user->country)
-                                            <option value="{{$country['name']}}" selected>{{$country['name']}}</option>
-                                        @else
-                                            <option value="{{$country['name']}}">{{$country['name']}}</option>
-                                        @endif
-                                    @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.city')</label>
-                                    <input type="text" name="city" class="form-control"  value="{{ old('city', $user->city) }}">
-                                </div>
-                            </div>
-                        </div>
-                        @if (Auth::user()->can('manage_users', 'App\Http\Models\UserRoles'))
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.status')</label>
-                                    <select name="role_id" id="user_role" class="form-control">
-                                        @foreach($user_roles as $role)
-                                            @if($user->role->name === $role->name)
-                                                <option value="{{$role->id}}" selected>{{$role->name}}</option>
-                                            @else
-                                                <option value="{{$role->id}}">{{$role->name}}</option>
-                                            @endif
+                                        @foreach($countries as $country)
+                                            <option value="{{$country['name']}}" {{$country['name'] === $user->country ? 'selected' : ''}}>{{$country['name']}}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                            </div>
-                        </div>
-                        @endif
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.about')</label>
-                                    <textarea rows="4" cols="80" class="form-control" name="about_me" >{{ old('about_me', $user->about_me) }}</textarea>
+                                <div class="field">
+                                    <label class="field-label">@lang('cpanel/users.city')</label>
+                                    <input type="text" name="city" class="form-control" value="{{ old('city', $user->city) }}">
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.facebook')</label>
-                                    <input type="text" class="form-control" name="facebook_url" placeholder="https://" value="{{ old('facebook_url', $user->facebook_url) }}">
+
+                            @if (Auth::user()->can('manage_users', 'App\Http\Models\UserRoles'))
+                                <div class="field">
+                                    <label class="field-label">@lang('cpanel/users.status')</label>
+                                    <select name="role_id" id="user_role" class="form-control">
+                                        @foreach($user_roles as $role)
+                                            <option value="{{$role->id}}" {{$user->role->name === $role->name ? 'selected' : ''}}>{{$role->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
+                            @endif
+
+                            <div class="field">
+                                <label class="field-label">@lang('cpanel/users.about')</label>
+                                <textarea rows="4" class="form-control" name="about_me">{{ old('about_me', $user->about_me) }}</textarea>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.google')</label>
-                                    <input type="text" class="form-control" name="google_url" placeholder="https://" value="{{ old('google_url', $user->google_url) }}">
+
+                            <fieldset class="mt-2 rounded-lg border border-ink-100 p-4">
+                                <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-ink-500">Social profiles</legend>
+                                <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
+                                    <div class="field">
+                                        <label class="field-label">@lang('cpanel/users.facebook')</label>
+                                        <input type="text" class="form-control" name="facebook_url" placeholder="https://" value="{{ old('facebook_url', $user->facebook_url) }}">
+                                    </div>
+                                    <div class="field">
+                                        <label class="field-label">@lang('cpanel/users.google')</label>
+                                        <input type="text" class="form-control" name="google_url" placeholder="https://" value="{{ old('google_url', $user->google_url) }}">
+                                    </div>
+                                    <div class="field">
+                                        <label class="field-label">@lang('cpanel/users.twitter')</label>
+                                        <input type="text" class="form-control" name="twitter_url" placeholder="https://" value="{{ old('twitter_url', $user->twitter_url) }}">
+                                    </div>
+                                    <div class="field">
+                                        <label class="field-label">@lang('cpanel/users.instagram')</label>
+                                        <input type="text" class="form-control" name="instagram_url" placeholder="https://" value="{{ old('instagram_url', $user->instagram_url) }}">
+                                    </div>
+                                    <div class="field">
+                                        <label class="field-label">@lang('cpanel/users.linkedin')</label>
+                                        <input type="text" class="form-control" name="linkedin_url" placeholder="https://" value="{{ old('linkedin_url', $user->linkedin_url) }}">
+                                    </div>
+                                    <div class="field">
+                                        <label class="field-label">@lang('cpanel/users.xing')</label>
+                                        <input type="text" class="form-control" name="xing_url" placeholder="https://" value="{{ old('xing_url', $user->xing_url) }}">
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.twitter')</label>
-                                    <input type="text" class="form-control" name="twitter_url" placeholder="https://" value="{{ old('twitter_url', $user->twitter_url) }}">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.instagram')</label>
-                                    <input type="text" class="form-control" name="instagram_url" placeholder="https://" value="{{ old('instagram_url', $user->instagram_url) }}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.linkedin')</label>
-                                    <input type="text" class="form-control" name="linkedin_url" placeholder="https://" value="{{ old('linkedin_url', $user->linkedin_url) }}">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>@lang('cpanel/users.xing')</label>
-                                    <input type="text" class="form-control" name="xing_url" placeholder="https://" value="{{ old('xing_url', $user->xing_url) }}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-check form-check-radio">
-                                    <label>@lang('cpanel/users.gender')</label>
-                                    <br>
-                                    <label class="form-check-label form-checkbox-label">
-                                        <input class="form-check-input" type="radio" name="gender" {{$user->gender === "male" ? 'checked' : null}} value="male" id="male">
-                                        <span class="form-check-sign"></span>
-                                        Male
+                            </fieldset>
+
+                            <div class="field">
+                                <span class="field-label">@lang('cpanel/users.gender')</span>
+                                <div class="flex flex-wrap gap-6">
+                                    <label class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
+                                        <input class="form-check-input" type="radio" name="gender" {{$user->gender === "male" ? 'checked' : null}} value="male" id="male"> Male
                                     </label>
-                                    <label class="form-check-label form-checkbox-label">
-                                        <input class="form-check-input" type="radio" name="gender" {{$user->gender === "female" ? 'checked' : null}} value="female" id="female">
-                                        <span class="form-check-sign"></span>
-                                        Female
+                                    <label class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
+                                        <input class="form-check-input" type="radio" name="gender" {{$user->gender === "female" ? 'checked' : null}} value="female" id="female"> Female
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-info btn-fill pull-right">@lang('cpanel/users.update_button_label')</button>
-                        <div class="clearfix"></div>
+                        <div class="flex justify-end border-t border-ink-100 px-5 py-4">
+                            <button type="submit" class="btn btn-info">@lang('cpanel/users.update_button_label')</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card card-user">
-                    <div class="card-image">
-                        <img src="{{asset('admin')}}/img/avatar-bg.jpg" alt="...">
-                    </div>
-                    <div class="card-body">
-                        <div class="author">
-                            <span class="user-avatar">
+
+                {{-- Avatar / identity card --}}
+                <div class="lg:col-span-1">
+                    <div class="card card-user">
+                        <div class="card-body text-center">
+                            <span class="user-avatar block">
                                 @if(!empty($user->avatar))
                                     <img id="file-image" class="avatar border-gray" src="{{$user->avatar}}" alt="User profile" />
                                 @else
                                     <img id="file-image" class="avatar border-gray" src="{{asset('admin')}}/img/faces/noavatar.svg" type="file" name="fileUpload" accept="image/*" />
                                 @endif
-                                <span class="input-group-btn">
-                                  <a id="lfm" data-input="thumbnail" data-preview="holder" class="btn btn-primary choose-image">
-                                    @lang('cpanel/users.avatar_edit')
-                                  </a>
+                                <span class="input-group-btn mt-3 inline-block">
+                                    <a id="lfm" data-input="thumbnail" data-preview="holder" class="choose-image">
+                                        @lang('cpanel/users.avatar_edit')
+                                    </a>
                                 </span>
-                                <input id="file-upload" value="{{old('avatar', $user->avatar)}}" class type="hidden" name="avatar" />
+                                <input id="file-upload" value="{{old('avatar', $user->avatar)}}" type="hidden" name="avatar" />
                             </span>
-                            <h5 class="title">{{$user->name}} {{$user->surname}}</h5>
-                            <p class="description">
-                                {{$user->username}}
-                            </p>
+                            <h5 class="title mt-4 text-base font-semibold text-ink-900">{{$user->name}} {{$user->surname}}</h5>
+                            <p class="description text-sm text-ink-500">{{$user->username}}</p>
+                            @if($user->about_me)
+                                <p class="description mt-3 text-sm leading-relaxed text-ink-600">{{$user->about_me}}</p>
+                            @endif
                         </div>
-                        <p class="description text-center">
-                            {{$user->about_me}}
-                        </p>
-                    </div>
-                    <hr>
-                    <div class="button-container mr-auto ml-auto">
-                        @if($user->facebook_url)
-                        <a href="{{ old('facebook_url', $user->facebook_url) }}" target="_blank" class="btn btn-simple btn-link btn-icon">
-                            <i class="fa fa-facebook-square"></i>
-                        </a>
+                        @php
+                            $socials = [
+                                'facebook_url' => 'fa-facebook-square',
+                                'google_url' => 'fa-google-plus-square',
+                                'twitter_url' => 'fa-twitter',
+                                'instagram_url' => 'fa-instagram',
+                                'linkedin_url' => 'fa-linkedin-square',
+                                'xing_url' => 'fa-xing-square',
+                            ];
+                            $has_social = collect($socials)->keys()->some(fn ($k) => !empty($user->$k));
+                        @endphp
+                        @if($has_social)
+                            <div class="border-t border-ink-100">
+                                <div class="button-container">
+                                    @foreach($socials as $field => $icon)
+                                        @if($user->$field)
+                                            <a href="{{ old($field, $user->$field) }}" target="_blank" aria-label="{{ $field }}">
+                                                <i class="fa {{ $icon }}"></i>
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
                         @endif
-                        @if($user->google_url)
-                        <a href="{{ old('google_url', $user->google_url) }}" target="_blank" class="btn btn-simple btn-link btn-icon">
-                            <i class="fa fa-google-plus-square"></i>
-                        </a>
-                        @endif
-                        @if($user->twitter_url)
-                        <a href="{{ old('twitter_url', $user->twitter_url) }}" target="_blank" class="btn btn-simple btn-link btn-icon">
-                            <i class="fa fa-twitter"></i>
-                        </a>
-                        @endif
-                        @if($user->instagram_url)
-                        <a href="{{ old('instagram_url', $user->instagram_url) }}" target="_blank" class="btn btn-simple btn-link btn-icon">
-                            <i class="fa fa-instagram"></i>
-                        </a>
-                        @endif
-                        @if($user->linkedin_url)
-                        <a href="{{ old('linkedin_url', $user->linkedin_url) }}" target="_blank" class="btn btn-simple btn-link btn-icon">
-                            <i class="fa fa-linkedin-square"></i>
-                        </a>
-                        @endif
-                        @if($user->xing_url)
-                        <a href="{{ old('xing_url', $user->xing_url) }}" target="_blank" class="btn btn-simple btn-link btn-icon">
-                            <i class="fa fa-xing-square"></i>
-                        </a>
-                         @endif
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
-    </form>
-
 @endsection
 
 @push('extrascripts')

@@ -9,98 +9,79 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    private $user_permissions;
+    /**
+     * Decoded permission map for the authenticated user, e.g.
+     * ['manage_users' => 1, 'see_admin_panel' => 0, ...].
+     *
+     * @var array<string, int>
+     */
+    private array $user_permissions = [];
 
     public function __construct()
     {
-        $this->user_permissions = json_decode(Auth::user()->permissions());
+        $user = Auth::user();
+
+        if (is_null($user)) {
+            return;
+        }
+
+        $decoded = json_decode($user->permissions() ?? '', true);
+
+        if (is_array($decoded)) {
+            $this->user_permissions = $decoded;
+        }
     }
 
-    public function manage_general_settings()
+    /**
+     * Whether the current user holds the given permission flag.
+     */
+    private function has(string $permission): bool
     {
-        $result = false;
-
-        if($this->user_permissions->manage_general_settings === 1) $result = true;
-
-        return $result;
+        return ($this->user_permissions[$permission] ?? 0) === 1;
     }
 
-    public function manage_users()
+    public function manage_general_settings(): bool
     {
-        $result = false;
-
-        if($this->user_permissions->manage_users === 1) $result = true;
-
-        return $result;
+        return $this->has('manage_general_settings');
     }
 
-
-    public function manage_user_roles()
+    public function manage_users(): bool
     {
-        $result = false;
-
-        if($this->user_permissions->manage_user_roles === 1) $result = true;
-
-        return $result;
+        return $this->has('manage_users');
     }
 
-    public function manage_pages()
+    public function manage_user_roles(): bool
     {
-        $result = false;
-
-        if($this->user_permissions->manage_pages === 1) $result = true;
-
-        return $result;
+        return $this->has('manage_user_roles');
     }
 
-    public function manage_post_categories()
+    public function manage_pages(): bool
     {
-        $result = false;
-
-        if($this->user_permissions->manage_post_categories === 1) $result = true;
-
-        return $result;
+        return $this->has('manage_pages');
     }
 
-    public function manage_posts()
+    public function manage_post_categories(): bool
     {
-        $result = false;
-
-        if($this->user_permissions->manage_posts === 1) $result = true;
-
-        return $result;
+        return $this->has('manage_post_categories');
     }
 
-    public function manage_menus()
+    public function manage_posts(): bool
     {
-        $result = false;
-
-        if($this->user_permissions->manage_menus === 1) $result = true;
-
-        return $result;
+        return $this->has('manage_posts');
     }
 
-    public function manage_comments()
+    public function manage_menus(): bool
     {
-        $result = false;
-
-        if($this->user_permissions->manage_comments === 1) $result = true;
-
-        return $result;
+        return $this->has('manage_menus');
     }
 
-    public function see_admin_panel()
+    public function manage_comments(): bool
     {
-        $result = false;
-
-        if($this->user_permissions->see_admin_panel === 1) $result = true;
-
-        return $result;
+        return $this->has('manage_comments');
     }
 
-
-
-
-
-
+    public function see_admin_panel(): bool
+    {
+        return $this->has('see_admin_panel');
+    }
 }

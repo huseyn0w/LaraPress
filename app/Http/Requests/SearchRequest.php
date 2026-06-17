@@ -24,7 +24,7 @@ class SearchRequest extends FormRequest
     public function rules()
     {
         return [
-            'g-recaptcha-response'=> 'required|captcha',
+            'g-recaptcha-response'=> ['nullable', 'captcha'],
             'query'=> 'required|string',
             'filter'=> 'required|string',
         ];

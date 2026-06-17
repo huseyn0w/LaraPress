@@ -1,4 +1,4 @@
-@extends(env('TEMPLATE_NAME').'/index')
+@extends(config('app.template_name').'/index')
 
 @section('content')
 <section class="top-section-area section-gap">

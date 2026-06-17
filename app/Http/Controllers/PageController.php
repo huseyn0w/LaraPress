@@ -48,7 +48,7 @@ class PageController extends BaseController
 
         $contact_mail = get_contact_email();
 
-        if(!$contact_mail) $contact_mail = env('CONTACT_EMAIL');
+        if(!$contact_mail) $contact_mail = config('mail.contact_address');
 
         Mail::to($contact_mail)->send(new ContactMail($data));
 
