@@ -43,7 +43,7 @@ class UsersTableSeeder extends Seeder
                     'avatar'  => '',
                     'about_me' => "ADMIN of CMS LaraPress",
                     'linkedin_url' => "",
-                    'password' => bcrypt('larapressdmin123'),
+                    'password' => bcrypt('larapressadmin123'),
                 ],
                 [
                     'name' => "Ilkin",

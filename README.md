@@ -1,58 +1,180 @@
-# LaraPress CMS
 <p align="center">
 <img alt="LaraPress Logo" src="https://raw.githubusercontent.com/huseyn0w/LaraPress-CMS/master/public/front/default/img/readme.png">
 </p>
-The CMS Project based on Laravel PHP Framework
 
-## Getting Started
-LaraPress CMS is developed as analog to such popular CMS as Wordpress, DLE, Joomla and etc, but based on framework Laravel.
-These instructions will get you a copy of the project up and running on your local machine / server for using or testing it.
-See deployment for notes on how to deploy the project on a live system.
+# LaraPress CMS
+
+**LaraPress — the Laravel version of WordPress.** A modern, multilingual, SEO/GEO-ready
+content management system built on **Laravel 11 / PHP 8.3**, with a Tailwind + Vite
+front-end and a first-class admin panel. It plays the same role as WordPress, DLE or
+Joomla, but on a clean, testable Laravel codebase that developers actually enjoy extending.
+
+Built and maintained by **[Elman Group](https://elman.group)**.
+
+---
+
+## Table of contents
+
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Requirements](#requirements)
+- [Quick start (Docker + Makefile)](#quick-start-docker--makefile)
+- [Manual setup (no Docker)](#manual-setup-no-docker)
+- [Testing](#testing)
+- [SEO / GEO](#seo--geo)
+- [Multilingual configuration](#multilingual-configuration)
+- [Admin credentials](#admin-credentials)
+- [Deployment](#deployment)
+  - [Hostinger (shared hosting, no Docker)](#hostinger-shared-hosting-no-docker)
+  - [VPS (nginx + php-fpm + mysql)](#vps-nginx--php-fpm--mysql)
+- [Is it ready to deploy?](#is-it-ready-to-deploy)
+- [Author, contributor & license](#author-contributor--license)
+
+---
+
+## Features
+
+* **Full CMS**: pages, posts, categories, menus, comments, media / file manager
+* **Modern responsive UI** (Tailwind CSS 3 + Alpine.js) for both the public site and the admin panel
+* **Built-in SEO/GEO** — Open Graph, Twitter cards, canonical + `hreflang`, JSON-LD structured data, dynamic `sitemap.xml`, `robots.txt`, and `llms.txt`
+* **Multilingual content** via `astrotomic/laravel-translatable` (en/ru out of the box, easily extended)
+* **Social-media authentication** (Facebook, GitHub, LinkedIn, and other Socialite providers)
+* **Users, roles & granular permissions** (custom role/permission middleware — one capability per middleware)
+* **Custom fields** and a **flexible template-switching system**
+* **Website search**
+* **Spam protection** via Google reCAPTCHA v3 (gracefully disabled when no keys are set)
+* **Database / model caching**
+* **158 automated tests** (PHPUnit) running on isolated in-memory SQLite
+
+### Why it's easy to extend
+
+Written with Laravel best practices: thin controllers, dedicated Form Request validators,
+the repository pattern for all DB access, observers, policies, the TinyMCE editor, and the
+Laravel File Manager.
+
+### Planned
+
+* E-Commerce extension
+* REST API for posts and pages
+
+---
+
+## Tech stack
+
+* **Laravel 11** (PHP 8.3)
+* **Tailwind CSS 3** + **Alpine.js**, bundled with **Vite** — lightweight front-end, no jQuery/plugin bloat
+* **MySQL 8** with `astrotomic/laravel-translatable` for multilingual content
+* Repository pattern, custom role/permission middleware, model caching
+* Google reCAPTCHA (v3) for spam protection
+* Docker stack for local development (nginx + php-fpm + MySQL 8)
+
+---
 
 ## Requirements
 
 * **PHP 8.2+** (developed and tested on PHP 8.3) with the `imagick` extension
 * **Composer 2**
-* **MySQL 8** (production/local) — SQLite is used only for the test suite
+* **MySQL 8** — SQLite is used only for the test suite (in-memory)
 * **Node.js 20+** and npm (for the Vite/Tailwind asset build)
+* *(optional)* **Docker + Docker Compose** for the one-command local stack
 
-## Tech stack
+---
 
-* **Laravel 11** (PHP framework)
-* **Tailwind CSS 3** + **Alpine.js**, bundled with **Vite** — lightweight front-end, no jQuery/plugin bloat
-* **MySQL 8** with `astrotomic/laravel-translatable` for multilingual content
-* Repository pattern, custom role/permission middleware, model caching
-* Google reCAPTCHA (v3) for spam protection — gracefully disabled when no keys are configured
-* Built-in **SEO/GEO**: Open Graph, Twitter cards, canonical + `hreflang`, JSON-LD structured data, `sitemap.xml`, `robots.txt`, `llms.txt`
-* **152 automated tests** (PHPUnit) running on isolated in-memory SQLite
+## Quick start (Docker + Makefile)
 
-## Installation (manual / no Docker)
+The fastest path. The Docker stack (nginx + PHP 8.3-FPM with imagick + MySQL 8) is a
+**local development convenience** — it is **not** required at runtime in production.
 
-> Prefer containers? Skip to **[Run locally with Docker](#run-locally-with-docker-development-only)** below.
+```bash
+git clone <your-repo-url> larapress && cd larapress
+make setup
+```
 
-1. Clone the project.
-2. Copy the env file and fill in your settings (database, mail, API keys, default language):
+`make setup` does everything end-to-end:
+
+1. copies `.env.example` → `.env` (if missing),
+2. builds and starts the Docker stack (`docker compose up -d --build`),
+3. `composer install`,
+4. `php artisan key:generate`,
+5. `php artisan migrate --seed`,
+6. `php artisan storage:link`,
+7. `npm install && npm run build` (assets, on the host).
+
+When it finishes:
+
+* **App:** http://localhost:8080
+* **Admin:** http://localhost:8080/larapress-admin (see [credentials](#admin-credentials))
+
+### Available `make` targets
+
+| Target        | Description                                                        |
+|---------------|--------------------------------------------------------------------|
+| `make setup`  | First-time bootstrap (everything above)                            |
+| `make up`     | Start the Docker stack                                             |
+| `make down`   | Stop the stack (keeps the DB volume)                               |
+| `make fresh`  | `migrate:fresh --seed` (rebuild the database)                      |
+| `make test`   | Run the PHPUnit suite inside the container                         |
+| `make build`  | Build front-end assets (Vite production build)                     |
+| `make shell`  | Open a shell in the app container                                  |
+| `make logs`   | Tail container logs                                                |
+| `make clean`  | Stop the stack **and remove the DB volume** (destroys data)        |
+
+Run `make help` to see all targets.
+
+### Optional Docker services
+
+* **Mailpit** (catches local outgoing mail, UI on http://localhost:8025):
+  ```bash
+  docker compose --profile mail up -d mailpit
+  ```
+  Then set in `.env`: `MAIL_MAILER=smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`.
+* **Vite HMR** (live reload instead of a one-off build):
+  ```bash
+  docker compose --profile dev up node     # Vite on http://localhost:5173
+  ```
+
+> **Docker-only files:** `Dockerfile`, `docker-compose.yml`, `docker/nginx/default.conf`,
+> `docker/php/php.ini`, `.dockerignore`, `Makefile`. **None of these are part of the
+> production runtime.**
+
+---
+
+## Manual setup (no Docker)
+
+Requires a local PHP 8.3 + Composer + Node + a running MySQL 8 server.
+
+1. Copy the env file and fill in your settings (database, mail, API keys, default language):
    ```bash
    cp .env.example .env
    ```
-3. Install PHP and front-end dependencies:
+   For a **local MySQL** server, set `DB_HOST=127.0.0.1` (the `.env.example` default of
+   `DB_HOST=mysql` is the Docker service name). Create a database named `larapress`
+   (or update `DB_DATABASE`/`DB_USERNAME`/`DB_PASSWORD` accordingly).
+
+2. Install PHP and front-end dependencies:
    ```bash
    composer install
    npm install
    ```
-4. Generate the app key and build assets:
+
+3. Generate the app key, run migrations + seeders, link storage, and build assets:
    ```bash
    php artisan key:generate
-   npm run build            # or `npm run dev` for the Vite dev server with HMR
+   composer setup            # = migrate --seed --force + storage:link (key:generate is idempotent)
+   npm run build             # or `npm run dev` for the Vite dev server with HMR
    ```
-5. Run the database migrations and seeders:
+   The `composer setup` script bundles `key:generate`, `migrate --seed`, and `storage:link`
+   for the non-Docker path. You can also run those artisan commands individually.
+
+4. Serve the app:
    ```bash
-   php artisan migrate --seed
+   php artisan serve         # http://127.0.0.1:8000
    ```
-6. Serve the app:
-   ```bash
-   php artisan serve
-   ```
+
+> **Media uploads:** the file manager writes to `public/uploads`, and the Laravel `public`
+> disk maps to `public/storage` → `storage/app/public`. Run `php artisan storage:link`
+> (included in `composer setup` / `make setup`) so uploaded media on the public disk is
+> served correctly.
 
 ### Spam protection (reCAPTCHA)
 
@@ -65,209 +187,220 @@ RECAPTCHA_SITE_KEY=your_site_key
 RECAPTCHA_SECRET_KEY=your_secret_key
 ```
 
-## SEO, GEO & performance
-
-The CMS ships SEO/GEO support out of the box, built to stay fast (no WordPress-style
-script bloat — the public pages load only the Vite bundle and, optionally, a single
-async analytics tag):
-
-* Per-page `<title>` / `<meta description>`, `<link rel="canonical">`, and per-entity
-  `noindex` / canonical overrides.
-* **Open Graph** + **Twitter Card** tags (with a configurable default social image).
-* **`hreflang`** alternates (en/ru + `x-default`) for the multilingual content.
-* **JSON-LD structured data** (schema.org) — `WebSite`+`SearchAction`+`Organization`
-  on the homepage, `BlogPosting`+`BreadcrumbList` on posts, `CollectionPage` on
-  categories, `ProfilePage`/`Person` on profiles — which also helps generative engines (GEO).
-* Dynamic **`/sitemap.xml`** (pages/posts/categories with `hreflang`), **`/robots.txt`**,
-  and **`/llms.txt`**.
-* Lazy-loaded images with width/height (CLS-safe), `preconnect` fonts with `display=swap`,
-  deferred/module scripts.
-
-Configure global SEO defaults in the admin panel under **Settings → SEO**
-(title separator, default description, default OG image, social handles, Google/Bing
-verification tags, optional GA4/GTM id loaded async, a global "discourage search engines"
-toggle, sitemap toggle, and extra `robots.txt` lines).
+---
 
 ## Testing
 
 ```bash
-php artisan test                          # full suite (host)
-docker compose exec app php artisan test  # inside Docker
-php artisan test --filter=SeoMetaTest     # a single test
+php artisan test                                # full suite (host)
+docker compose exec app php artisan test        # inside Docker
+make test                                       # inside Docker (shortcut)
+php artisan test --filter=SeoMetaTest           # a single test
 ```
 
-Tests run on an **isolated in-memory SQLite** database (pinned in `tests/CreatesApplication.php`)
-so they never touch your local MySQL/Docker data.
+The suite is **158 tests** and runs on an **isolated in-memory SQLite** database (pinned in
+`tests/CreatesApplication.php` and `phpunit.xml`) so it **never** touches your local MySQL /
+Docker data — no DB setup required to run tests.
 
-## Administrator area credentials:
-Go to: SITE_URL/larapress-admin
-<pre>
+---
+
+## SEO / GEO
+
+LaraPress ships SEO/GEO support out of the box, built to stay fast (no WordPress-style
+script bloat — public pages load only the Vite bundle and, optionally, a single async
+analytics tag):
+
+* Per-page `<title>` / `<meta description>`, `<link rel="canonical">`, per-entity `noindex` / canonical overrides.
+* **Open Graph** + **Twitter Card** tags (with a configurable default social image).
+* **`hreflang`** alternates (en/ru + `x-default`) for multilingual content.
+* **JSON-LD structured data** (schema.org) — `WebSite` + `SearchAction` + `Organization` on the homepage,
+  `BlogPosting` + `BreadcrumbList` on posts, `CollectionPage` on categories, `ProfilePage` / `Person`
+  on profiles — which also helps generative engines (GEO).
+* Dynamic **`/sitemap.xml`** (pages/posts/categories with `hreflang`), **`/robots.txt`**, and **`/llms.txt`**.
+* Lazy-loaded images with width/height (CLS-safe), `preconnect` fonts with `display=swap`, deferred/module scripts.
+
+Configure global SEO defaults in the admin panel under **Settings → SEO** (title separator,
+default description, default OG image, social handles, Google/Bing verification tags, optional
+async GA4/GTM id, a global "discourage search engines" toggle, sitemap toggle, and extra
+`robots.txt` lines).
+
+---
+
+## Multilingual configuration
+
+1. Edit the language list in `config/app.php`:
+   ```php
+   'languages_list' => [
+       'en' => ['title' => 'English', 'icon' => env('APP_URL').'/admin/img/flags/en.png'],
+       'ru' => ['title' => 'Русский', 'icon' => env('APP_URL').'/admin/img/flags/ru.png'],
+   ],
+   ```
+2. Manage the localization strings under `resources/lang/`.
+
+The active locale is resolved per request from `session('locale')`, falling back to
+`config('app.locale')` (set via the `LOCALE` env key).
+
+---
+
+## Admin credentials
+
+After seeding, the admin panel lives at:
+
+```
+<APP_URL>/larapress-admin
+```
+
+Seeded login:
+
+```
 Username: admin
-Password: larapressdmin123
-</pre>
-
-## To manage website languages:
-1) Open config/app.php file and edit array of languages:
-<pre>
-'languages_list' => [
-    'en'  => ['title' => 'English', 'icon' => env('APP_URL').'/admin/img/flags/en.png'],
-    'ru'  => ['title' => 'Русский', 'icon' => env('APP_URL').'/admin/img/flags/ru.png']
-]
-</pre>
-
-2) Open resourses/lang/ folder to manage language localization string files.
-
-
-## General features
-* Full CMS: pages, posts, categories, menus, comments, media/file manager
-* Modern responsive UI (Tailwind CSS) for both the public site and the admin panel
-* Built-in SEO/GEO (Open Graph, JSON-LD, sitemap/robots, hreflang) — see above
-* Social-media authentication (Twitter, Facebook, LinkedIn, Google, GitHub)
-* Website search
-* Users, roles & granular permissions
-* Custom fields
-* Flexible template-changing system
-* Multiple languages (multilingual content via translations)
-* Database caching
-
-## Planning additional features
-* E-Commerce extension
-* REST API for posts and pages
-
-
-
-## Advantages for developers
-Why it is easy to extend? Because it was written by using best practices and technologies, such as:
-* Short controllers
-* Separate Validator Request classes
-* Repository pattern to work with DB
-* Middlewares
-* Observers
-* Policies
-* Beautiful text editor (TinyMCE)
-* Perfect File Manager (Laravel FileManager)
-
-## Version
-
-Current Version of Laravel Framework is **11.x**
-
-Current version of CMS is **2.0** (modernized: Laravel 11 / PHP 8.3, Vite + Tailwind, Dockerized local dev)
-
-## Author
-
-* **Elman Hüseynov** - [huseyn0w](https://linkedin.com/in/huseyn0w)
-
-## Contributor
-
-* **Ilkin Alibayli** - [ilkinalibayli](https://www.linkedin.com/in/ilkin-alibayli/)
-
-## License
-
-This project is licensed under the Public V3 License - see the [LICENSE.md](LICENSE.md) file for details
-
-<!-- ===================================================================== -->
-<!-- Phase 2.5: Local Docker dev + Hostinger (no-Docker) deployment        -->
-<!-- ===================================================================== -->
-
-## Run locally with Docker (development only)
-
-> The Docker setup is a **local development convenience only**. It is **not**
-> used in production and the application has **no runtime dependency on Docker**.
-> See *Deploy to Hostinger* below for the production flow.
-
-**Requirements:** Docker + Docker Compose.
-
-1. Copy the env file and point the DB at the Docker MySQL service:
-   ```bash
-   cp .env.example .env
-   # In .env set:
-   #   DB_HOST=mysql
-   #   DB_CONNECTION=mysql
-   ```
-2. Build and start the stack:
-   ```bash
-   docker compose up -d
-   ```
-   Services started: `app` (PHP 8.3-FPM with imagick), `web` (nginx on
-   http://localhost:8080), `mysql` (MySQL 8, published on host port 33060).
-3. Install PHP dependencies, generate the key, and migrate/seed:
-   ```bash
-   docker compose exec app composer install
-   docker compose exec app php artisan key:generate
-   docker compose exec app php artisan migrate --seed
-   ```
-4. Build front-end assets. Either run Vite once on the host (or in the node
-   service) for a static build, or use the HMR dev server:
-   ```bash
-   # One-off build (host):
-   npm install && npm run build
-
-   # OR live HMR via the optional node service:
-   docker compose --profile dev up node   # Vite on http://localhost:5173
-   ```
-5. Open the app: **http://localhost:8080**
-   Admin area: http://localhost:8080/larapress-admin (see credentials above).
-
-**Optional services**
-
-- **Mailpit** (catches local outgoing mail, UI on http://localhost:8025):
-  ```bash
-  docker compose --profile mail up -d mailpit
-  ```
-  Then in `.env`: `MAIL_MAILER=smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`.
-- **node / Vite** is also optional (see step 4). For a non-HMR workflow just
-  `npm run build` once and skip it.
-
-**Tests** run against SQLite in-memory (configured in `phpunit.xml`), so no DB
-is required:
-```bash
-docker compose exec app php artisan test   # or simply `php artisan test` on the host
+Password: larapressadmin123
 ```
 
-The Docker-specific files are: `Dockerfile`, `docker-compose.yml`,
-`docker/nginx/default.conf`, `docker/php/php.ini`, `.dockerignore`. **None of
-these are deployed to or used by production.**
+> Change this password immediately in any non-local environment.
 
-## Deploy to Hostinger (no Docker)
+---
 
-Production runs on **traditional Hostinger PHP-FPM hosting — Docker is never
-used here.** The Docker files above are development-only.
+## Deployment
+
+LaraPress runs on traditional PHP hosting with **no runtime dependency on Docker**. Two
+supported targets:
+
+### Hostinger (shared hosting, no Docker)
 
 1. Upload / pull the code to your Hostinger account.
 2. Install PHP dependencies (production, optimized):
    ```bash
    composer install --no-dev --optimize-autoloader
    ```
-3. Build front-end assets and upload the result. Build locally (or in CI) and
-   commit/upload the generated `public/build/` directory:
+3. Build front-end assets **locally or in CI**, then upload the generated `public/build/`
+   directory (shared hosting usually has no Node toolchain):
    ```bash
    npm install && npm run build
    ```
 4. Set the domain's **document root to `/public`** in hPanel.
 5. Configure `.env` with your Hostinger MySQL credentials:
    ```bash
+   APP_ENV=production
+   APP_DEBUG=false
    DB_CONNECTION=mysql
    DB_HOST=localhost          # Hostinger MySQL is local to the account
    DB_PORT=3306
    DB_DATABASE=your_db_name
    DB_USERNAME=your_db_user
    DB_PASSWORD=your_db_password
-   APP_ENV=production
-   APP_DEBUG=false
    ```
-6. Generate the app key (once) and run migrations, then cache config/routes
-   via Hostinger SSH (or a one-off cron job):
+6. Via SSH (or a one-off cron job), generate the key, migrate, cache config/routes, and link storage:
    ```bash
    php artisan key:generate
    php artisan migrate --force
    php artisan config:cache
    php artisan route:cache
+   php artisan storage:link
    ```
-7. Ensure the server has the **`imagick` PHP extension** enabled (required by
-   the file manager / image features). On Hostinger this is selectable in the
-   PHP extensions panel.
+7. Enable the **`imagick` PHP extension** in the hPanel PHP-extensions panel (required by the
+   file manager / image features).
 
-> The app must run identically from a plain `composer install --no-dev` plus
-> built assets on Hostinger's PHP-FPM. **No Docker, nginx config, or `docker/`
-> file is part of the production runtime.**
+**Shared-hosting friendliness:** the app needs no queue workers, no websockets, and no
+always-on processes (`QUEUE_CONNECTION=sync`). `robots.txt`/`sitemap.xml` are served
+dynamically by Laravel. The scheduler is **optional**. `php artisan config:cache` and
+`route:cache` are **safe** — the app reads no `env()` in views, so cached config does not
+break rendering (verified: home returns `200`, admin returns `302` with caches enabled).
 
+### VPS (nginx + php-fpm + mysql)
+
+You have two options on a VPS:
+
+**A) Reuse the included Docker stack** (simplest):
+```bash
+git clone <repo> && cd larapress
+make setup            # or: docker compose up -d ...
+```
+Then put your real reverse proxy / TLS in front (or expose port 8080 behind one).
+
+**B) Native nginx + php-fpm + MySQL** (no Docker). Install PHP 8.3-FPM (with `imagick`,
+`gd`, `intl`, `zip`, `bcmath`, `mbstring`, `pdo_mysql`), MySQL 8, and Node (for the build).
+Deploy the code, then:
+
+```bash
+composer install --no-dev --optimize-autoloader
+npm install && npm run build
+cp .env.example .env        # set APP_ENV=production, APP_DEBUG=false, DB_HOST=127.0.0.1, etc.
+php artisan key:generate
+php artisan migrate --force
+php artisan config:cache && php artisan route:cache
+php artisan storage:link
+```
+
+Example nginx server block (adapted from `docker/nginx/default.conf`, which is a working
+reference config):
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/larapress/public;
+    index index.php index.html;
+    charset utf-8;
+    client_max_body_size 64M;            # sized for the media/file manager
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    # robots.txt is served dynamically by Laravel — do NOT add a static location for it.
+
+    error_page 404 /index.php;
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;   # or 127.0.0.1:9000
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        include fastcgi_params;
+        fastcgi_read_timeout 300;
+    }
+
+    location ~ /\.(?!well-known).* { deny all; }       # block .env, .git, etc.
+}
+```
+
+Make sure `storage/` and `bootstrap/cache/` are writable by the php-fpm user. **Queue
+workers, the scheduler, and Supervisor are all optional** — only add them if you start
+using queued jobs or scheduled tasks.
+
+### Is it ready to deploy?
+
+**Yes.** LaraPress runs cleanly **locally** (Docker via `make setup`, or fully manual), and
+deploys to both **Hostinger shared hosting** and a **VPS** with no required background
+services. A clean Docker bring-up was verified end to end: migrations + seeders succeed
+against a fresh `larapress` MySQL database, the home page returns `200`, `/larapress-admin`
+returns `302`, and `/sitemap.xml` returns `200` — and these stay correct with
+`config:cache` + `route:cache` enabled (the production code path).
+
+**Caveats / things to do per environment:**
+
+* Provide real production `.env` values (`APP_KEY`, DB credentials, mail, and reCAPTCHA keys
+  if you enable captcha) and set `APP_ENV=production`, `APP_DEBUG=false`.
+* On shared hosting, **build assets off-host** (`npm run build`) and upload `public/build/`.
+* Ensure the **`imagick`** PHP extension is enabled on the target.
+* Run `php artisan storage:link` so public-disk media is served.
+* Change the seeded admin password.
+
+---
+
+## Author, contributor & license
+
+**Author**
+
+* **Elman Hüseynov** — [huseyn0w](https://linkedin.com/in/huseyn0w) · [Elman Group](https://elman.group)
+
+**Contributor**
+
+* **Ilkin Alibayli** — [ilkinalibayli](https://www.linkedin.com/in/ilkin-alibayli/)
+
+**License**
+
+This project is licensed under the GNU General Public License v3 — see the
+[LICENSE](LICENSE) file for details.

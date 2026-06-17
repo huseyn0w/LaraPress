@@ -1,0 +1,77 @@
+# =============================================================================
+# LaraPress CMS - convenience targets for local development (Docker).
+#
+# The Docker stack is a LOCAL DEV convenience only; production deploys to
+# Hostinger / a VPS without Docker (see README "Deployment").
+#
+#   make setup   one-shot bootstrap: up + composer + key + migrate/seed + build
+#   make up      start the Docker stack (detached)
+#   make down    stop the stack (keeps the database volume)
+#   make fresh   rebuild the DB from scratch (migrate:fresh --seed)
+#   make test    run the PHPUnit suite inside the container
+#   make build   build front-end assets on the host (Vite)
+#   make shell   open a shell in the app container
+#   make logs    tail container logs
+# =============================================================================
+
+# Run artisan/composer inside the running app container.
+DC      := docker compose
+APP     := $(DC) exec -T app
+
+.DEFAULT_GOAL := help
+
+.PHONY: help setup up down fresh test build shell logs key migrate seed link clean
+
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+
+setup: ## First-time bootstrap: bring up Docker, install deps, migrate+seed, build assets
+	@test -f .env || cp .env.example .env
+	$(DC) up -d --build
+	$(APP) composer install
+	$(APP) php artisan key:generate
+	$(APP) php artisan migrate --seed
+	$(APP) php artisan storage:link || true
+	npm install
+	npm run build
+	@echo ""
+	@echo "  LaraPress is up:  http://localhost:8080"
+	@echo "  Admin panel:      http://localhost:8080/larapress-admin"
+	@echo "  Login: admin / larapressdmin123"
+
+up: ## Start the Docker stack
+	$(DC) up -d
+
+down: ## Stop the Docker stack (keeps the DB volume)
+	$(DC) down
+
+fresh: ## Drop and rebuild the database, then reseed
+	$(APP) php artisan migrate:fresh --seed
+
+test: ## Run the test suite inside the container (in-memory SQLite)
+	$(APP) php artisan test
+
+build: ## Build front-end assets on the host (Vite production build)
+	npm run build
+
+key: ## Generate the application key
+	$(APP) php artisan key:generate
+
+migrate: ## Run database migrations
+	$(APP) php artisan migrate
+
+seed: ## Run database seeders
+	$(APP) php artisan db:seed
+
+link: ## Create the public/storage symlink
+	$(APP) php artisan storage:link
+
+shell: ## Open a bash shell in the app container
+	$(DC) exec app bash
+
+logs: ## Tail container logs
+	$(DC) logs -f
+
+clean: ## Stop the stack AND remove the database volume (destroys data)
+	$(DC) down -v

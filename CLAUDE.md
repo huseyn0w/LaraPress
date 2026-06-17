@@ -4,29 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-LaraPress CMS — a Wordpress/Joomla-style multilingual CMS built on **Laravel 8 / PHP 7.3+**. Requires the `ext-imagick` PHP extension. Front-end assets are compiled with Laravel Mix (webpack) + Bootstrap 4 + jQuery + Vue 2.
+LaraPress CMS — a WordPress/Joomla-style multilingual CMS built on **Laravel 11 / PHP 8.3** (min PHP 8.2). Requires the `ext-imagick` PHP extension and **MySQL 8** (SQLite is used only for the test suite). Front-end is **Tailwind CSS 3 + Alpine.js bundled with Vite** (no Bootstrap/jQuery/Vue — those were removed in the modernization). Local dev can run via Docker Compose; production runs on plain PHP-FPM (Hostinger/VPS) with **no** Docker dependency.
 
 ## Commands
 
 ```bash
-composer install                 # PHP dependencies
-npm install                      # or `yarn` — JS dependencies
-cp .env.example .env             # then fill DB + API keys; php artisan key:generate
-php artisan migrate --seed       # create schema AND seed roles/users/pages/posts (seeds are required for a working install)
+# --- Local dev via Docker (recommended) ---
+make setup                       # docker up + composer install + key:generate + migrate --seed + storage:link + npm build
+make up / make down / make fresh # start / stop / rebuild-from-scratch the stack
+make test                        # run the suite inside the container
+# App: http://localhost:8080   Admin: http://localhost:8080/larapress-admin
 
-php artisan serve                # run dev server
-npm run dev                      # build assets once
-npm run watch                    # rebuild assets on change
-npm run prod                     # production asset build
+# --- Manual (no Docker) ---
+composer install && npm install
+cp .env.example .env && php artisan key:generate
+php artisan migrate --seed       # seeds are REQUIRED for a working install (roles/users/pages/posts/settings)
+npm run build                    # or `npm run dev` for the Vite dev server (HMR)
+php artisan serve
 
-vendor/bin/phpunit               # run the test suite
-vendor/bin/phpunit --filter=SomeTest          # run a single test by name
-vendor/bin/phpunit tests/Feature/ExampleTest.php   # run a single test file
+# --- Tests ---
+php artisan test                              # full suite (isolated in-memory SQLite — never touches MySQL)
+php artisan test --filter=SeoMetaTest         # a single test class
+docker compose exec -T app php artisan test   # same, inside the container
 ```
+
+Test isolation is pinned in `tests/CreatesApplication.php` (forces SQLite `:memory:`, array cache, `app.env=testing`, model-caching off) because the Docker container injects `DB_CONNECTION=mysql` via `$_SERVER` — without the pin the suite would run against (and wipe) the live MySQL dev DB. Don't weaken it.
 
 Code style is enforced by StyleCI (`.styleci.yml`, Laravel preset) on push — there is no local lint command.
 
-Admin panel lives at `/<APP_URL>/larapress-admin` (seeded credentials `admin` / `larapressdmin123`).
+Admin panel lives at `/larapress-admin` (seeded credentials `admin` / `larapressadmin123` — change in production).
 
 ## Architecture
 
@@ -43,7 +49,7 @@ Translatable models (`Post`, `Page`, `Category`, `Menu`) implement `Translatable
 - **Front routes** (`routes/web.php`, default namespace): `PageController`, `PostController`, `CategoryController`, `UserController`, `PostCommentController`. Note the catch-all `/{locale?}/{slug?}` → `PageController@languageIndex` must stay last.
 - **Admin routes** are all under the `larapress-admin` prefix + `CPanel` namespace, guarded by `auth` + `see_admin_panel`, with each section gated by a custom permission middleware.
 
-The permission system is **custom** (not a package): `UserRoles` + `UserPermissions` models, and one middleware per capability (`ManageUsers`, `ManagePosts`, `ManagePages`, `ManageCategories`, `ManageComments`, `ManageRoles`, `ManageGeneralSettings`, `ManageMenu`). These are aliased in `app/Http/Kernel.php` as `manage_*`. Note: `see_admin_panel` is aliased to `ManageMenu` — verify the intended check when touching admin gating.
+The permission system is **custom** (not a package): `UserRoles` + `UserPermissions` models, and one middleware per capability (`ManageUsers`, `ManagePosts`, `ManagePages`, `ManageCategories`, `ManageComments`, `ManageRoles`, `ManageGeneralSettings`, `ManageMenu`). These are aliased in `app/Http/Kernel.php` as `manage_*`. The `see_admin_panel` alias maps to `AdminPanelMiddleware` (which checks the `see_admin_panel` permission and returns 403 when missing).
 
 ### Theming / template selection
 Front views live under `resources/views/default/` (`pages/`, `posts/`, `categories/`, `users/`). A page's blade is chosen dynamically from a DB column: `PageController` does `view('default.pages.' . $this->data->template, ...)`. Adding a page template means adding a blade under `resources/views/default/pages/` and exposing its name to the page editor. `default` is effectively the active theme folder.
@@ -54,8 +60,15 @@ Registered in `app/Providers/ObserverServiceProvider.php` (`PostObserver`, `Post
 ### Model caching
 `Post` and `Category` use the `genealabs/laravel-model-caching` `Cachable` trait. Writes auto-flush the model's cache, but be aware reads are cached when debugging stale data.
 
+### Asset pipeline (Vite + Tailwind + Alpine)
+Entry points `resources/css/app.css` (+ `resources/css/admin.css`) and `resources/js/app.js` (+ `resources/js/admin.js`) are bundled by Vite (`vite.config.js`, `tailwind.config.js`). Blade loads them with `@vite([...])`. Tailwind **preflight is disabled globally**; each theme scopes its own reset under a wrapper class (`.theme-default` for the public site, `.theme-admin` for the panel) so the two themes don't bleed into each other. The legacy `public/front/**` and `public/admin/**` assets are no longer loaded by the rewritten views.
+
+### SEO / GEO
+A single head partial `resources/views/default/partials/seo-meta.blade.php` emits title/description, canonical, Open Graph, Twitter cards, `hreflang` alternates, robots, and JSON-LD (via the `json_ld()` / `get_seo_settings()` helpers). `SeoController` serves dynamic `/sitemap.xml`, `/robots.txt`, `/llms.txt` (routes are registered before the front catch-all). Global SEO defaults live in the `seo_settings` singleton (admin **Settings → SEO**); per-entity `canonical_url` / `meta_noindex` live on the `*_translations` tables. Note: `/robots.txt` is dynamic, so nginx must NOT have a static `location = /robots.txt` block.
+
 ### Other conventions
-- **Validation**: dedicated Form Request classes in `app/Http/Requests/`.
+- **Validation**: dedicated Form Request classes in `app/Http/Requests/`. The base `LaraPressRequest` must **not** redeclare a `$locale` property (Symfony 7's `Request` already declares a typed `?string $locale`); it uses `$currentLocale` instead.
 - **Custom helpers**: globally available, autoloaded via `bootstrap/larapress-helpers.php` (composer `files` autoload) — e.g. `get_languages()`, `lang_exist()`, `get_current_lang()`.
+- **Config over env() in views**: never call `env()` at runtime in Blade (breaks under `php artisan config:cache`); use `config()` — e.g. the active theme is `config('app.template_name')`.
 - **Authorization policies**: `app/Policies/UserPolicy.php` (registered in `AuthServiceProvider`).
-- **Integrations**: HTML sanitization via `mews/purifier`, media via `unisharp/laravel-filemanager` (config built by `app/Handlers/LfmConfigHandler.php`), social login via `laravel/socialite` (Twitter/Facebook/LinkedIn/Google/GitHub), `albertcht/invisible-recaptcha`, image processing via `intervention/image`.
+- **Integrations**: HTML sanitization via `mews/purifier`, media via `unisharp/laravel-filemanager` (config built by `app/Handlers/LfmConfigHandler.php`), social login via `laravel/socialite` (Twitter/Facebook/LinkedIn/Google/GitHub), spam protection via a `captcha` service (`App\Services\Captcha`, Google reCAPTCHA v3 — disabled when no keys), image processing via `intervention/image`.
