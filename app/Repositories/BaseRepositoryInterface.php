@@ -11,12 +11,25 @@ namespace App\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Contract for the application's Eloquent-backed repositories.
+ *
+ * Implementations encapsulate all persistence for a single model (or its
+ * translatable counterpart). Write methods (create/update) accept either a
+ * FormRequest, a plain Request, or an explicit associative array. FormRequests
+ * are always reduced to their validated() payload, so only whitelisted data is
+ * ever mass assigned — callers must never hand raw, unvalidated input to a
+ * repository. Read methods return Eloquent models/collections (or trigger the
+ * shared not-found / abort helpers) so controllers stay thin.
+ */
 interface BaseRepositoryInterface
 {
 
 
     /**
-     * @param $data
+     * Persist a new record from validated/whitelisted data.
+     *
+     * @param  \Illuminate\Foundation\Http\FormRequest|\Illuminate\Http\Request|array  $data
      */
     public function create($data);
 

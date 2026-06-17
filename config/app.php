@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Active Front-end Template
+    |--------------------------------------------------------------------------
+    |
+    | The theme folder under resources/views and public/front used to render
+    | the public site. Read via config (NOT env() directly in views) so it keeps
+    | working after `php artisan config:cache` in production.
+    |
+    */
+
+    'template_name' => env('TEMPLATE_NAME', 'default'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |
@@ -193,7 +206,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        AlbertCht\InvisibleReCaptcha\InvisibleReCaptchaServiceProvider::class,
+        App\Providers\CaptchaServiceProvider::class,
 
     ],
 

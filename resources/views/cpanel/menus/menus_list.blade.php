@@ -13,83 +13,60 @@
 @endpush
 
 @section('content')
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/menus.list_headline')</h1>
+            <a href="{{route('cpanel_add_new_menu')}}" class="btn btn-info">
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1Z"/></svg>
+                @lang('cpanel/menus.add_new_menu')
+            </a>
+        </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card strpied-tabled-with-hover">
-                    <div class="card-header ">
-                        <h4 class="card-title">@lang('cpanel/menus.list_headline')</h4>
-                    </div>
-                    <div class="card-body table-full-width table-responsive">
-                        @if ($errors->any())
-                            <div class="col-12">
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
-                        @if ($update_message = Session::get('menu_added'))
-                            <div class="col-12">
-                                @if ($update_message)
-                                    <div class="alert alert-success">
-                                        <strong>@lang('cpanel/menus.menu_added')</strong>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                        <table class="table table-hover table-striped users-table">
-                            <thead>
-                                <tr>
-                                    <th>№</th>
-                                    <th>@lang('cpanel/menus.table_name')</th>
-                                    <th>@lang('cpanel/menus.table_action')</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            @php($menus_count = 0)
-                            @forelse($menus_list as $menu)
-                                @php($menus_count++)
-                                <tr>
-                                    <td>
-                                        {{$menus_count}}
-                                    </td>
-                                    <td>
-                                        {{$menu->title}}
-                                    </td>
-                                    <td>
-                                        <span class="user_actions">
-                                         @if (Auth::user()->can('manage_menus', 'App\Http\Models\UserRoles'))
-                                                <a href="{{route('cpanel_edit_menu', ['id' => $menu->id, 'lang' => get_current_lang()])}}" target="_blank">@lang('cpanel/menus.edit')</a>
-                                                <input type="hidden" class="deleted_menu_id" value="{{$menu->id}}" name="deleted_menu_id">
-                                            @if($menu->id > 1)
-                                                <button type="button" class="delete_menu">@lang('cpanel/menus.delete')</button>
-                                            @endif
-                                         @endif
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <td colspan="7">@lang('cpanel/menus.not_found')</td>
-                            @endforelse
-                            </tbody>
-                        </table>
-                        <div class="col-md-12">
-                            {{ $menus_list->links() }}
-                        </div>
-                        <div class="col-md-12">
-                            <a href="{{route('cpanel_add_new_menu')}}" class="btn btn-info btn-fill pull-right">@lang('cpanel/menus.add_new_menu')</a>
-                        </div>
-                    </div>
-                </div>
+        @include('cpanel.core.flash')
+        @if (Session::get('menu_added'))
+            <div class="alert alert-success"><strong>@lang('cpanel/menus.menu_added')</strong></div>
+        @endif
+
+        <div class="card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="data-table users-table">
+                    <thead>
+                        <tr>
+                            <th class="w-12">№</th>
+                            <th>@lang('cpanel/menus.table_name')</th>
+                            <th>@lang('cpanel/menus.table_action')</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @php($menus_count = 0)
+                    @forelse($menus_list as $menu)
+                        @php($menus_count++)
+                        <tr>
+                            <td class="text-ink-400">{{$menus_count}}</td>
+                            <td class="font-medium text-ink-900">{{$menu->title}}</td>
+                            <td>
+                                <span class="user_actions">
+                                    @if (Auth::user()->can('manage_menus', 'App\Http\Models\UserRoles'))
+                                        <a href="{{route('cpanel_edit_menu', ['id' => $menu->id, 'lang' => get_current_lang()])}}" target="_blank">@lang('cpanel/menus.edit')</a>
+                                        <input type="hidden" class="deleted_menu_id" value="{{$menu->id}}" name="deleted_menu_id">
+                                        @if($menu->id > 1)
+                                            <button type="button" class="delete_menu">@lang('cpanel/menus.delete')</button>
+                                        @endif
+                                    @endif
+                                </span>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3" class="py-10 text-center text-ink-400">@lang('cpanel/menus.not_found')</td></tr>
+                    @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="border-t border-ink-100 px-5 py-4">
+                {{ $menus_list->links() }}
             </div>
         </div>
     </div>
-
 @endsection
 
 @push('finalscripts')

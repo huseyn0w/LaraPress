@@ -18,7 +18,6 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        \App\Http\Middleware\TrustProxies::class,
     ];
 
     /**
@@ -58,7 +57,7 @@ class Kernel extends HttpKernel
         'manage_pages' => \App\Http\Middleware\ManagePages::class,
         'manage_menus' => \App\Http\Middleware\ManageMenu::class,
         'manage_comments' => \App\Http\Middleware\ManageComments::class,
-        'see_admin_panel' => \App\Http\Middleware\ManageMenu::class,
+        'see_admin_panel' => \App\Http\Middleware\AdminPanelMiddleware::class,
         'manage_categories' => \App\Http\Middleware\ManageCategories::class,
         'manage_general_settings' => \App\Http\Middleware\ManageGeneralSettings::class,
         'auth' => \App\Http\Middleware\Authenticate::class,

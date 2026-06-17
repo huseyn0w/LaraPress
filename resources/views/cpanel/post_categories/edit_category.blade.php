@@ -9,110 +9,61 @@
 
 @extends('cpanel.core.index')
 
-
-
 @section('content')
+    <div class="mx-auto max-w-4xl">
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/categories.edit_category_headline')</h1>
+        </div>
 
-    <form action="{{ route('cpanel_update_category', ['id' => $entity->id]) }}" method="POST">
-        @csrf
-        @method('PUT')
-        <div class="container-fluid">
-            <div class="row">
-                @if ($errors->any())
-                    <div class="col-12">
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+        @include('cpanel.core.flash')
+        @if (($update_message = Session::get('message')) !== null)
+            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/categories.updated_success') : __('cpanel/categories.updated_error') }}</strong></div>
+        @endif
+
+        <form action="{{ route('cpanel_update_category', ['id' => $entity->id]) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="card">
+                <div class="card-body">
+                    @include('cpanel.core.translation')
+
+                    <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
+                        <div class="field">
+                            <label for="cpanel_title" class="field-label">@lang('cpanel/categories.title')</label>
+                            <input type="text" id="cpanel_title" required class="form-control" name="title" value="{{ old('title', $entity->title) }}">
+                            <div class="field-desc"><p>@lang('cpanel/categories.title_desc')</p></div>
+                        </div>
+                        <div class="field">
+                            <label for="cpanel_slug" class="field-label">@lang('cpanel/categories.slug')</label>
+                            <input type="text" id="cpanel_slug" required class="form-control" name="slug" value="{{ old('slug', $entity->slug) }}">
+                            <div class="field-desc"><p>@lang('cpanel/categories.slug_desc')</p></div>
                         </div>
                     </div>
-                @endif
-                @if ($update_message = Session::get('message'))
-                    <div class="col-12">
-                        @if ($update_message)
-                            <div class="alert alert-success">
-                                <strong>@lang('cpanel/categories.updated_success')</strong>
-                            </div>
-                        @else
-                            <div class="alert alert-danger">
-                                <strong>@lang('cpanel/categories.updated_error')</strong>
-                            </div>
-                        @endif
+
+                    <div class="field">
+                        <label class="field-label">@lang('cpanel/categories.parent_category')</label>
+                        <select name="parent_category" class="form-control">
+                            <option value="">@lang('cpanel/categories.no_parent_category')</option>
+                            @foreach($categories_list as $category_item)
+                                @if($category_item->id === $entity->id) @continue @endif
+                                <option value="{{$category_item->id}}" {{$category_item->id === $entity->parent_category ? 'selected': null}}>{{$category_item->title}}</option>
+                            @endforeach
+                        </select>
+                        <div class="field-desc"><p>@lang('cpanel/categories.parent_category_desc')</p></div>
                     </div>
-                @endif
-                <div class="col-xs-12 col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">@lang('cpanel/categories.edit_category_headline')</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                @include('cpanel.core.translation')
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="cpanel_title">@lang('cpanel/categories.title')</label>
-                                        <input type="text" id="cpanel_title" required class="form-control" name="title" value="{{ old('title', $entity->title) }}" >
-                                        <div class="field-desc">
-                                            <p>
-                                                @lang('cpanel/categories.title_desc')
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="cpanel_slug">@lang('cpanel/categories.slug')</label>
-                                        <input type="text" id="cpanel_slug" required class="form-control" name="slug" value="{{ old('slug', $entity->slug) }}">
-                                        <div class="field-desc">
-                                            <p>
-                                                @lang('cpanel/categories.slug_desc')
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label>@lang('cpanel/categories.parent_category')</label>
-                                        <select name="parent_category" class="form-control">
-                                            <option value="">@lang('cpanel/categories.no_parent_category')</option>
-                                            @foreach($categories_list as $category_item)
-                                                @if($category_item->id === $entity->id) @continue @endif
-                                                <option value="{{$category_item->id}}" {{$category_item->id === $entity->parent_category ? 'selected': null}}>{{$category_item->title}}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="field-desc">
-                                            <p>
-                                                @lang('cpanel/categories.parent_category_desc')
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label>@lang('cpanel/categories.description')</label>
-                                        <textarea name="description"  class="form-control">{{ old('description', $entity->description) }}</textarea>
-                                        <div class="field-desc">
-                                            <p>
-                                                @lang('cpanel/categories.description_content')
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @include('cpanel.core.seo')
-                            <button type="submit" class="btn btn-info btn-fill pull-right">@lang('cpanel/categories.update_button_label')</button>
-                            <div class="clearfix"></div>
-                        </div>
+
+                    <div class="field">
+                        <label class="field-label">@lang('cpanel/categories.description')</label>
+                        <textarea name="description" class="form-control">{{ old('description', $entity->description) }}</textarea>
+                        <div class="field-desc"><p>@lang('cpanel/categories.description_content')</p></div>
                     </div>
+
+                    @include('cpanel.core.seo')
+                </div>
+                <div class="flex justify-end border-t border-ink-100 px-5 py-4">
+                    <button type="submit" class="btn btn-info">@lang('cpanel/categories.update_button_label')</button>
                 </div>
             </div>
-        </div>
-    </form>
-
+        </form>
+    </div>
 @endsection

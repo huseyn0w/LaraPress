@@ -12,6 +12,7 @@ use App\Http\Models\Post;
 use App\Http\Models\PostTranslation;
 use Doctrine\DBAL\Driver\PDOException;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class CPanelPostRepository extends BaseRepository
 {
@@ -20,6 +21,11 @@ class CPanelPostRepository extends BaseRepository
     protected $translated_table = 'post_translations';
 
     protected $translated_table_join_column = 'post_id';
+
+    // `category` is a validated input but not a posts/post_translations column;
+    // the PostObserver reads it off the request to sync the category_post
+    // pivot, so it must never reach Post::create()/update() mass assignment.
+    protected $non_persisted_fields = ['category'];
 
     protected $select_fields = [
         'id',
@@ -50,15 +56,11 @@ class CPanelPostRepository extends BaseRepository
                 ->where($this->translated_table.'.locale', $this->locale)
                 ->with('author')->onlyTrashed()->paginate($count);
 
-        } catch (QueryException $e) {
-            dd($e->getMessage());
-            throwAbort();
-        } catch (PDOException $e) {
-            dd($e->getMessage());
-            throwAbort();
-        } catch (\Error $e) {
-            dd($e->getMessage());
-            throwAbort();
+        } catch (QueryException | PDOException | \Error $e) {
+            Log::error('Fetching trashed posts failed', [
+                'exception' => $e->getMessage(),
+            ]);
+            return throwAbort();
         }
 
         return $data;

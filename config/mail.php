@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'driver' => env('MAIL_DRIVER', 'smtp'),
+    'driver' => env('MAIL_MAILER', env('MAIL_DRIVER', 'smtp')),
 
     /*
     |--------------------------------------------------------------------------
@@ -59,6 +59,18 @@ return [
         'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Contact Form Address
+    |--------------------------------------------------------------------------
+    |
+    | Fallback recipient for the front-end contact form, used when no contact
+    | email has been configured through the general settings screen.
+    |
+    */
+
+    'contact_address' => env('CONTACT_EMAIL'),
 
     /*
     |--------------------------------------------------------------------------

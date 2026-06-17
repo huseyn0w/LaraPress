@@ -22,40 +22,47 @@ class CPanelUserRolesRepository extends BaseRepository
 
     public function create($request)
     {
-        $data = $this->prepare_role_data($request);
-
-        return parent::create($data);
+        return parent::create($this->prepare_role_data($request));
     }
 
     public function update($id, $request)
     {
-        $final_request = $this->prepare_role_data($request);
-
-        return parent::update($id, $final_request);
+        return parent::update($id, $this->prepare_role_data($request));
     }
 
-
-    private function prepare_role_data($request)
+    /**
+     * Build an explicit, whitelisted attribute array for a role. The full
+     * permission map is rebuilt server-side (defaulting every permission to 0)
+     * and only the submitted permission names are flipped to 1, so the stored
+     * JSON can never contain attacker-defined permission keys.
+     *
+     * @param  \Illuminate\Foundation\Http\FormRequest  $request
+     * @return array<string, mixed>
+     */
+    private function prepare_role_data($request): array
     {
+        $validated = $request->validated();
 
-        $data = [];
+        $permissions = [];
 
-        $all_permissions = get_user_role_permissions();
-
-        foreach($all_permissions as $permission){
-            $data['permissions'][$permission->name] = 0;
+        foreach (get_user_role_permissions() as $permission) {
+            $permissions[$permission->name] = 0;
         }
 
-        if(isset($request['permissions']) && !empty($request['permissions']) && is_array($request['permissions']))
-        {
-            foreach($request['permissions'] as $key => $permission_name){
-                $data['permissions'][$permission_name] = 1;
+        $submitted = $validated['permissions'] ?? [];
+
+        if (is_array($submitted)) {
+            foreach ($submitted as $permission_name) {
+                // Only flip permissions that actually exist.
+                if (array_key_exists($permission_name, $permissions)) {
+                    $permissions[$permission_name] = 1;
+                }
             }
         }
 
-        $request->merge(['permissions' => json_encode($data['permissions'])]);
-
-
-        return $request;
+        return [
+            'name'        => $validated['name'] ?? null,
+            'permissions' => json_encode($permissions),
+        ];
     }
 }

@@ -34,11 +34,14 @@ class Post extends Model implements TranslatableContract
         'meta_description'
     ];
 
-    protected $fillable = [
-        'created_at',
-        'updated_at',
-        'likes'
-    ];
+    /**
+     * The `posts` table only stores the primary key and soft-delete timestamp;
+     * all editable content lives in the `post_translations` table (see
+     * PostTranslation). Nothing on the main row is mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [];
 
     public function author()
     {

@@ -18,7 +18,12 @@ use Illuminate\Validation\Rule;
 class LaravellaRequest extends FormRequest
 {
 
-    protected $locale;
+    // NOTE: do NOT name this $locale — Symfony 7's HttpFoundation\Request (the
+    // parent of FormRequest) declares a typed `protected ?string $locale`, and
+    // an untyped redeclaration here is a fatal type-incompatibility on Laravel 11.
+    protected ?string $currentLocale = null;
+
+    protected $term_id;
 
     protected $table;
 
@@ -30,7 +35,7 @@ class LaravellaRequest extends FormRequest
     {
         parent::__construct($query, $request, $attributes, $cookies, $files, $server, $content);
 
-        $this->locale = app()->getLocale();
+        $this->currentLocale = app()->getLocale();
 
         $this->term_id = (int) $this->route('id');
 
@@ -40,7 +45,7 @@ class LaravellaRequest extends FormRequest
     protected function newRecordRule(string $field)
     {
         return Rule::unique($this->table, $field)->where(function ($query) {
-            return $query->where('locale', $this->locale);
+            return $query->where('locale', $this->currentLocale);
         });
     }
 
@@ -50,7 +55,7 @@ class LaravellaRequest extends FormRequest
 
 
         return Rule::unique($this->table, $field)->where(function ($query) {
-            return $query->where('locale', $this->locale);
+            return $query->where('locale', $this->currentLocale);
         })->ignore($term_id, $this->ignore_column);
     }
 

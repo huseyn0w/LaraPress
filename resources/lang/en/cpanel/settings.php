@@ -26,6 +26,30 @@ return [
     'choose_image'                      => 'Choose Image',
     'footer_copyright'                  => 'Footer copyright',
     'linkedin_url'                      => 'Linkedin URL',
-    'github_url'                        => 'Github URL'
+    'github_url'                        => 'Github URL',
+
+    // Phase 7 (SEO/GEO)
+    'seo_settings_headline'             => 'SEO Settings',
+    'seo_settings_updates_success'      => 'SEO settings have been updated',
+    'seo_meta_section'                  => 'Meta defaults',
+    'seo_title_separator'              => 'Title separator',
+    'seo_default_description'           => 'Default meta description',
+    'seo_default_og_image'              => 'Default social / OG image URL',
+    'seo_social_section'                => 'Social',
+    'seo_og_site_name'                  => 'OG site name',
+    'seo_twitter_handle'                => 'Twitter handle',
+    'seo_verification_section'          => 'Search-engine verification',
+    'seo_google_verification'           => 'Google Search Console',
+    'seo_bing_verification'             => 'Bing',
+    'seo_analytics_section'             => 'Analytics (optional)',
+    'seo_analytics_help'                => 'Leave empty to load no analytics script. When set, it is loaded async/deferred.',
+    'seo_ga4_id'                        => 'Google Analytics 4 ID',
+    'seo_gtm_id'                        => 'Google Tag Manager ID',
+    'seo_indexing_section'              => 'Indexing, robots & sitemap',
+    'seo_discourage'                    => 'Discourage search engines from indexing this site',
+    'seo_discourage_help'               => 'Adds a site-wide noindex and Disallow: / in robots.txt. Use for staging only.',
+    'seo_sitemap_enabled'               => 'Enable sitemap.xml',
+    'seo_robots_extra'                  => 'robots.txt extra lines',
+    'seo_robots_extra_help'             => 'Appended verbatim to the generated robots.txt (one directive per line).',
 
 ];

@@ -1,6 +1,9 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use App\Http\Models\UserPermissions as UserPermissions;
 
 class UserRolesSeeder extends Seeder

@@ -39,7 +39,9 @@ class FrontEndUserRequest extends FormRequest
             'google_url'                    => 'nullable|url',
             'linkedin_url'                  => 'nullable|url',
             'xing_url'                      => 'nullable|url',
-            'role_id'                       => 'numeric',
+            // NOTE: role_id is intentionally NOT accepted here. A front-end
+            // user must never be able to change their own role; the repository
+            // strips it as a second line of defence.
             'gender'                        => 'nullable|in:male,female',
             'avatar'                        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];

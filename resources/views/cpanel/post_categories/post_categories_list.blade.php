@@ -13,123 +13,81 @@
 @endpush
 
 @section('content')
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/categories.list_headline')</h1>
+            <a href="{{route('cpanel_add_new_category')}}" class="btn btn-info">
+                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1Z"/></svg>
+                @lang('cpanel/categories.add_new_category')
+            </a>
+        </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card strpied-tabled-with-hover">
-                    <div class="card-header ">
-                        <h4 class="card-title">@lang('cpanel/categories.list_headline')</h4>
-                    </div>
-                    <div class="card-body table-full-width table-responsive">
-                        @if ($errors->any())
-                            <div class="col-12">
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
-                        @if ($update_message = Session::get('message'))
-                            <div class="col-12">
-                                @if ($update_message)
-                                    <div class="alert alert-success">
-                                        <strong>>@lang('cpanel/categories.bulky_deleted_message')</strong>
-                                    </div>
-                                @else
-                                    <div class="alert alert-danger">
-                                        <strong>@lang('cpanel/categories.bulky_deleted_error_message')</strong>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                        @if ($update_message = Session::get('category_added'))
-                            <div class="col-12">
-                                @if ($update_message)
-                                    <div class="alert alert-success">
-                                        <strong>@lang('cpanel/categories.category_added')</strong>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-                        <form method="POST" action="{{route('cpanel_category_bulk_delete')}}">
-                            @csrf
-                            @method('DELETE')
-                            <div class="select-cover">
-                                <select id="inputState" name="categories_action"  class="form-control">
-                                    <option selected="selected">@lang('cpanel/categories.bulk_action_label')</option>
-                                    <option value="delete">@lang('cpanel/categories.bulk_action_delete_label')</option>
-                                </select>
-                                <button type="submit" class="btn btn-info btn-fill">@lang('cpanel/categories.bulk_action_apply')</button>
-                            </div>
-                            <table class="table table-hover table-striped users-table">
-                                <thead>
-                                    <tr>
-                                        <th>
-                                           <div class="form-check">
-                                               <label for="selectAll" class="form-check-label form-checkbox">
-                                                   <input class="form-check-input" id="selectAll" name="allcategories" type="checkbox" >
-                                                   <span class="form-check-sign"></span>
-                                               </label>
-                                           </div>
-                                        </th>
-                                        <th>№</th>
-                                        <th>@lang('cpanel/categories.table_name')</th>
-                                        <th>@lang('cpanel/categories.table_action')</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                @php($category_count = 0)
-                                @forelse($categories_list as $category)
-                                    @php($category_count++)
-                                    <tr>
-                                        <td>
-                                            @if($category->id !== 1)
-                                            <div class="form-check">
-                                                <label for="category_{{$category->id}}" class="form-check-label form-checkbox">
-                                                    <input class="form-check-input categories-checkbox-input" id="category_{{$category->id}}" name="categories[]" type="checkbox" value="{{$category->id}}" >
-                                                    <span class="form-check-sign"></span>
-                                                </label>
-                                            </div>
-                                                @else
+        @include('cpanel.core.flash')
+        @if (($update_message = Session::get('message')) !== null)
+            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/categories.bulky_deleted_message') : __('cpanel/categories.bulky_deleted_error_message') }}</strong></div>
+        @endif
+        @if (Session::get('category_added'))
+            <div class="alert alert-success"><strong>@lang('cpanel/categories.category_added')</strong></div>
+        @endif
 
-                                            @endif
-                                        </td>
-                                        <td>{{$category_count}}</td>
-                                        <td>
-                                            {{$category->title}}
-                                        </td>
-                                        <td>
-                                            <span class="user_actions">
-                                            <a href="{{route('cpanel_edit_category', ['id' => $category->id, 'lang' => get_current_lang()])}}" target="_blank">@lang('cpanel/categories.edit_category')</a>
-                                            @if($category->id !== 1)
-                                                <input type="hidden" class="deleted_category_id" value="{{$category->id}}" name="deleted_category_id">
-                                                <button type="button" class="delete_category">@lang('cpanel/categories.delete_category')</button>
-                                            @endif
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <td colspan="7">@lang('cpanel/categories.not_found')</td>
-                                @endforelse
-                                </tbody>
-                            </table>
-                        </form>
-                        <div class="col-md-12">
-                            {{ $categories_list->links() }}
-                        </div>
-                        <div class="col-md-12">
-                            <a href="{{route('cpanel_add_new_category')}}" class="btn btn-info btn-fill pull-right">@lang('cpanel/categories.add_new_category')</a>
-                        </div>
+        <div class="card overflow-hidden">
+            <form method="POST" action="{{route('cpanel_category_bulk_delete')}}">
+                @csrf
+                @method('DELETE')
+                <div class="border-b border-ink-100 px-5 py-4">
+                    <div class="select-cover mb-0">
+                        <select id="inputState" name="categories_action" class="form-control">
+                            <option selected="selected">@lang('cpanel/categories.bulk_action_label')</option>
+                            <option value="delete">@lang('cpanel/categories.bulk_action_delete_label')</option>
+                        </select>
+                        <button type="submit" class="btn btn-ghost">@lang('cpanel/categories.bulk_action_apply')</button>
                     </div>
                 </div>
+
+                <div class="overflow-x-auto">
+                    <table class="data-table users-table">
+                        <thead>
+                            <tr>
+                                <th class="w-10"><input class="form-check-input" id="selectAll" name="allcategories" type="checkbox" aria-label="Select all"></th>
+                                <th class="w-12">№</th>
+                                <th>@lang('cpanel/categories.table_name')</th>
+                                <th>@lang('cpanel/categories.table_action')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @php($category_count = 0)
+                        @forelse($categories_list as $category)
+                            @php($category_count++)
+                            <tr>
+                                <td>
+                                    @if($category->id !== 1)
+                                        <input class="form-check-input categories-checkbox-input" id="category_{{$category->id}}" name="categories[]" type="checkbox" value="{{$category->id}}" aria-label="Select category">
+                                    @endif
+                                </td>
+                                <td class="text-ink-400">{{$category_count}}</td>
+                                <td class="font-medium text-ink-900">{{$category->title}}</td>
+                                <td>
+                                    <span class="user_actions">
+                                        <a href="{{route('cpanel_edit_category', ['id' => $category->id, 'lang' => get_current_lang()])}}" target="_blank">@lang('cpanel/categories.edit_category')</a>
+                                        @if($category->id !== 1)
+                                            <input type="hidden" class="deleted_category_id" value="{{$category->id}}" name="deleted_category_id">
+                                            <button type="button" class="delete_category">@lang('cpanel/categories.delete_category')</button>
+                                        @endif
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="4" class="py-10 text-center text-ink-400">@lang('cpanel/categories.not_found')</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            <div class="border-t border-ink-100 px-5 py-4">
+                {{ $categories_list->links() }}
             </div>
         </div>
     </div>
-
 @endsection
 
 @push('finalscripts')

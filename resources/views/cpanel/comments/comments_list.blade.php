@@ -11,125 +11,86 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 @endpush
 
-@php
-    $route_name = Route::current()->getName();
-@endphp
-
 @section('content')
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/comments.list_headline')</h1>
+        </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card strpied-tabled-with-hover">
-                    <div class="card-header ">
-                        <h4 class="card-title">@lang('cpanel/comments.list_headline')</h4>
-                    </div>
-                    <div class="card-body table-full-width table-responsive">
-                        @if ($errors->any())
-                            <div class="col-12">
-                                <div class="alert alert-danger">
-                                    <ul>
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        @endif
+        @include('cpanel.core.flash')
+        @if (($update_message = Session::get('deleted')) !== null)
+            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/comments.bulky_deleted_message') : __('cpanel/comments.bulky_deleted_error_message') }}</strong></div>
+        @endif
 
-                        @if ($update_message = Session::get('deleted'))
-                            <div class="col-12">
-                                @if ($update_message)
-                                    <div class="alert alert-success">
-                                        <strong>@lang('cpanel/comments.bulky_deleted_message')</strong>
-                                    </div>
-                                @else
-                                    <div class="alert alert-danger">
-                                        <strong>@lang('cpanel/comments.bulky_deleted_error_message')</strong>
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-
-
-
-                        <form method="POST" action="{{route('cpanel_comments_bulk_delete')}}">
-                            @csrf
-                            @method('DELETE')
-                            <div class="select-cover">
-                                <select id="inputState" name="comments_action" required="" class="form-control">
-                                    <option selected="selected">@lang('cpanel/comments.bulk_action_label')</option>
-                                    <option value="delete">@lang('cpanel/comments.bulk_action_delete_label')</option>
-                                </select>
-                                <button type="submit" class="btn btn-info btn-fill">@lang('cpanel/comments.bulk_action_apply')</button>
-                            </div>
-                            <table class="table table-hover table-striped users-table">
-                                <thead>
-                                <tr>
-                                    <th>
-                                        <div class="form-check">
-                                            <label for="selectAll" class="form-check-label form-checkbox">
-                                                <input class="form-check-input" id="selectAll" name="allcomments" type="checkbox" >
-                                                <span class="form-check-sign"></span>
-                                            </label>
-                                        </div>
-                                    </th>
-                                    <th>@lang('cpanel/comments.table_title')</th>
-                                    <th>@lang('cpanel/comments.table_name')</th>
-                                    <th>@lang('cpanel/comments.table_author')</th>
-                                    <th>@lang('cpanel/comments.table_publish_date')</th>
-                                    <th>@lang('cpanel/comments.table_status')</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                @php($comments_count = 0)
-                                @forelse($comments_list as $comment)
-                                    @php($comments_count++)
-                                    <tr>
-                                        <td>
-                                            <div class="form-check">
-                                                <label for="comment_{{$comment->id}}" class="form-check-label form-checkbox">
-                                                    <input class="form-check-input comments-checkbox-input" id="comment_{{$comment->id}}" name="comments[]" type="checkbox" value="{{$comment->id}}" >
-                                                    <span class="form-check-sign"></span>
-                                                </label>
-                                            </div>
-                                        </td>
-                                        <td>{{$comment->post->title}}</td>
-                                        <td>
-                                            {{$comment->comment}}
-
-                                            <span class="user_actions">
-                                                @if (Auth::user()->can('manage_comments', 'App\Http\Models\UserRoles'))
-                                                    <button type="button" class="delete_comment">@lang('cpanel/comments.delete')</button>
-                                                    @if($comment->status !== 1)
-                                                        <button type="button" class="approve_comment">@lang('cpanel/comments.approve')</button>
-                                                    @else
-                                                        <button type="button" class="unapprove_comment">@lang('cpanel/comments.unapprove')</button>
-                                                    @endif
-                                                    <input type="hidden" class="action_comment_id" value="{{$comment->id}}" name="deleted_comment_id">
-                                                @endif
-                                            </span>
-
-                                        </td>
-                                        <td>{{$comment->user->username}}</td>
-                                        <td>{{$comment->created_at->format('d.m.Y')}}</td>
-                                        <td>@if($comment->status == 1)  @lang('cpanel/comments.status_approved') @else @lang('cpanel/comments.status_pending') @endif</td>
-                                    </tr>
-                                @empty
-                                    <td colspan="7">@lang('cpanel/comments.not_found')</td>
-                                @endforelse
-                                </tbody>
-                            </table>
-                        </form>
-                        <div class="col-md-12">
-                            {{ $comments_list->links() }}
-                        </div>
+        <div class="card overflow-hidden">
+            <form method="POST" action="{{route('cpanel_comments_bulk_delete')}}">
+                @csrf
+                @method('DELETE')
+                <div class="border-b border-ink-100 px-5 py-4">
+                    <div class="select-cover mb-0">
+                        <select id="inputState" name="comments_action" required class="form-control">
+                            <option selected="selected">@lang('cpanel/comments.bulk_action_label')</option>
+                            <option value="delete">@lang('cpanel/comments.bulk_action_delete_label')</option>
+                        </select>
+                        <button type="submit" class="btn btn-ghost">@lang('cpanel/comments.bulk_action_apply')</button>
                     </div>
                 </div>
+
+                <div class="overflow-x-auto">
+                    <table class="data-table users-table">
+                        <thead>
+                            <tr>
+                                <th class="w-10"><input class="form-check-input" id="selectAll" name="allcomments" type="checkbox" aria-label="Select all"></th>
+                                <th>@lang('cpanel/comments.table_title')</th>
+                                <th>@lang('cpanel/comments.table_name')</th>
+                                <th>@lang('cpanel/comments.table_author')</th>
+                                <th>@lang('cpanel/comments.table_publish_date')</th>
+                                <th>@lang('cpanel/comments.table_status')</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @php($comments_count = 0)
+                        @forelse($comments_list as $comment)
+                            @php($comments_count++)
+                            <tr>
+                                <td><input class="form-check-input comments-checkbox-input" id="comment_{{$comment->id}}" name="comments[]" type="checkbox" value="{{$comment->id}}" aria-label="Select comment"></td>
+                                <td class="text-ink-600">{{$comment->post->title}}</td>
+                                <td>
+                                    <span class="text-ink-800">{{$comment->comment}}</span>
+                                    <span class="user_actions">
+                                        @if (Auth::user()->can('manage_comments', 'App\Http\Models\UserRoles'))
+                                            <button type="button" class="delete_comment">@lang('cpanel/comments.delete')</button>
+                                            @if($comment->status !== 1)
+                                                <button type="button" class="approve_comment">@lang('cpanel/comments.approve')</button>
+                                            @else
+                                                <button type="button" class="unapprove_comment">@lang('cpanel/comments.unapprove')</button>
+                                            @endif
+                                            <input type="hidden" class="action_comment_id" value="{{$comment->id}}" name="deleted_comment_id">
+                                        @endif
+                                    </span>
+                                </td>
+                                <td>{{$comment->user->username}}</td>
+                                <td class="whitespace-nowrap text-ink-600">{{$comment->created_at->format('d.m.Y')}}</td>
+                                <td>
+                                    @if($comment->status == 1)
+                                        <span class="badge badge-success">@lang('cpanel/comments.status_approved')</span>
+                                    @else
+                                        <span class="badge badge-muted">@lang('cpanel/comments.status_pending')</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="6" class="py-10 text-center text-ink-400">@lang('cpanel/comments.not_found')</td></tr>
+                        @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+            <div class="border-t border-ink-100 px-5 py-4">
+                {{ $comments_list->links() }}
             </div>
         </div>
     </div>
-
 @endsection
 
 @push('finalscripts')

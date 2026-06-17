@@ -24,7 +24,7 @@ class ContactMail extends FormRequest
     public function rules()
     {
         return [
-            'g-recaptcha-response' => 'required|captcha',
+            'g-recaptcha-response' => ['nullable', 'captcha'],
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'subject' => 'required|string',

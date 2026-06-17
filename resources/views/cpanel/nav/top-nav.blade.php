@@ -8,41 +8,67 @@
 
 $languages = get_languages();
 ?>
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg " color-on-scroll="500">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#pablo"> @lang('cpanel/nav/top.logged_in_as') {{$current_user->username}} </a>
-        <button href="" class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-bar burger-lines"></span>
-            <span class="navbar-toggler-bar burger-lines"></span>
-            <span class="navbar-toggler-bar burger-lines"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navigation">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{route('front_pages',['slug' => '/'])}}">
-                        <span class="no-icon">@lang('cpanel/nav/top.homepage')</span>
+<header class="sticky top-0 z-sticky flex h-16 items-center gap-3 border-b border-ink-200 bg-paper/90 px-4 backdrop-blur sm:px-6 lg:px-8">
+    {{-- Mobile sidebar toggle (controls the Alpine state in core/index) --}}
+    <button
+        type="button"
+        @click="sidebarOpen = true"
+        class="-ml-1 inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink-600 transition hover:bg-ink-100 lg:hidden"
+        aria-label="Open navigation"
+    >
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+
+    <p class="hidden text-sm text-ink-500 sm:block">
+        @lang('cpanel/nav/top.logged_in_as')
+        <span class="font-semibold text-ink-900">{{$current_user->username}}</span>
+    </p>
+
+    <div class="ml-auto flex items-center gap-1.5">
+        <a
+            href="{{route('front_pages',['slug' => '/'])}}"
+            target="_blank"
+            class="hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900 sm:inline-flex"
+        >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7M21 3l-9 9M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+            @lang('cpanel/nav/top.homepage')
+        </a>
+
+        {{-- Language switcher --}}
+        <div class="relative" x-data="{ open: false }" @click.outside="open = false" @keydown.escape="open = false">
+            <button
+                type="button"
+                @click="open = !open"
+                :aria-expanded="open"
+                class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-ink-100 hover:text-ink-900"
+            >
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+                <span class="hidden sm:inline">@lang('cpanel/nav/top.change_language')</span>
+                <svg class="h-4 w-4 transition-transform" :class="open && 'rotate-180'" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4Z" clip-rule="evenodd"/></svg>
+            </button>
+            <div
+                x-cloak
+                x-show="open"
+                x-transition.origin.top.right
+                class="absolute right-0 top-full z-dropdown mt-1.5 w-48 origin-top-right overflow-hidden rounded-xl border border-ink-200 bg-surface p-1.5 shadow-lift"
+            >
+                @foreach($languages as $code => $language)
+                    <a href="{{route('lang_route', ['locale' => $code])}}" class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-ink-600 transition hover:bg-ink-50 hover:text-ink-900">
+                        <img src="{{$language['icon']}}" alt="{{$language['title']}}" class="h-4 w-auto rounded-sm" />
+                        <span>{{$language['title']}}</span>
                     </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="no-icon">@lang('cpanel/nav/top.change_language')</span>
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        @foreach($languages as $code => $language)
-                            <a href="{{route('lang_route', ['locale' => $code])}}" class="dropdown-item">
-                                <img src="{{$language['icon']}}" alt="{{$language['title']}}" />
-                                <span>{{$language['title']}}</span>
-                            </a>
-                        @endforeach
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('logout') }}">
-                        <span class="no-icon">@lang('cpanel/nav/top.log_out')</span>
-                    </a>
-                </li>
-            </ul>
+                @endforeach
+            </div>
         </div>
+
+        <span class="mx-1 hidden h-6 w-px bg-ink-200 sm:block"></span>
+
+        <a
+            href="{{ route('logout') }}"
+            class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-ink-600 transition hover:bg-danger-50 hover:text-danger-600"
+        >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            <span class="hidden sm:inline">@lang('cpanel/nav/top.log_out')</span>
+        </a>
     </div>
-</nav>
+</header>

@@ -19,6 +19,8 @@ class CategoryTranslation extends Model
         'author_id',
         'description',
         'meta_description',
-        'meta_keywords'
+        'meta_keywords',
+        'canonical_url',
+        'meta_noindex'
     ];
 }

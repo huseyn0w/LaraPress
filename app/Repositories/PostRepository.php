@@ -33,6 +33,8 @@ class PostRepository extends BaseRepository
         'slug',
         'meta_description',
         'meta_keywords',
+        'canonical_url',
+        'meta_noindex',
         'status',
         'created_at',
         'updated_at'
@@ -81,6 +83,12 @@ class PostRepository extends BaseRepository
     {
         $comments_per_page = get_comments_count_per_page();
         $data = parent::getTranslatedBy($param,$value);
+
+        // A non-existent slug yields null here; let the caller surface the 404
+        // (BaseController::index throwNotFound) instead of fatally calling
+        // setRelation() on null.
+        if (is_null($data)) return null;
+
         $data->setRelation('comments', $data->comments()->with('replies')->with('user')->orderBy('id', 'DESC')->paginate($comments_per_page));
 
         return $data;

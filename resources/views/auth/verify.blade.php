@@ -1,4 +1,4 @@
-@extends(env('TEMPLATE_NAME').'/index')
+@extends(config('app.template_name').'/index')
 
 @section('content')
 <div class="container">

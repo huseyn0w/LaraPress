@@ -23,6 +23,8 @@ class PostTranslation extends Model
         'content',
         'meta_description',
         'status',
-        'meta_keywords'
+        'meta_keywords',
+        'canonical_url',
+        'meta_noindex'
     ];
 }

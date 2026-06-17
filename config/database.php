@@ -2,7 +2,13 @@
 
 use Illuminate\Support\Str;
 
-$DATABASE_URL = parse_url('DATABASE_URL');
+// Parse a Heroku-style DATABASE_URL when present. Guard every key so the pgsql
+// connection array can be built without emitting "Undefined array key" warnings
+// on PHP 8.x when DATABASE_URL is unset (e.g. local sqlite development).
+$DATABASE_URL = array_merge(
+    ['host' => null, 'port' => null, 'path' => '', 'user' => null, 'pass' => null],
+    (is_string(env('DATABASE_URL')) ? parse_url(env('DATABASE_URL')) : null) ?: []
+);
 
 return [
 

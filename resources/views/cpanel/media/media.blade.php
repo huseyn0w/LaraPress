@@ -14,24 +14,18 @@
 @endpush
 
 @section('content')
+    <div class="mx-auto max-w-7xl">
+        <div class="mb-6">
+            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/media.headline')</h1>
+        </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card strpied-tabled-with-hover">
-                    <div class="card-header ">
-                        <h4 class="card-title">@lang('cpanel/media.headline')</h4>
-                    </div>
-                    <div class="card-body">
-                        <iframe src="/filemanager" style="width: 100%; height: 500px; overflow: hidden; border: none;"></iframe>
-                    </div>
-                </div>
-            </div>
+        <div class="card overflow-hidden">
+            {{-- Laravel FileManager runs inside this iframe; the standalone-button
+                 script (loaded below) drives the LFM picker hooks elsewhere. --}}
+            <iframe src="/filemanager" class="block h-[70vh] min-h-[500px] w-full border-0"></iframe>
         </div>
     </div>
-
 @endsection
-
 
 @push('extrascripts')
     <script src="{{base_path('vendor')}}/laravel-filemanager/js/stand-alone-button.js"></script>

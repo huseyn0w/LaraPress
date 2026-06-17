@@ -11,6 +11,9 @@ namespace App\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Doctrine\DBAL\Driver\PDOException;
 
 abstract class BaseRepository implements  BaseRepositoryInterface
@@ -34,43 +37,107 @@ abstract class BaseRepository implements  BaseRepositoryInterface
 
     protected $select_fields_ready_array;
 
+    /**
+     * Validated request keys that are NOT persisted attributes of the target
+     * model and must be stripped before mass assignment. These are consumed
+     * elsewhere (e.g. the PostObserver reads `category` straight off the
+     * request to sync the category_post pivot), so letting them reach
+     * Model::create()/update() would raise a MassAssignmentException now that
+     * the models carry a minimal $fillable (Phase 3 hardening).
+     *
+     * @var array<int, string>
+     */
+    protected $non_persisted_fields = [];
+
 
     public function __construct()
     {
 
     }
 
-    protected function checkForTranslation($request)
+    /**
+     * Resolve a request (FormRequest, plain Request or array) into a
+     * whitelisted associative array of attributes that are safe to mass
+     * assign. FormRequests are reduced to their validated() payload so raw,
+     * unvalidated user input can never reach create()/update().
+     *
+     * @param  FormRequest|Request|array  $request
+     * @return array<string, mixed>
+     */
+    protected function extractData($request): array
     {
-        if($request->route('id') && !empty($request->route('id') && !is_null($this->translated_model)))
-        {
-            $this->model = $this->translated_model;
-            $id = $request->route('id');
-            $request->merge([$this->translated_table_join_column => $id, 'locale' => get_current_lang()]);
+        if (is_array($request)) {
+            return $request;
         }
 
+        if ($request instanceof FormRequest) {
+            return $request->validated();
+        }
 
-        return $request;
+        if ($request instanceof Request) {
+            return $request->all();
+        }
+
+        return (array) $request;
+    }
+
+    /**
+     * When the current route targets a translatable entity, switch the active
+     * model to its translation model and inject the (server-derived) join
+     * column and locale into the data array. These values come from the route
+     * and the session locale, never from arbitrary user input.
+     *
+     * @param  FormRequest|Request|array  $request
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function checkForTranslation($request, array $data): array
+    {
+        $routeId = (!is_array($request) && method_exists($request, 'route'))
+            ? $request->route('id')
+            : null;
+
+        if (!empty($routeId) && !is_null($this->translated_model)) {
+            $this->model = $this->translated_model;
+            $data[$this->translated_table_join_column] = $routeId;
+            $data['locale'] = get_current_lang();
+        }
+
+        return $data;
+    }
+
+
+    /**
+     * Drop validated keys that do not map to a persisted column on the target
+     * model (see $non_persisted_fields).
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function stripNonPersistedFields(array $data): array
+    {
+        foreach ($this->non_persisted_fields as $field) {
+            unset($data[$field]);
+        }
+
+        return $data;
     }
 
 
     public function create($request)
     {
-        $final_request = $this->checkForTranslation($request);
-
+        $data = $this->extractData($request);
+        $data = $this->stripNonPersistedFields($data);
+        $data = $this->checkForTranslation($request, $data);
 
         try {
-            $data = $final_request->all();
             $result = $this->model::create($data);
-        } catch (QueryException $e) {
-            dd($e->getMessage());
-            throwAbort();
-        } catch (PDOException $e) {
-            dd($e->getMessage());
-            throwAbort();
-        } catch (\Error $e) {
-            dd($e->getMessage());
-            throwAbort();
+        } catch (QueryException | PDOException | \Error $e) {
+            Log::error('Repository create failed', [
+                'model'     => is_object($this->model) ? get_class($this->model) : $this->model,
+                'exception' => $e->getMessage(),
+            ]);
+            return throwAbort();
         }
 
 
@@ -96,14 +163,16 @@ abstract class BaseRepository implements  BaseRepositoryInterface
     public function get($param)
     {
         try {
-            $data = $this->model::find($param)->first()->get();
-        } catch (QueryException $e) {
-            throwAbort();
-        } catch (PDOException $e) {
-            throwAbort();
-        } catch (\Error $e) {
-            throwAbort();
+            $data = $this->model::find($param);
+        } catch (QueryException | PDOException | \Error $e) {
+            Log::error('Repository get failed', [
+                'param'     => $param,
+                'exception' => $e->getMessage(),
+            ]);
+            return throwAbort();
         }
+
+        if (is_null($data)) return throwNotFound();
 
 
         return $data;
@@ -188,13 +257,10 @@ abstract class BaseRepository implements  BaseRepositoryInterface
                 ->with('author')->paginate($count, array('*'), 'page', $page);
 
         } catch (QueryException $e) {
-//            dd($e->getMessage());
             throwAbort();
         } catch (PDOException $e) {
-//            dd($e->getMessage());
             throwAbort();
         } catch (\Error $e) {
-//            dd($e->getMessage());
             throwAbort();
         }
 
@@ -258,13 +324,10 @@ abstract class BaseRepository implements  BaseRepositoryInterface
                 ->with('author')->first();
 
         } catch (QueryException $e) {
-//            dd($e->getMessage());
             throwAbort();
         } catch (PDOException $e) {
-//            dd($e->getMessage());
             throwAbort();
         } catch (\Error $e) {
-//            dd($e->getMessage());
             throwAbort();
         }
 
@@ -280,22 +343,24 @@ abstract class BaseRepository implements  BaseRepositoryInterface
     {
         $result = false;
 
+        $data = $this->extractData($request);
+        $data = $this->stripNonPersistedFields($data);
+
         try {
 
             $instance = $this->model::find($id);
-            $instance->update($request->all());
 
-            if($instance) $result = true;
+            if (is_null($instance)) return throwNotFound();
 
-        } catch (QueryException $e) {
-//            dd($e->getMessage());
-            throwAbort();
-        } catch (PDOException $e) {
-//            dd($e->getMessage());
-            throwAbort();
-        } catch (\Error $e) {
-//            dd($e->getMessage());
-            throwAbort();
+            if ($instance->update($data)) $result = true;
+
+        } catch (QueryException | PDOException | \Error $e) {
+            Log::error('Repository update failed', [
+                'model'     => is_object($this->model) ? get_class($this->model) : $this->model,
+                'id'        => $id,
+                'exception' => $e->getMessage(),
+            ]);
+            return throwAbort();
         }
 
 
@@ -398,8 +463,7 @@ abstract class BaseRepository implements  BaseRepositoryInterface
     protected function getSearchedTable($column)
     {
         $table_name = null;
-//        dd($this->
-//);
+
         if(in_array($this->main_table.'.'.$column, $this->select_fields_ready_array))
         {
             $table_name = $this->main_table;
