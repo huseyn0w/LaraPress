@@ -28,7 +28,7 @@ Built and maintained by **[Elman Group](https://elman.group)**.
   - [Hostinger (shared hosting, no Docker)](#hostinger-shared-hosting-no-docker)
   - [VPS (nginx + php-fpm + mysql)](#vps-nginx--php-fpm--mysql)
 - [Is it ready to deploy?](#is-it-ready-to-deploy)
-- [Author, contributor & license](#author-contributor--license)
+- [Author & license](#author--license)
 
 ---
 
@@ -403,15 +403,11 @@ returns `302`, and `/sitemap.xml` returns `200` — and these stay correct with
 
 ---
 
-## Author, contributor & license
+## Author & license
 
 **Author**
 
 * **Elman Hüseynov** — [huseyn0w](https://linkedin.com/in/huseyn0w) · [Elman Group](https://elman.group)
-
-**Contributor**
-
-* **Ilkin Alibayli** — [ilkinalibayli](https://www.linkedin.com/in/ilkin-alibayli/)
 
 **License**
 
