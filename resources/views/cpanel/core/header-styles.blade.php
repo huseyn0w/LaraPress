@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: header-styles.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 09.08.2019

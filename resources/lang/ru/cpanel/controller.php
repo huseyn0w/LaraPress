@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: controller.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 20.11.2019

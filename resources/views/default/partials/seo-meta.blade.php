@@ -1,5 +1,5 @@
 {{--
-  Laravella CMS — Phase 7 (SEO/GEO)
+  LaraPress CMS — Phase 7 (SEO/GEO)
   File: partials/seo-meta.blade.php
 
   Single, clean <head> meta partial. Driven by whatever the controllers already

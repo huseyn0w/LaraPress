@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: yourprofile.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 12.11.2019

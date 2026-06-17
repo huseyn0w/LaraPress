@@ -1,7 +1,7 @@
 <?php
 /**
- * Laravella CMS
- * File: LaravellaRequest.php
+ * LaraPress CMS
+ * File: LaraPressRequest.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 23.11.2019
  */
@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 
-class LaravellaRequest extends FormRequest
+class LaraPressRequest extends FormRequest
 {
 
     // NOTE: do NOT name this $locale — Symfony 7's HttpFoundation\Request (the

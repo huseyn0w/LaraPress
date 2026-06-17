@@ -48,7 +48,7 @@ class PostCrudTest extends TestCase
     public function test_admin_can_create_a_post(): void
     {
         $response = $this->actingAs($this->admin)
-            ->post('/laravella-admin/posts/new', $this->postPayload());
+            ->post('/larapress-admin/posts/new', $this->postPayload());
 
         $response->assertSessionHasNoErrors();
         $response->assertRedirect(route('cpanel_posts_list'));
@@ -66,11 +66,11 @@ class PostCrudTest extends TestCase
 
     public function test_admin_can_update_a_post(): void
     {
-        $this->actingAs($this->admin)->post('/laravella-admin/posts/new', $this->postPayload());
+        $this->actingAs($this->admin)->post('/larapress-admin/posts/new', $this->postPayload());
         $translation = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
 
         $response = $this->actingAs($this->admin)
-            ->put('/laravella-admin/posts/' . $translation->post_id . '/update', $this->postPayload([
+            ->put('/larapress-admin/posts/' . $translation->post_id . '/update', $this->postPayload([
                 'content' => 'edited body',
             ]));
 
@@ -82,12 +82,12 @@ class PostCrudTest extends TestCase
 
     public function test_admin_can_soft_delete_a_post(): void
     {
-        $this->actingAs($this->admin)->post('/laravella-admin/posts/new', $this->postPayload());
+        $this->actingAs($this->admin)->post('/larapress-admin/posts/new', $this->postPayload());
         $translation = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
         $postId = $translation->post_id;
 
         $this->actingAs($this->admin)
-            ->delete('/laravella-admin/posts/' . $postId . '/delete')
+            ->delete('/larapress-admin/posts/' . $postId . '/delete')
             ->assertOk();
 
         $this->assertNull(Post::find($postId), 'Post should be soft deleted.');
@@ -97,8 +97,8 @@ class PostCrudTest extends TestCase
     public function test_validation_blocks_post_without_required_fields(): void
     {
         $response = $this->actingAs($this->admin)
-            ->from('/laravella-admin/posts/new')
-            ->post('/laravella-admin/posts/new', ['title' => '']);
+            ->from('/larapress-admin/posts/new')
+            ->post('/larapress-admin/posts/new', ['title' => '']);
 
         $response->assertSessionHasErrors(['title', 'slug', 'author_id', 'category']);
         $this->assertSame(0, PostTranslation::where('slug', 'round-trip-post')->count());
@@ -110,7 +110,7 @@ class PostCrudTest extends TestCase
         $user = User::factory()->create(['role_id' => 2]);
 
         $this->actingAs($user)
-            ->get('/laravella-admin/posts')
+            ->get('/larapress-admin/posts')
             ->assertStatus(403);
     }
 
@@ -123,7 +123,7 @@ class PostCrudTest extends TestCase
         ]);
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->actingAs($user)->get('/laravella-admin')->assertOk();
-        $this->actingAs($user)->get('/laravella-admin/posts')->assertStatus(401);
+        $this->actingAs($user)->get('/larapress-admin')->assertOk();
+        $this->actingAs($user)->get('/larapress-admin/posts')->assertStatus(401);
     }
 }

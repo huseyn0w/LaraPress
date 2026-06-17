@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: comments.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 17.11.2019

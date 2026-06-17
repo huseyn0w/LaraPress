@@ -19,7 +19,7 @@ class CPanelPagesSeeder extends Seeder
             'en' => array (
                 'headline' =>
                     array (
-                        'value' => 'Laravella CMS',
+                        'value' => 'LaraPress CMS',
                         'type' => 'text',
                         'admin_label' => 'Headline',
                     ),
@@ -88,7 +88,7 @@ class CPanelPagesSeeder extends Seeder
                                             ),
                                         'author-position' =>
                                             array (
-                                                'value' => 'Laravella CMS Author',
+                                                'value' => 'LaraPress CMS Author',
                                                 'type' => 'text',
                                                 'admin_label' => 'Author Position',
                                             ),
@@ -120,7 +120,7 @@ class CPanelPagesSeeder extends Seeder
                                             ),
                                         'author-position' =>
                                             array (
-                                                'value' => 'Laravella CMS Contributor',
+                                                'value' => 'LaraPress CMS Contributor',
                                                 'type' => 'text',
                                                 'admin_label' => 'Author Position',
                                             ),
@@ -143,7 +143,7 @@ class CPanelPagesSeeder extends Seeder
             'ru' => array (
                 'headline' =>
                     array (
-                        'value' => 'Laravella CMS',
+                        'value' => 'LaraPress CMS',
                         'type' => 'text',
                         'admin_label' => 'Заголовок',
                     ),
@@ -212,7 +212,7 @@ class CPanelPagesSeeder extends Seeder
                                             ),
                                         'author-position' =>
                                             array (
-                                                'value' => 'Создатель Laravella CMS',
+                                                'value' => 'Создатель LaraPress CMS',
                                                 'type' => 'text',
                                                 'admin_label' => 'Должность',
                                             ),
@@ -244,7 +244,7 @@ class CPanelPagesSeeder extends Seeder
                                             ),
                                         'author-position' =>
                                             array (
-                                                'value' => 'Содействующий в создании Laravella CMS',
+                                                'value' => 'Содействующий в создании LaraPress CMS',
                                                 'type' => 'text',
                                                 'admin_label' => 'Должность',
                                             ),
@@ -280,7 +280,7 @@ class CPanelPagesSeeder extends Seeder
                 'author_id' => 1,
                 'status' => 1,
                 'meta_keywords' => 'page, homepage',
-                'meta_description' => 'This is homepage of CMS Laravella',
+                'meta_description' => 'This is homepage of CMS LaraPress',
                 'custom_fields' => json_encode($home_page_custom_fields['en']),
                 'template' => 'home',
                 'created_at' => Carbon::now(),
@@ -294,7 +294,7 @@ class CPanelPagesSeeder extends Seeder
                 'author_id' => 1,
                 'status' => 1,
                 'meta_keywords' => 'страница, главная',
-                'meta_description' => 'Это главная страница CMS Laravella',
+                'meta_description' => 'Это главная страница CMS LaraPress',
                 'custom_fields' => json_encode($home_page_custom_fields['ru']),
                 'template' => 'home',
                 'created_at' => Carbon::now(),

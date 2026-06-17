@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: search.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 15.11.2019

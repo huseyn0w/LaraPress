@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: custom-passwords.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 21.11.2019

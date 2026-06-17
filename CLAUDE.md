@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Laravella CMS — a Wordpress/Joomla-style multilingual CMS built on **Laravel 8 / PHP 7.3+**. Requires the `ext-imagick` PHP extension. Front-end assets are compiled with Laravel Mix (webpack) + Bootstrap 4 + jQuery + Vue 2.
+LaraPress CMS — a Wordpress/Joomla-style multilingual CMS built on **Laravel 8 / PHP 7.3+**. Requires the `ext-imagick` PHP extension. Front-end assets are compiled with Laravel Mix (webpack) + Bootstrap 4 + jQuery + Vue 2.
 
 ## Commands
 
@@ -26,7 +26,7 @@ vendor/bin/phpunit tests/Feature/ExampleTest.php   # run a single test file
 
 Code style is enforced by StyleCI (`.styleci.yml`, Laravel preset) on push — there is no local lint command.
 
-Admin panel lives at `/<APP_URL>/laravella-admin` (seeded credentials `admin` / `laravelladmin123`).
+Admin panel lives at `/<APP_URL>/larapress-admin` (seeded credentials `admin` / `larapressdmin123`).
 
 ## Architecture
 
@@ -41,7 +41,7 @@ Translatable models (`Post`, `Page`, `Category`, `Menu`) implement `Translatable
 
 ### Routing & access control are split front vs. admin
 - **Front routes** (`routes/web.php`, default namespace): `PageController`, `PostController`, `CategoryController`, `UserController`, `PostCommentController`. Note the catch-all `/{locale?}/{slug?}` → `PageController@languageIndex` must stay last.
-- **Admin routes** are all under the `laravella-admin` prefix + `CPanel` namespace, guarded by `auth` + `see_admin_panel`, with each section gated by a custom permission middleware.
+- **Admin routes** are all under the `larapress-admin` prefix + `CPanel` namespace, guarded by `auth` + `see_admin_panel`, with each section gated by a custom permission middleware.
 
 The permission system is **custom** (not a package): `UserRoles` + `UserPermissions` models, and one middleware per capability (`ManageUsers`, `ManagePosts`, `ManagePages`, `ManageCategories`, `ManageComments`, `ManageRoles`, `ManageGeneralSettings`, `ManageMenu`). These are aliased in `app/Http/Kernel.php` as `manage_*`. Note: `see_admin_panel` is aliased to `ManageMenu` — verify the intended check when touching admin gating.
 
@@ -56,6 +56,6 @@ Registered in `app/Providers/ObserverServiceProvider.php` (`PostObserver`, `Post
 
 ### Other conventions
 - **Validation**: dedicated Form Request classes in `app/Http/Requests/`.
-- **Custom helpers**: globally available, autoloaded via `bootstrap/laravella-helpers.php` (composer `files` autoload) — e.g. `get_languages()`, `lang_exist()`, `get_current_lang()`.
+- **Custom helpers**: globally available, autoloaded via `bootstrap/larapress-helpers.php` (composer `files` autoload) — e.g. `get_languages()`, `lang_exist()`, `get_current_lang()`.
 - **Authorization policies**: `app/Policies/UserPolicy.php` (registered in `AuthServiceProvider`).
 - **Integrations**: HTML sanitization via `mews/purifier`, media via `unisharp/laravel-filemanager` (config built by `app/Handlers/LfmConfigHandler.php`), social login via `laravel/socialite` (Twitter/Facebook/LinkedIn/Google/GitHub), `albertcht/invisible-recaptcha`, image processing via `intervention/image`.

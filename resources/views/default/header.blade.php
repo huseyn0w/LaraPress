@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: header.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 19.07.2019
@@ -90,7 +90,7 @@ $current_lang = get_current_lang_prefix();
             @if($logo_url)
                 <img src="{{$logo_url}}" alt="" class="h-9 w-auto">
             @else
-                <span class="font-serif text-2xl font-semibold tracking-tightest text-ink-900">Laravella</span>
+                <span class="font-serif text-2xl font-semibold tracking-tightest text-ink-900">LaraPress</span>
             @endif
         </a>
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: comments_list.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 08.11.2019

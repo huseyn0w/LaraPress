@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS — menu builder source accordion (Phase 5 partial).
+ * LaraPress CMS — menu builder source accordion (Phase 5 partial).
  * Shared by new_menu / edit_menu. The select IDs + classes
  * (#pages_list / #posts_list / #categories_list, .multiple_list.menu_item,
  * #link_label / #link_url) are the hooks menu.js reads, so they are preserved.

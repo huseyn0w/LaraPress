@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Http\Models\Page;
 
-class PageObserver extends LaravellaObserver
+class PageObserver extends LaraPressObserver
 {
     /**
      * Handle the page "creating" event.

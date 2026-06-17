@@ -28,7 +28,7 @@
   <div class="container-fluid" id="wrapper">
     <div class="panel panel-primary hidden-xs">
       <div class="panel-heading">
-        <h1 class="panel-title">Laravella file manager</h1>
+        <h1 class="panel-title">LaraPress file manager</h1>
       </div>
     </div>
     <div class="row">

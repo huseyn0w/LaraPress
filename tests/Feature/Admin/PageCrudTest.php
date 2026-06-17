@@ -46,7 +46,7 @@ class PageCrudTest extends TestCase
     public function test_admin_can_create_a_page(): void
     {
         $response = $this->actingAs($this->admin)
-            ->post('/laravella-admin/pages/new', $this->payload());
+            ->post('/larapress-admin/pages/new', $this->payload());
 
         $response->assertSessionHasNoErrors();
         $response->assertRedirect();
@@ -59,11 +59,11 @@ class PageCrudTest extends TestCase
 
     public function test_admin_can_update_a_page(): void
     {
-        $this->actingAs($this->admin)->post('/laravella-admin/pages/new', $this->payload());
+        $this->actingAs($this->admin)->post('/larapress-admin/pages/new', $this->payload());
         $translation = PageTranslation::where('slug', 'about-page')->firstOrFail();
 
         $response = $this->actingAs($this->admin)
-            ->put('/laravella-admin/pages/' . $translation->page_id . '/update', $this->payload([
+            ->put('/larapress-admin/pages/' . $translation->page_id . '/update', $this->payload([
                 'content' => 'updated page body',
             ]));
 
@@ -74,11 +74,11 @@ class PageCrudTest extends TestCase
 
     public function test_admin_can_delete_a_page(): void
     {
-        $this->actingAs($this->admin)->post('/laravella-admin/pages/new', $this->payload());
+        $this->actingAs($this->admin)->post('/larapress-admin/pages/new', $this->payload());
         $translation = PageTranslation::where('slug', 'about-page')->firstOrFail();
 
         $this->actingAs($this->admin)
-            ->delete('/laravella-admin/pages/' . $translation->page_id . '/delete')
+            ->delete('/larapress-admin/pages/' . $translation->page_id . '/delete')
             ->assertOk();
 
         $this->assertSame(0, PageTranslation::where('slug', 'about-page')->count());
@@ -87,8 +87,8 @@ class PageCrudTest extends TestCase
     public function test_validation_blocks_invalid_page(): void
     {
         $response = $this->actingAs($this->admin)
-            ->from('/laravella-admin/pages/new')
-            ->post('/laravella-admin/pages/new', ['title' => '']);
+            ->from('/larapress-admin/pages/new')
+            ->post('/larapress-admin/pages/new', ['title' => '']);
 
         $response->assertSessionHasErrors(['title', 'slug', 'author_id', 'template']);
     }
@@ -101,6 +101,6 @@ class PageCrudTest extends TestCase
         ]);
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->actingAs($user)->get('/laravella-admin/pages')->assertStatus(401);
+        $this->actingAs($user)->get('/larapress-admin/pages')->assertStatus(401);
     }
 }

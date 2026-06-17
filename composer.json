@@ -1,7 +1,7 @@
 {
-    "name": "laravel/laravel",
+    "name": "huseyn0w/larapress",
     "type": "project",
-    "description": "The Laravel Framework.",
+    "description": "LaraPress — the Laravel version of WordPress.",
     "keywords": [
         "framework",
         "laravel"
@@ -53,7 +53,7 @@
             "Database\\Seeders\\": "database/seeds/"
         },
         "files": [
-            "bootstrap/laravella-helpers.php"
+            "bootstrap/larapress-helpers.php"
         ]
     },
     "autoload-dev": {

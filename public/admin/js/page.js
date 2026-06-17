@@ -32,7 +32,7 @@ $(function () {
         var delete_conf = confirm(delete_confirmation);
         if(delete_conf){
             $.ajax({
-                url: "/laravella-admin/pages/" + deleted_page_id + "/delete/",
+                url: "/larapress-admin/pages/" + deleted_page_id + "/delete/",
                 type: 'DELETE',
                 data: {
                     "id": deleted_page_id

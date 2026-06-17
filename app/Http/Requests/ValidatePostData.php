@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 
-class ValidatePostData extends LaravellaRequest
+class ValidatePostData extends LaraPressRequest
 {
 
     protected $table = 'post_translations';

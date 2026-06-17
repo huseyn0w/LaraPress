@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: home.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 17.11.2019
@@ -9,7 +9,7 @@
 return [
 
     'dashboard'       => 'Главная',
-    'greetings'       => 'Добро пожаловать на главную страницу CMS Laravella. Перед вами небольшая статистика',
+    'greetings'       => 'Добро пожаловать на главную страницу CMS LaraPress. Перед вами небольшая статистика',
     'last_posts'      => '5 последних постов',
     'no_posts'        => 'Постов нет',
     'last_comments'   => '5 последних комментариев',

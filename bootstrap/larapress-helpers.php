@@ -1,7 +1,7 @@
 <?php
 /**
- * Laravella CMS
- * File: laravella-helpers.php
+ * LaraPress CMS
+ * File: larapress-helpers.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 22.07.2019
  */
@@ -900,7 +900,7 @@ function get_entity_translation_links($type, $id):array
     foreach ($languages_list as $prefix => $data)
     {
         if($prefix === $locale) continue;
-        $result[$data['title']] = 'laravella-admin/'.$type.'/'.$id.'/'.$prefix;
+        $result[$data['title']] = 'larapress-admin/'.$type.'/'.$id.'/'.$prefix;
     }
 
 

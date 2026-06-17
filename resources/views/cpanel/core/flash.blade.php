@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: flash.blade.php  (Phase 5)
  * Reusable validation-error block for admin forms. Replaces the repeated
  * `@if ($errors->any())` markup. Pull in with @include('cpanel.core.flash').

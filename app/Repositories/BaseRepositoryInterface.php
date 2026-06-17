@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: BaseRepositoryInterface.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 28.07.2019

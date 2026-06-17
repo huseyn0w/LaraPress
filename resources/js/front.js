@@ -1,5 +1,5 @@
 /**
- * Laravella CMS — public theme interactivity (Alpine.js + fetch).
+ * LaraPress CMS — public theme interactivity (Alpine.js + fetch).
  *
  * Replaces the legacy jQuery/Bootstrap front bundle (like.js, comment.js,
  * nice-select, sticky nav, magnific lightbox). Everything hits the SAME

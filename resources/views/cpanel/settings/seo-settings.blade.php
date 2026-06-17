@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: seo-settings.blade.php
  * Phase 7 (SEO/GEO): global SEO settings admin page.
  */

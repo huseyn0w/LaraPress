@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: new_menu.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 04.09.2019

@@ -30,7 +30,7 @@ class RoleCrudTest extends TestCase
 
     public function test_admin_can_create_a_role(): void
     {
-        $response = $this->actingAs($this->admin)->post('/laravella-admin/roles/new', [
+        $response = $this->actingAs($this->admin)->post('/larapress-admin/roles/new', [
             'name'        => 'Author',
             'permissions' => ['manage_posts', 'manage_comments'],
         ]);
@@ -52,7 +52,7 @@ class RoleCrudTest extends TestCase
             'permissions' => json_encode(['manage_posts' => 1]),
         ]);
 
-        $response = $this->actingAs($this->admin)->put('/laravella-admin/roles/' . $role->id . '/update', [
+        $response = $this->actingAs($this->admin)->put('/larapress-admin/roles/' . $role->id . '/update', [
             'name'        => 'Temp Renamed',
             'permissions' => ['manage_pages'],
         ]);
@@ -73,7 +73,7 @@ class RoleCrudTest extends TestCase
         ]);
 
         $this->actingAs($this->admin)
-            ->delete('/laravella-admin/roles/' . $role->id . '/delete')
+            ->delete('/larapress-admin/roles/' . $role->id . '/delete')
             ->assertOk();
 
         $this->assertDatabaseMissing('user_roles', ['id' => $role->id]);
@@ -82,8 +82,8 @@ class RoleCrudTest extends TestCase
     public function test_validation_blocks_duplicate_role_name(): void
     {
         $response = $this->actingAs($this->admin)
-            ->from('/laravella-admin/roles/new')
-            ->post('/laravella-admin/roles/new', ['name' => 'Administrator']);
+            ->from('/larapress-admin/roles/new')
+            ->post('/larapress-admin/roles/new', ['name' => 'Administrator']);
 
         $response->assertSessionHasErrors(['name']);
     }
@@ -96,6 +96,6 @@ class RoleCrudTest extends TestCase
         ]);
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->actingAs($user)->get('/laravella-admin/roles')->assertStatus(401);
+        $this->actingAs($user)->get('/larapress-admin/roles')->assertStatus(401);
     }
 }

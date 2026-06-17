@@ -1,5 +1,5 @@
 /**
- * Laravella CMS — admin shell runtime (Phase 5).
+ * LaraPress CMS — admin shell runtime (Phase 5).
  *
  * Loaded via Vite in the admin <head>. Responsibilities:
  *   1. Alpine for the app shell (sidebar toggle, topbar user/language menus).
@@ -153,7 +153,7 @@ function installJqueryShims($) {
         });
     };
 
-    // bootstrap-notify replacement. showNotification() (in laravella.js) calls
+    // bootstrap-notify replacement. showNotification() (in larapress.js) calls
     // $.notify({ message }, { type, placement }). Map type -> toast kind.
     $.notify = function (content, options) {
         const message = (content && content.message) || '';

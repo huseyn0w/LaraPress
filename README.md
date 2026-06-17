@@ -1,11 +1,11 @@
-# Laravella CMS
+# LaraPress CMS
 <p align="center">
-<img alt="Laravella Logo" src="https://raw.githubusercontent.com/huseyn0w/Laravella-CMS/master/public/front/default/img/readme.png">
+<img alt="LaraPress Logo" src="https://raw.githubusercontent.com/huseyn0w/LaraPress-CMS/master/public/front/default/img/readme.png">
 </p>
 The CMS Project based on Laravel PHP Framework
 
 ## Getting Started
-Laravella CMS is developed as analog to such popular CMS as Wordpress, DLE, Joomla and etc, but based on framework Laravel.
+LaraPress CMS is developed as analog to such popular CMS as Wordpress, DLE, Joomla and etc, but based on framework Laravel.
 These instructions will get you a copy of the project up and running on your local machine / server for using or testing it.
 See deployment for notes on how to deploy the project on a live system.
 
@@ -100,10 +100,10 @@ Tests run on an **isolated in-memory SQLite** database (pinned in `tests/Creates
 so they never touch your local MySQL/Docker data.
 
 ## Administrator area credentials:
-Go to: SITE_URL/laravella-admin
+Go to: SITE_URL/larapress-admin
 <pre>
 Username: admin
-Password: laravelladmin123
+Password: larapressdmin123
 </pre>
 
 ## To manage website languages:
@@ -206,7 +206,7 @@ This project is licensed under the Public V3 License - see the [LICENSE.md](LICE
    docker compose --profile dev up node   # Vite on http://localhost:5173
    ```
 5. Open the app: **http://localhost:8080**
-   Admin area: http://localhost:8080/laravella-admin (see credentials above).
+   Admin area: http://localhost:8080/larapress-admin (see credentials above).
 
 **Optional services**
 

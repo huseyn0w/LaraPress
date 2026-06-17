@@ -30,7 +30,7 @@ class SeoController extends Controller
             abort(404);
         }
 
-        $xml = Cache::remember('laravella.sitemap.xml', now()->addHour(), function () {
+        $xml = Cache::remember('larapress.sitemap.xml', now()->addHour(), function () {
             return $this->buildSitemap();
         });
 
@@ -147,7 +147,7 @@ class SeoController extends Controller
         if ($seo && !empty($seo->discourage_search_engines)) {
             $lines[] = 'Disallow: /';
         } else {
-            $lines[] = 'Disallow: /laravella-admin';
+            $lines[] = 'Disallow: /larapress-admin';
             $lines[] = 'Disallow: /search';
             $lines[] = 'Allow: /';
         }

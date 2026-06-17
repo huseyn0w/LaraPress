@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 
-class ValidatePageData extends LaravellaRequest
+class ValidatePageData extends LaraPressRequest
 {
     protected $table = 'page_translations';
 

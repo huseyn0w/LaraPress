@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: CPanelGeneralSettingRepository.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 25.07.2019

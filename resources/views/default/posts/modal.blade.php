@@ -1,6 +1,6 @@
 <?php
 /**
- * Laravella CMS
+ * LaraPress CMS
  * File: modal.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 07.11.2019
