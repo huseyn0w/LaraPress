@@ -133,6 +133,19 @@ Run `make help` to see all targets.
   docker compose --profile dev up node     # Vite on http://localhost:5173
   ```
 
+### Live code reload (no container restart needed)
+
+The project directory is bind-mounted into the containers (`./:/var/www/html`), so:
+
+* **PHP, Blade, routes, config, helpers, classes** — changes apply **immediately** on
+  the next request. No `docker compose restart` needed.
+* **Tailwind CSS / JS** — bundled by Vite, so run **`npm run dev`** (or the `node`
+  service above) for hot reload, or `npm run build` for a one-off rebuild.
+* **`.env` infrastructure vars** (DB host, etc.) are injected at container start —
+  re-run `docker compose up -d` after changing those.
+* Avoid `php artisan config:cache` / `route:cache` in dev (they freeze edits until
+  `php artisan config:clear`); they're a production-only optimization.
+
 > **Docker-only files:** `Dockerfile`, `docker-compose.yml`, `docker/nginx/default.conf`,
 > `docker/php/php.ini`, `.dockerignore`, `Makefile`. **None of these are part of the
 > production runtime.**
