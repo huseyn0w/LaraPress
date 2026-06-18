@@ -120,8 +120,9 @@ return [
     */
 
     'languages_list' => [
-        'en'  => ['title' => 'English', 'icon' => env('APP_URL').'/admin/img/flags/en.png'],
-        'ru'  => ['title' => 'Русский', 'icon' => env('APP_URL').'/admin/img/flags/ru.png']
+        'en'     => ['title' => 'English'         , 'icon' => env('APP_URL').'/admin/img/flags/en.png'],
+        'ru'     => ['title' => 'Русский'         , 'icon' => env('APP_URL').'/admin/img/flags/ru.png'],
+        'pt-br'  => ['title' => 'Português Brasil', 'icon' => env('APP_URL').'/admin/img/flags/pt_br.png']
     ],
 
     /*
