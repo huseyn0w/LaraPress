@@ -90,7 +90,7 @@
         list-style: none;
     }
 
-    .theme-admin button {
+    .theme-admin :where(button) {
         font-family: inherit;
         font-size: 100%;
         line-height: inherit;
@@ -101,9 +101,7 @@
         cursor: pointer;
     }
 
-    .theme-admin input,
-    .theme-admin textarea,
-    .theme-admin select {
+    .theme-admin :where(input, textarea, select) {
         font-family: inherit;
         font-size: 100%;
         color: inherit;

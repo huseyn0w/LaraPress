@@ -213,9 +213,23 @@ make test                                       # inside Docker (shortcut)
 php artisan test --filter=SeoMetaTest           # a single test
 ```
 
-The suite is **158 tests** and runs on an **isolated in-memory SQLite** database (pinned in
+The suite is **170 tests** and runs on an **isolated in-memory SQLite** database (pinned in
 `tests/CreatesApplication.php` and `phpunit.xml`) so it **never** touches your local MySQL /
 Docker data — no DB setup required to run tests.
+
+### Browser / e2e tests (Laravel Dusk)
+
+Real headless-Chrome tests that verify **functionality *and* that styles are applied**
+(login form, admin sidebar contrast, language switch, link ports, GEO settings) — things
+the HTTP-level suite can't see:
+
+```bash
+make dusk                              # one command: serves the app + runs the browser suite
+make dusk ARGS="--filter=AuthAndAdminTest"
+```
+
+Runs on the host against a **dedicated `larapress_dusk`** database (never the dev DB).
+Full guide: [`docs/e2e-testing.md`](docs/e2e-testing.md).
 
 ---
 

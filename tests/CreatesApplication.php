@@ -17,6 +17,14 @@ trait CreatesApplication
 
         $app->make(Kernel::class)->bootstrap();
 
+        // Browser (Dusk) tests run the app over real HTTP against a dedicated
+        // MySQL database (larapress_dusk, see .env.dusk.local). The test process
+        // and the served app must SHARE that database, so the in-memory SQLite
+        // pin below must NOT apply for Dusk — DUSK=true signals that.
+        if (env('DUSK')) {
+            return $app;
+        }
+
         // SAFETY: pin the test suite to an isolated in-memory SQLite database,
         // regardless of where env vars come from. Inside Docker the container
         // injects DB_CONNECTION=mysql into $_SERVER, which Laravel's env

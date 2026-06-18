@@ -56,7 +56,13 @@
         text-wrap: balance;
     }
 
-    .theme-default a {
+    /* `:where()` keeps these element resets at zero specificity beyond
+       `.theme-default`, so Tailwind component/utility classes (e.g.
+       `.btn-primary` on a <button>, `text-*` on links/inputs) still win.
+       Without it, `.theme-default button` (0,1,1) beats `.btn-primary` (0,1,0)
+       and the brand background/colour is stripped — e.g. the login submit
+       button rendered transparent with inherited dark text. */
+    .theme-default :where(a) {
         color: inherit;
         text-decoration: none;
     }
@@ -76,7 +82,7 @@
         list-style: none;
     }
 
-    .theme-default button {
+    .theme-default :where(button) {
         font-family: inherit;
         font-size: 100%;
         line-height: inherit;
@@ -87,9 +93,7 @@
         cursor: pointer;
     }
 
-    .theme-default input,
-    .theme-default textarea,
-    .theme-default select {
+    .theme-default :where(input, textarea, select) {
         font-family: inherit;
         font-size: 100%;
         color: inherit;

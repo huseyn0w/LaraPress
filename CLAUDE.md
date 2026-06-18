@@ -26,9 +26,13 @@ php artisan serve
 php artisan test                              # full suite (isolated in-memory SQLite — never touches MySQL)
 php artisan test --filter=SeoMetaTest         # a single test class
 docker compose exec -T app php artisan test   # same, inside the container
+
+# --- Browser / e2e (Laravel Dusk) ---
+make dusk                                     # serves app on :8000 + runs headless-Chrome suite
+make dusk ARGS="--filter=AuthAndAdminTest"
 ```
 
-Test isolation is pinned in `tests/CreatesApplication.php` (forces SQLite `:memory:`, array cache, `app.env=testing`, model-caching off) because the Docker container injects `DB_CONNECTION=mysql` via `$_SERVER` — without the pin the suite would run against (and wipe) the live MySQL dev DB. Don't weaken it.
+Test isolation is pinned in `tests/CreatesApplication.php` (forces SQLite `:memory:`, array cache, `app.env=testing`, model-caching off) because the Docker container injects `DB_CONNECTION=mysql` via `$_SERVER` — without the pin the suite would run against (and wipe) the live MySQL dev DB. Don't weaken it. **Exception**: that same file early-returns (skips the pin) when `env('DUSK')` is true, so the **Dusk** browser/e2e suite can share a real DB with the served app. Dusk runs on the host against a dedicated `larapress_dusk` MySQL DB (`.env.dusk.local`, gitignored; example committed), served on `:8000` — orchestrated by `scripts/dusk.sh` (`make dusk`). Browser tests live in `tests/Browser/` and assert computed styles (not just markup) so they catch CSS regressions the HTTP suite can't. See `docs/e2e-testing.md`.
 
 Code style is enforced by StyleCI (`.styleci.yml`, Laravel preset) on push — there is no local lint command.
 

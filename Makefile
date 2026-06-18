@@ -52,6 +52,9 @@ fresh: ## Drop and rebuild the database, then reseed
 test: ## Run the test suite inside the container (in-memory SQLite)
 	$(APP) php artisan test
 
+dusk: ## Run Laravel Dusk browser/e2e tests (host Chrome -> dedicated dusk DB). Pass ARGS=... to filter.
+	bash scripts/dusk.sh $(ARGS)
+
 build: ## Build front-end assets on the host (Vite production build)
 	npm run build
 

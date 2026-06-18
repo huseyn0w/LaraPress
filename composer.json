@@ -30,6 +30,7 @@
         "barryvdh/laravel-ide-helper": "^3.0",
         "fakerphp/faker": "^1.23",
         "filp/whoops": "^2.0",
+        "laravel/dusk": "^8.6",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.0",
         "phpunit/phpunit": "^11.0",

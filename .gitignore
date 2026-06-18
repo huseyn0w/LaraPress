@@ -5,6 +5,7 @@
 /vendor
 /.idea
 .env
+.env.dusk.local
 .editorconfig
 .env.backup
 TODOLIST.md
