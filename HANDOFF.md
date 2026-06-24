@@ -3,9 +3,10 @@
 > Living handoff for the canon-convergence effort. Read this + `REFACTOR_PLAN.md` +
 > `../FEATURE_MATRIX.md` + `../DESIGN_SYSTEM.md` before continuing. Last updated 2026-06-24.
 >
-> **Latest:** suite **186 green**; architecture refactor complete; comment-notification
-> feature (event + queued listener) + comment submit rate-limiting (parity §3) DONE &
-> adversarially verified. Resume at PENDING item 1 (Tags taxonomy).
+> **Latest:** suite **195 green**, PHPStan clean. Architecture refactor complete;
+> comment-notification + rate-limiting DONE; **Tags taxonomy core DONE** (schema/models,
+> find-or-create+sync, post attachment via observer, public `/tag/{slug}` archive) &
+> adversarially verified. Resume at PENDING item 1 (finish Tags UI glue, then revisions).
 
 ## Where things stand
 
@@ -68,8 +69,15 @@ Service -> Event -> Listener/Observer   (for side effects of writes)
 > `CommentService::create`) AND **comment submit rate-limiting** (`throttle:8,1` on the
 > comment write routes + `max:5000` body cap) — closes parity §18 and §3. 4 tests added.
 
-1. **Tags taxonomy** (P1): mirror `Category` (model/repo/observer/service); `tags` +
-   `post_tag` (+ translations) migrations; admin CRUD + public archive; search includes tags.
+1. **Tags taxonomy** (P1) — **CORE DONE** (schema `tags`/`tag_translations`/`post_tag`;
+   `Tag`/`TagTranslation`; `Post::tags()`; `TagRepository` find-or-create+sync +
+   `postsForTag`; `PostObserver::syncTags` reads the `tags` form field; `Front\TagViewService`
+   + thin `TagController` + `/tag/{slug}` archive + view; language switcher wired). **Remaining
+   UI glue:** (a) add a `tags` input to the admin post create/edit form so editors can set
+   tags (observer already consumes the `tags` request key — comma-separated names); (b) show a
+   post's tags (linking `/tag/{slug}`) on the public post-detail view; (c) optional: include
+   tags in search (§4) + an admin tag list. NB: 2 of the frozen PHPStan baseline entries are
+   tag `relationExistence` larastan false-positives (identical to the category ones) — leave.
 3. **Revisions + restore UI** (P2, net-new for all stacks): immutable snapshot before
    post/page update (in the repository write, or a `Revisioned` observer); dashboard diff +
    restore view.
