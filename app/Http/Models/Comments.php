@@ -5,6 +5,10 @@ namespace App\Http\Models;
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property-read User|null $user
+ * @property-read Post|null $post
+ */
 class Comments extends Model
 {
     use Cachable;
