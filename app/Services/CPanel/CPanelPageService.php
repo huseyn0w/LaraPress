@@ -3,7 +3,9 @@
 namespace App\Services\CPanel;
 
 use App\Repositories\CPanelPageRepository;
+use App\Repositories\RevisionRepository;
 use App\Services\BaseCrudService;
+use App\Services\Concerns\ManagesRevisions;
 
 /**
  * Domain service for CPanel page administration. Owns all data access for the
@@ -12,8 +14,11 @@ use App\Services\BaseCrudService;
  */
 class CPanelPageService extends BaseCrudService
 {
-    public function __construct(private CPanelPageRepository $repo)
+    use ManagesRevisions;
+
+    public function __construct(private CPanelPageRepository $repo, RevisionRepository $revisions)
     {
         parent::__construct($repo);
+        $this->revisions = $revisions;
     }
 }

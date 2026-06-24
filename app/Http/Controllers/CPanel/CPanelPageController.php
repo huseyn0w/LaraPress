@@ -66,6 +66,19 @@ class CPanelPageController extends CPanelBaseController
         return parent::update($id, $request);
     }
 
+    public function restoreRevision($id, $revision, $lang)
+    {
+        $restored = $this->service->restoreRevision((int) $id, $lang, (int) $revision);
+
+        if (! $restored) {
+            abort(404);
+        }
+
+        return redirect()
+            ->route('cpanel_edit_page', ['id' => $id, 'lang' => $lang])
+            ->with('revision_restored', true);
+    }
+
     public function addPage()
     {
         $array = [

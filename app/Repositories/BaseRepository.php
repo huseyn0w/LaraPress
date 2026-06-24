@@ -360,6 +360,24 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
     public function updateWhere($data, $parameter = 'id') {}
 
+    /**
+     * Resolve the translation row for a translatable entity in a given locale
+     * (e.g. the post_translations row for post #5 in 'en'). Returns null for
+     * non-translatable repositories or when no such translation exists. Used by
+     * the revision UI, where revisions are keyed on the translation row id.
+     */
+    public function translationFor(int $parentId, string $locale): ?Model
+    {
+        if (is_null($this->translated_model)) {
+            return null;
+        }
+
+        return $this->translated_model->newQuery()
+            ->where($this->translated_table_join_column, $parentId)
+            ->where('locale', $locale)
+            ->first();
+    }
+
     public function delete($id)
     {
         $result = false;

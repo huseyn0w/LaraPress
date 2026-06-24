@@ -17,11 +17,14 @@ class RevisionRepository extends BaseRepository
 
     /**
      * Volatile attributes never restored back onto a live row — they identify
-     * the row or its bookkeeping, not its editorial content.
+     * the row (id/join column/locale) or are independent counters (likes), not
+     * the editorial content a revision is meant to capture.
      *
      * @var array<int, string>
      */
-    private array $excludedFromRestore = ['id', 'created_at', 'updated_at'];
+    private array $excludedFromRestore = [
+        'id', 'created_at', 'updated_at', 'post_id', 'page_id', 'locale', 'likes',
+    ];
 
     public function __construct(Revision $model)
     {
@@ -86,5 +89,51 @@ class RevisionRepository extends BaseRepository
         return collect($revision->data)
             ->except($this->excludedFromRestore)
             ->all();
+    }
+
+    /**
+     * Per-field comparison between a revision's snapshot and the live row, for
+     * the compare screen. Each entry carries the field name, the snapshot
+     * value, the current value and whether they differ. Pure presentation data —
+     * no ORM.
+     *
+     * @return array<int, array{field: string, old: mixed, current: mixed, changed: bool}>
+     */
+    public function diff(Model $current, Revision $revision): array
+    {
+        $fields = [];
+
+        foreach ($this->restorableData($revision) as $field => $oldValue) {
+            $currentValue = $current->getAttribute($field);
+
+            $fields[] = [
+                'field' => $field,
+                'old' => $oldValue,
+                'current' => $currentValue,
+                'changed' => (string) $oldValue !== (string) $currentValue,
+            ];
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Restore a revision: write its snapshot content back onto the live
+     * translation row. The save fires the translation's *updating* observer,
+     * which snapshots the current (pre-restore) state first — so a restore is
+     * itself revisioned and therefore undoable. Returns false when the row no
+     * longer exists.
+     */
+    public function restoreFrom(Revision $revision): bool
+    {
+        $translation = $revision->revisionable;
+
+        if (! $translation) {
+            return false;
+        }
+
+        $translation->fill($this->restorableData($revision));
+
+        return (bool) $translation->save();
     }
 }

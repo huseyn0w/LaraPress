@@ -82,4 +82,55 @@ class PostRevisionTest extends TestCase
 
         $this->assertSame(2, Revision::count(), 'Each edit appends one revision.');
     }
+
+    public function test_restoring_a_revision_reverts_content_and_snapshots_current(): void
+    {
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $translation = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
+
+        // Edit: snapshots the 'original body' state as the first revision.
+        $this->actingAs($this->admin)->put(
+            '/cmstack-laravel-admin/posts/'.$translation->post_id.'/update',
+            $this->postPayload(['content' => 'edited body'])
+        );
+        $revision = Revision::firstOrFail();
+        $this->assertStringContainsString('original body', $revision->data['content']);
+
+        // Restore the original revision.
+        $this->actingAs($this->admin)->post(
+            '/cmstack-laravel-admin/posts/'.$translation->post_id.'/revisions/'.$revision->id.'/restore/en'
+        )->assertRedirect();
+
+        // Content reverted to the snapshot.
+        $fresh = PostTranslation::findOrFail($translation->id);
+        $this->assertStringContainsString('original body', $fresh->content);
+
+        // Restore is itself an edit: the pre-restore ('edited body') state is
+        // captured as a new revision, so the restore is undoable.
+        $this->assertSame(2, Revision::count(), 'Restore snapshots the pre-restore state.');
+        $this->assertStringContainsString('edited body', Revision::orderByDesc('id')->firstOrFail()->data['content']);
+    }
+
+    public function test_cannot_restore_a_revision_belonging_to_another_post(): void
+    {
+        // Post A with one revision.
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $a = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
+        $this->actingAs($this->admin)->put('/cmstack-laravel-admin/posts/'.$a->post_id.'/update', $this->postPayload(['content' => 'a edited']));
+        $revisionOfA = Revision::firstOrFail();
+
+        // Post B with distinct content so a clobber is detectable.
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload([
+            'title' => 'Second Post', 'slug' => 'second-post', 'content' => 'b untouched body',
+        ]));
+        $b = PostTranslation::where('slug', 'second-post')->firstOrFail();
+
+        // Try to restore A's revision under B's id -> must 404 and not touch B.
+        $this->actingAs($this->admin)->post(
+            '/cmstack-laravel-admin/posts/'.$b->post_id.'/revisions/'.$revisionOfA->id.'/restore/en'
+        )->assertNotFound();
+
+        $freshB = PostTranslation::findOrFail($b->id);
+        $this->assertStringContainsString('b untouched body', $freshB->content, 'B must be untouched.');
+    }
 }

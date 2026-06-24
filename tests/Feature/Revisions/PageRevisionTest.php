@@ -65,4 +65,24 @@ class PageRevisionTest extends TestCase
         $this->assertSame($translation->id, $revision->revisionable_id);
         $this->assertStringContainsString('original page body', $revision->data['content']);
     }
+
+    public function test_restoring_a_page_revision_reverts_content(): void
+    {
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/pages/new', $this->payload());
+        $translation = PageTranslation::where('slug', 'about-page')->firstOrFail();
+
+        $this->actingAs($this->admin)->put(
+            '/cmstack-laravel-admin/pages/'.$translation->page_id.'/update',
+            $this->payload(['content' => 'updated page body'])
+        );
+        $revision = Revision::firstOrFail();
+
+        $this->actingAs($this->admin)->post(
+            '/cmstack-laravel-admin/pages/'.$translation->page_id.'/revisions/'.$revision->id.'/restore/en'
+        )->assertRedirect();
+
+        $fresh = PageTranslation::findOrFail($translation->id);
+        $this->assertStringContainsString('original page body', $fresh->content);
+        $this->assertSame(2, Revision::count(), 'Restore snapshots the pre-restore state.');
+    }
 }

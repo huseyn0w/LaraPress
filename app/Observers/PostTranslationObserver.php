@@ -14,8 +14,17 @@ class PostTranslationObserver extends CmstackLaravelObserver
      */
     public function saving(PostTranslation $postTranslation)
     {
-        $postTranslation->preview = clean($this->request->preview);
-        $postTranslation->content = clean($this->request->content);
+        // Only sanitise from the request when those fields were actually
+        // submitted (the edit form path). Writes that don't carry them — e.g. a
+        // revision restore — must keep the values already set on the model
+        // rather than have them clobbered to empty.
+        if ($this->request->has('preview')) {
+            $postTranslation->preview = clean($this->request->preview);
+        }
+
+        if ($this->request->has('content')) {
+            $postTranslation->content = clean($this->request->content);
+        }
     }
 
     /**

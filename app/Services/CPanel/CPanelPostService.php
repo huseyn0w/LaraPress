@@ -3,13 +3,18 @@
 namespace App\Services\CPanel;
 
 use App\Repositories\CPanelPostRepository;
+use App\Repositories\RevisionRepository;
 use App\Services\BaseCrudService;
+use App\Services\Concerns\ManagesRevisions;
 
 class CPanelPostService extends BaseCrudService
 {
-    public function __construct(private CPanelPostRepository $repo)
+    use ManagesRevisions;
+
+    public function __construct(private CPanelPostRepository $repo, RevisionRepository $revisions)
     {
         parent::__construct($repo);
+        $this->revisions = $revisions;
     }
 
     /**
