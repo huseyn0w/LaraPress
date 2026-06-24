@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Http\Models\Category;
 use App\Http\Models\Post;
+use App\Repositories\TagRepository;
 
 class PostObserver extends CmstackLaravelObserver
 {
@@ -17,6 +18,7 @@ class PostObserver extends CmstackLaravelObserver
         if (! is_null($post->post_id)) {
             $this->detachCategory($post);
             $this->attachCategory($post);
+            $this->syncTags($post);
         }
     }
 
@@ -28,6 +30,7 @@ class PostObserver extends CmstackLaravelObserver
     public function created(Post $post)
     {
         $this->attachCategory($post);
+        $this->syncTags($post);
     }
 
     /**
@@ -39,6 +42,7 @@ class PostObserver extends CmstackLaravelObserver
     public function forceDeleted($post)
     {
         $this->detachCategory($post);
+        $post->tags()->detach();
     }
 
     private function attachCategory($post)
@@ -52,5 +56,26 @@ class PostObserver extends CmstackLaravelObserver
     private function detachCategory($post)
     {
         $post->categories()->detach();
+    }
+
+    /**
+     * Sync the post's tags from the submitted `tags` input (array of names or a
+     * comma-separated string). Only acts when the form actually submitted a
+     * `tags` field, so unrelated saves never wipe existing tags. Find-or-create
+     * + sync lives in TagRepository (the observer only delegates).
+     */
+    private function syncTags($post)
+    {
+        if (! $this->request->has('tags')) {
+            return;
+        }
+
+        $names = $this->request->input('tags');
+
+        if (is_string($names)) {
+            $names = $names === '' ? [] : explode(',', $names);
+        }
+
+        app(TagRepository::class)->syncToPost($post, is_array($names) ? $names : []);
     }
 }

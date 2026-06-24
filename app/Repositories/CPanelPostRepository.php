@@ -23,10 +23,11 @@ class CPanelPostRepository extends BaseRepository
 
     protected $translated_table_join_column = 'post_id';
 
-    // `category` is a validated input but not a posts/post_translations column;
-    // the PostObserver reads it off the request to sync the category_post
-    // pivot, so it must never reach Post::create()/update() mass assignment.
-    protected $non_persisted_fields = ['category'];
+    // `category`/`tags` are validated inputs but not posts/post_translations
+    // columns; the PostObserver reads them off the request to sync the
+    // category_post / post_tag pivots, so they must never reach
+    // Post::create()/update() mass assignment.
+    protected $non_persisted_fields = ['category', 'tags'];
 
     protected $select_fields = [
         'id',
