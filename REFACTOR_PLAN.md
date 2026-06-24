@@ -202,6 +202,44 @@ fix → commit.
 
 ---
 
+## 1c. HARD RULE — services never touch the ORM; side effects via observers
+
+The prompt mandates: the **service layer accesses data only through repositories**
+(no `Model::`, `new Model()`, `->fill/->save/->update/->delete` on Eloquent, no query
+builder, no `DB::`, no raw SQL in services). Side effects of writes (notifications, cache
+invalidation, audit, reindex) are **not** invoked inline — the service emits a **domain
+event** and **listeners/observers** handle the effect. Strict chain:
+**controller → service → repository → model**, plus **service → event → listener/observer**.
+
+This was applied to every service: auth (`SocialAuthService`/`UserRegistrationService` →
+`UserRepository::findOrLinkSocialIdentity/createFromSocial/createFromRegistration/
+setPlainPassword`), settings (`Seo/GeoSettingsService::save` → repo `saveSingleton`),
+dashboard (`CPanelDashboardService` → `CPanel{Post,User,Comment}Repository` read methods),
+and the front `SeoFeedService` (raw sitemap/llms joins → `*Repository::sitemapEntries/
+llmsEntries`). Verified: `grep` shows zero ORM access in any service body; adversarial
+skeptics confirmed the layering is clean.
+
+### Event classification policy (required by the rule)
+
+Every domain event is classified **synchronous** (must run in the same DB transaction —
+atomic with the write) or **asynchronous** (fire-and-forget via the queue). Atomic effects
+run as in-transaction synchronous listeners, never detached queued jobs. Current/planned
+events:
+
+| Event | Effect (listener/observer) | Classification | Rationale |
+|---|---|---|---|
+| `CommentSubmitted` (planned, parity §18) | email post author + moderators | **async** (queued) | email is fire-and-forget; must not block or roll back the comment write |
+| Content published/updated | cache invalidation | **sync** (in-transaction) | cached reads must be consistent with the committed write. Today handled by `genealabs/laravel-model-caching` auto-flush on save (Observer-equivalent); when moved to explicit events, keep synchronous |
+| `PostLiked` (existing like toggle) | like-count consistency | **sync** | the count must be atomic with the like row; currently inside the repo write |
+| Audit log (future) | append audit record | **async** | non-critical trail; queue acceptable |
+
+No side effect is currently fired inline from a service. When the comment-notification
+feature lands (parity P5), it must be an async queued listener on `CommentSubmitted`, not a
+`Mail::send` inside `CommentService`. (`ContactService::send` is exempt: the contact form's
+mail *is* the primary user action, not a side effect of a DB write.)
+
+---
+
 ## 6. Status log
 
 - 2026-06-24: Audit complete; baseline 170 green; plan written.
@@ -209,4 +247,19 @@ fix → commit.
   latent double-hash bug (register + password reset). Suite 182 green.
 - 2026-06-24: Slice B (Pint + Larastan level5/baseline + composer scripts) done; analyse green.
 - 2026-06-24: Prompt updated with the ZERO-logic-in-controllers hard rule; full controller
-  audit added above. Next: Slice C1 (BaseCrudService + CPanelBaseController).
+  audit added above.
+- 2026-06-24: Slice C DONE. Introduced `BaseCrudService` + `App\Services\CPanel\*` +
+  `App\Services\Front\*`; refactored **every** controller (admin + front) to a pure HTTP
+  boundary. No controller touches a repository (`grep $this->repository` in controllers =
+  none). Suite 182 green; PHPStan level-5 green (baseline 91→86).
+- 2026-06-24: Prompt updated with the services-only-through-repositories + events/observers
+  hard rule. Moved all remaining ORM access out of services into repository methods
+  (auth/settings/dashboard/seo-feed). `grep` shows zero ORM in service bodies. Added the
+  event sync/async classification policy (§1c).
+- 2026-06-24: Adversarial verification of the whole service layer (3 skeptics: layering /
+  behavior / security+perf). Verdict: layering clean, behavior preserved, no security/perf
+  regression. One finding fixed — `ResetPasswordController` model mutation moved to
+  `UserRepository::setPlainPassword`. Suite 182 green; PHPStan green.
+- **Architecture refactor (Task 2) COMPLETE and verified.** Remaining work (see HANDOFF.md):
+  feature-parity gaps (§2 P1–P9), the comment-notification event (P5, the first real
+  event/observer), UI redesign to DESIGN_SYSTEM, coverage→80%/CI, README rewrite.
