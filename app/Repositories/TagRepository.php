@@ -67,7 +67,9 @@ class TagRepository extends BaseRepository
      */
     public function findOrCreateByName(string $name): Tag
     {
-        $locale = app()->getLocale();
+        // Use the same locale source as the read paths (postsForTag /
+        // getTranslatedBy) so a tag is written and resolved under one locale.
+        $locale = get_current_lang();
         $slug = Str::slug($name);
 
         $existing = $this->model->whereTranslation('slug', $slug, $locale)->first()
