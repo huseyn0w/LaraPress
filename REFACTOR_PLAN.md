@@ -260,6 +260,9 @@ mail *is* the primary user action, not a side effect of a DB write.)
   behavior / security+perf). Verdict: layering clean, behavior preserved, no security/perf
   regression. One finding fixed — `ResetPasswordController` model mutation moved to
   `UserRepository::setPlainPassword`. Suite 182 green; PHPStan green.
-- **Architecture refactor (Task 2) COMPLETE and verified.** Remaining work (see HANDOFF.md):
-  feature-parity gaps (§2 P1–P9), the comment-notification event (P5, the first real
-  event/observer), UI redesign to DESIGN_SYSTEM, coverage→80%/CI, README rewrite.
+- **Architecture refactor (Task 2) COMPLETE and verified.**
+- 2026-06-24: Parity P5 + §3 DONE. Comment-notification via `CommentSubmitted` event →
+  queued `SendCommentNotification` listener → `CommentSubmittedMail` (the first real
+  event/observer, async per §1c). Adversarial review surfaced a missing submit rate limit;
+  added `throttle:8,1` + `max:5000` (closes parity §3 "Submit rate limiting"). Suite 186 green.
+  Remaining (see HANDOFF.md): parity P1–P4/P6–P9, UI redesign, coverage→80%/CI, README.

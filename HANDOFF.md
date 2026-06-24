@@ -2,6 +2,10 @@
 
 > Living handoff for the canon-convergence effort. Read this + `REFACTOR_PLAN.md` +
 > `../FEATURE_MATRIX.md` + `../DESIGN_SYSTEM.md` before continuing. Last updated 2026-06-24.
+>
+> **Latest:** suite **186 green**; architecture refactor complete; comment-notification
+> feature (event + queued listener) + comment submit rate-limiting (parity §3) DONE &
+> adversarially verified. Resume at PENDING item 1 (Tags taxonomy).
 
 ## Where things stand
 
@@ -59,12 +63,12 @@ Service -> Event -> Listener/Observer   (for side effects of writes)
 > skeptics → fix → commit → refresh this file. Keep services repo-only and side effects in
 > events/observers (with sync/async classification in `REFACTOR_PLAN.md`).
 
-1. **Comment-notification email (parity §18, FEATURE_MATRIX) — do FIRST.** It is the first
-   real event/observer and exercises the §1c policy: emit `CommentSubmitted` from
-   `CommentService`/`CPanelCommentService` write path; an **async (queued)** listener mails
-   the post author + moderators. Wire `app/Providers/EventServiceProvider.php`. Tests with
-   `Event::fake()` / `Mail::fake()`.
-2. **Tags taxonomy** (P1): mirror `Category` (model/repo/observer/service); `tags` +
+> DONE since last handoff: **comment-notification** (`App\Events\CommentSubmitted` →
+> queued `App\Listeners\SendCommentNotification` → `CommentSubmittedMail`, emitted from
+> `CommentService::create`) AND **comment submit rate-limiting** (`throttle:8,1` on the
+> comment write routes + `max:5000` body cap) — closes parity §18 and §3. 4 tests added.
+
+1. **Tags taxonomy** (P1): mirror `Category` (model/repo/observer/service); `tags` +
    `post_tag` (+ translations) migrations; admin CRUD + public archive; search includes tags.
 3. **Revisions + restore UI** (P2, net-new for all stacks): immutable snapshot before
    post/page update (in the repository write, or a `Revisioned` observer); dashboard diff +
@@ -166,5 +170,6 @@ Operating rules (unchanged):
   <noreply@anthropic.com>). When context drops below ~50%, refresh HANDOFF.md (incl. this
   continuation prompt) and tell me in Russian to open a new window.
 
-Start with PENDING item 1 (comment-notification email — the first real event/observer).
+Start with PENDING item 1 (Tags taxonomy). Comment-notification + comment rate-limiting are
+already DONE (parity §18 + §3).
 ```
