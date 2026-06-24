@@ -107,6 +107,12 @@ class SocialAuthService
         });
     }
 
+    /**
+     * Derive a username from the local part of the email. For a normal address
+     * this matches the original controller exactly; a malformed `@`-less value
+     * (which never passes the email validation in validateNew) returns the whole
+     * string rather than the original's empty string — a harmless hardening.
+     */
     private function usernameFromEmail(string $email): string
     {
         $position = strpos($email, '@');

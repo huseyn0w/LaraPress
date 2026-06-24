@@ -36,4 +36,21 @@ class ResetPasswordController extends Controller
     {
         $this->middleware('guest');
     }
+
+    /**
+     * Assign the new password to the user.
+     *
+     * The default trait implementation calls Hash::make() here, but User's
+     * setPasswordAttribute mutator already hashes on assignment. Passing the
+     * plaintext through keeps a single hashing path and avoids double-hashing
+     * (which would silently break login after a reset).
+     *
+     * @param  \App\Http\Models\User  $user
+     * @param  string  $password
+     * @return void
+     */
+    protected function setUserPassword($user, $password)
+    {
+        $user->password = $password;
+    }
 }
