@@ -36,7 +36,7 @@
                     <tbody>
                     @forelse($revisions as $revision)
                         <tr>
-                            <td class="font-medium text-ink-900">v{{ $revisions->count() - $loop->index }}</td>
+                            <td class="font-medium text-ink-900">v{{ $revisions->total() - ($revisions->firstItem() - 1) - $loop->index }}</td>
                             <td class="text-ink-700">{{ optional($revision->author)->username ?? __('cpanel/revisions.unknown_author') }}</td>
                             <td class="whitespace-nowrap text-ink-600">{{ \Carbon\Carbon::parse($revision->created_at)->format('d.m.Y H:i') }}</td>
                             <td>
@@ -57,6 +57,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($revisions->hasPages())
+                <div class="border-t border-ink-100 px-5 py-4">
+                    {{ $revisions->links() }}
+                </div>
+            @endif
         </div>
     </div>
 @endsection

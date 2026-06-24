@@ -103,6 +103,12 @@ class CPanelPostController extends CPanelBaseController
 
     public function revisions($id, $lang)
     {
+        // A trashed post is not editable (getById excludes soft-deleted), so its
+        // revision history must be unreachable too — stay consistent with editPost.
+        if (is_null($this->service->getById((int) $id))) {
+            abort(404);
+        }
+
         $data = $this->service->revisionsFor((int) $id, $lang);
 
         return view('cpanel.revisions.list', [
@@ -118,6 +124,10 @@ class CPanelPostController extends CPanelBaseController
 
     public function revisionDiff($id, $revision, $lang)
     {
+        if (is_null($this->service->getById((int) $id))) {
+            abort(404);
+        }
+
         $data = $this->service->revisionDiff((int) $id, $lang, (int) $revision);
 
         if (is_null($data)) {
@@ -137,6 +147,10 @@ class CPanelPostController extends CPanelBaseController
 
     public function restoreRevision($id, $revision, $lang)
     {
+        if (is_null($this->service->getById((int) $id))) {
+            abort(404);
+        }
+
         $restored = $this->service->restoreRevision((int) $id, $lang, (int) $revision);
 
         if (! $restored) {

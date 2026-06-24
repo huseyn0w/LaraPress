@@ -4,8 +4,9 @@ namespace App\Services\Concerns;
 
 use App\Http\Models\Revision;
 use App\Repositories\RevisionRepository;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
+use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 
 /**
  * Revision listing / diff / restore for translatable content services
@@ -24,14 +25,14 @@ trait ManagesRevisions
      * revision-history screen. `current` is null when the entity/locale has no
      * translation.
      *
-     * @return array{current: ?Model, revisions: Collection}
+     * @return array{current: ?Model, revisions: LengthAwarePaginator}
      */
     public function revisionsFor(int $id, string $locale): array
     {
         $translation = $this->repository->translationFor($id, $locale);
 
         if (! $translation) {
-            return ['current' => null, 'revisions' => collect()];
+            return ['current' => null, 'revisions' => new Paginator([], 0, 25)];
         }
 
         return [

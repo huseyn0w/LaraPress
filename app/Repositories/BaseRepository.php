@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 abstract class BaseRepository implements BaseRepositoryInterface
@@ -341,7 +342,9 @@ abstract class BaseRepository implements BaseRepositoryInterface
                 return throwNotFound();
             }
 
-            if ($instance->update($data)) {
+            // Atomic with any write-side effects fired by the model's observers
+            // (e.g. the pre-update revision snapshot): commit or roll back as one.
+            if (DB::transaction(fn () => $instance->update($data))) {
                 $result = true;
             }
 

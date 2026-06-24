@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Http\Models\Revision;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Persistence for content revisions. All ORM access for revisions lives here so
@@ -16,14 +18,17 @@ class RevisionRepository extends BaseRepository
     protected $eager_relations = [];
 
     /**
-     * Volatile attributes never restored back onto a live row — they identify
-     * the row (id/join column/locale) or are independent counters (likes), not
-     * the editorial content a revision is meant to capture.
+     * Editorial fields a restore may write back onto the live translation row.
+     * This is an ALLOW-list, not a deny-list: anything else in the snapshot
+     * (identity columns id/post_id/page_id/locale, the `likes` counter, the
+     * `author_id` — never silently reassign authorship — timestamps, or any
+     * stray/forged key) is dropped, so fill() can only touch known content.
      *
      * @var array<int, string>
      */
-    private array $excludedFromRestore = [
-        'id', 'created_at', 'updated_at', 'post_id', 'page_id', 'locale', 'likes',
+    private array $restorableFields = [
+        'title', 'slug', 'content', 'preview', 'template', 'custom_fields',
+        'status', 'meta_description', 'meta_keywords', 'meta_noindex', 'canonical_url',
     ];
 
     public function __construct(Revision $model)
@@ -53,16 +58,18 @@ class RevisionRepository extends BaseRepository
     }
 
     /**
-     * All revisions for a translation row, newest first, with the editor loaded.
+     * Paginated revisions for a translation row, newest first, editor eager-
+     * loaded. Paginated so a heavily-edited post can't load its entire (full-row
+     * JSON) history into one page.
      */
-    public function listFor(string $type, int $id)
+    public function listFor(string $type, int $id, int $perPage = 25)
     {
         return $this->model
             ->where('revisionable_type', $type)
             ->where('revisionable_id', $id)
             ->with('author')
             ->orderByDesc('id')
-            ->get();
+            ->paginate($perPage);
     }
 
     /**
@@ -87,7 +94,7 @@ class RevisionRepository extends BaseRepository
     public function restorableData(Revision $revision): array
     {
         return collect($revision->data)
-            ->except($this->excludedFromRestore)
+            ->only($this->restorableFields)
             ->all();
     }
 
@@ -134,6 +141,13 @@ class RevisionRepository extends BaseRepository
 
         $translation->fill($this->restorableData($revision));
 
-        return (bool) $translation->save();
+        try {
+            // Atomic: the pre-restore snapshot (taken by the updating observer)
+            // and the row update commit together, so a failed restore — e.g. a
+            // unique(locale,title,slug) collision — leaves no orphaned revision.
+            return (bool) DB::transaction(fn () => $translation->save());
+        } catch (QueryException $e) {
+            return false;
+        }
     }
 }

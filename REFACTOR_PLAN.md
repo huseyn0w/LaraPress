@@ -229,6 +229,7 @@ events:
 | Event | Effect (listener/observer) | Classification | Rationale |
 |---|---|---|---|
 | `CommentSubmitted` (planned, parity §18) | email post author + moderators | **async** (queued) | email is fire-and-forget; must not block or roll back the comment write |
+| Content updated (Post/PageTranslation `updating`) | snapshot the prior translation into `revisions` | **sync** (in-transaction) | the snapshot must be atomic with the update — `BaseRepository::update` / `RevisionRepository::restoreFrom` wrap the save in `DB::transaction`, so a failed write leaves no orphaned revision |
 | Content published/updated | cache invalidation | **sync** (in-transaction) | cached reads must be consistent with the committed write. Today handled by `genealabs/laravel-model-caching` auto-flush on save (Observer-equivalent); when moved to explicit events, keep synchronous |
 | `PostLiked` (existing like toggle) | like-count consistency | **sync** | the count must be atomic with the like row; currently inside the repo write |
 | Audit log (future) | append audit record | **async** | non-critical trail; queue acceptable |
@@ -266,3 +267,18 @@ mail *is* the primary user action, not a side effect of a DB write.)
   event/observer, async per §1c). Adversarial review surfaced a missing submit rate limit;
   added `throttle:8,1` + `max:5000` (closes parity §3 "Submit rate limiting"). Suite 186 green.
   Remaining (see HANDOFF.md): parity P1–P4/P6–P9, UI redesign, coverage→80%/CI, README.
+- 2026-06-24: Parity P1 (Tags taxonomy) DONE end-to-end (see HANDOFF.md). Suite 196 green.
+- 2026-06-25: Parity **Revisions + restore UI** DONE (FEATURE_MATRIX §1, net-new for all
+  stacks). Immutable pre-update snapshot of the Post/PageTranslation row via the translation
+  `updating` observer → `RevisionRepository` (polymorphic `revisions` table). Admin history
+  list (paginated) + per-field diff + scoped restore for posts and pages; restore is itself
+  revisioned (undoable). Snapshot/restore are sync/in-transaction (§1c row added). 3 adversarial
+  skeptics (correctness / security / architecture-perf) run; fixes applied: (1) restore uses an
+  ALLOW-list of editorial fields — never reassigns `author_id`, drops stray keys, and guards the
+  unique(locale,title,slug) collision (no 500); (2) update + restore wrapped in `DB::transaction`
+  (no orphaned revisions); (3) revision routes 404 for trashed posts (consistent with editPost);
+  (4) `listFor` paginated (no unbounded full-row JSON load); plus added authz + compare-IDOR +
+  authorship + collision + trashed regression tests. Suite **211 green**, Pint + PHPStan clean.
+  Known v1 limitations (tracked, acceptable): `revisions.data` stores the full translation row as
+  JSON per edit (no pruning/dedup — revisit if storage grows); `revisionable_type` stores the FQCN
+  (no morph map). Remaining: parity P3/P4/P6–P9, UI redesign, coverage→80%/CI, README.

@@ -6,6 +6,7 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Models\PostTranslation;
 use App\Http\Models\Revision;
 use App\Http\Models\User;
+use App\Http\Models\UserRoles;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -111,6 +112,81 @@ class PostRevisionTest extends TestCase
         $this->assertStringContainsString('edited body', Revision::orderByDesc('id')->firstOrFail()->data['content']);
     }
 
+    public function test_restore_reverts_content_but_not_authorship(): void
+    {
+        $other = User::factory()->create(['role_id' => 1]);
+
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $translation = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
+
+        // Edit reassigns the author and changes content (snapshots the original,
+        // authored by admin).
+        $this->actingAs($this->admin)->put('/cmstack-laravel-admin/posts/'.$translation->post_id.'/update', $this->postPayload([
+            'author_id' => $other->id, 'content' => 'edited body',
+        ]));
+        $revision = Revision::firstOrFail();
+        $this->assertSame($this->admin->id, (int) $revision->data['author_id']);
+
+        $this->actingAs($this->admin)->post(
+            '/cmstack-laravel-admin/posts/'.$translation->post_id.'/revisions/'.$revision->id.'/restore/en'
+        )->assertRedirect();
+
+        $fresh = PostTranslation::findOrFail($translation->id);
+        // Editorial content reverts...
+        $this->assertStringContainsString('original body', $fresh->content);
+        // ...but authorship is NOT silently reverted (anti-spoof: restore must
+        // not reassign author_id from an old snapshot).
+        $this->assertSame($other->id, (int) $fresh->author_id);
+    }
+
+    public function test_restore_with_conflicting_slug_does_not_500(): void
+    {
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $a = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
+
+        // Rename A (snapshots its original title/slug), freeing the old slug.
+        $this->actingAs($this->admin)->put('/cmstack-laravel-admin/posts/'.$a->post_id.'/update', $this->postPayload([
+            'title' => 'Renamed Post', 'slug' => 'renamed-post', 'content' => 'edited body',
+        ]));
+        $revision = Revision::firstOrFail();
+
+        // B now takes A's original title/slug.
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload([
+            'content' => 'b body',
+        ]));
+
+        // Restoring A's revision would collide on unique(locale,title,slug).
+        $response = $this->actingAs($this->admin)->post(
+            '/cmstack-laravel-admin/posts/'.$a->post_id.'/revisions/'.$revision->id.'/restore/en'
+        );
+
+        $this->assertNotSame(500, $response->status(), 'Restore must fail gracefully, not 500.');
+    }
+
+    public function test_revisions_are_unreachable_for_a_trashed_post(): void
+    {
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $translation = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
+        $this->actingAs($this->admin)->delete('/cmstack-laravel-admin/posts/'.$translation->post_id.'/delete');
+
+        $this->actingAs($this->admin)
+            ->get('/cmstack-laravel-admin/posts/'.$translation->post_id.'/revisions/en')
+            ->assertNotFound();
+    }
+
+    public function test_user_without_post_permission_cannot_access_revisions(): void
+    {
+        $role = UserRoles::create([
+            'name' => 'PanelNoPosts',
+            'permissions' => json_encode(['see_admin_panel' => 1, 'manage_posts' => 0]),
+        ]);
+        $user = User::factory()->create(['role_id' => $role->id]);
+
+        $this->actingAs($user)
+            ->get('/cmstack-laravel-admin/posts/1/revisions/en')
+            ->assertStatus(401);
+    }
+
     public function test_revisions_list_page_renders(): void
     {
         $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
@@ -159,5 +235,23 @@ class PostRevisionTest extends TestCase
 
         $freshB = PostTranslation::findOrFail($b->id);
         $this->assertStringContainsString('b untouched body', $freshB->content, 'B must be untouched.');
+    }
+
+    public function test_cannot_compare_a_revision_belonging_to_another_post(): void
+    {
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $a = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
+        $this->actingAs($this->admin)->put('/cmstack-laravel-admin/posts/'.$a->post_id.'/update', $this->postPayload(['content' => 'a edited']));
+        $revisionOfA = Revision::firstOrFail();
+
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload([
+            'title' => 'Second Post', 'slug' => 'second-post',
+        ]));
+        $b = PostTranslation::where('slug', 'second-post')->firstOrFail();
+
+        // The compare endpoint must be scoped like restore (no cross-post leak).
+        $this->actingAs($this->admin)
+            ->get('/cmstack-laravel-admin/posts/'.$b->post_id.'/revisions/'.$revisionOfA->id.'/compare/en')
+            ->assertNotFound();
     }
 }
