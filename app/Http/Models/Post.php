@@ -50,6 +50,11 @@ class Post extends Model implements TranslatableContract
         return $this->belongsToMany(Category::class, 'category_post');
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'post_tag');
+    }
+
     public function likes()
     {
         return $this->belongsTo(Likes::class);
