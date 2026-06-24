@@ -88,6 +88,8 @@ Route::prefix('cmstack-laravel-admin')->middleware(['auth', 'see_admin_panel'])-
         Route::get('/', 'CPanelPageController@index')->name('cpanel_pages_list');
         Route::get('/{id}/{lang}', 'CPanelPageController@editPage')->name('cpanel_edit_page')->where('id', '[0-9]+');
         Route::put('/{id}/update', 'CPanelPageController@updatePage')->name('cpanel_update_page')->where('id', '[0-9]+');
+        Route::get('/{id}/revisions/{lang}', 'CPanelPageController@revisions')->name('cpanel_page_revisions')->where('id', '[0-9]+');
+        Route::get('/{id}/revisions/{revision}/compare/{lang}', 'CPanelPageController@revisionDiff')->name('cpanel_page_revision_diff')->where(['id' => '[0-9]+', 'revision' => '[0-9]+']);
         Route::post('/{id}/revisions/{revision}/restore/{lang}', 'CPanelPageController@restoreRevision')->name('cpanel_restore_page_revision')->where(['id' => '[0-9]+', 'revision' => '[0-9]+']);
         Route::delete('/multipleDelete', 'CPanelPageController@multipleDelete')->name('cpanel_pages_bulk_delete');
         Route::delete('/{id}/delete', 'CPanelPageController@deleteAjax')->name('cpanel_ajax_soft_delete_page')->where('id', '[0-9]+');
@@ -110,6 +112,8 @@ Route::prefix('cmstack-laravel-admin')->middleware(['auth', 'see_admin_panel'])-
         Route::get('/trashed', 'CPanelPostController@trashedPosts')->name('cpanel_trashed_posts_list');
         Route::get('/{id}/{lang}', 'CPanelPostController@editPost')->name('cpanel_edit_post')->where('id', '[0-9]+');
         Route::put('/{id}/update', 'CPanelPostController@updatePost')->name('cpanel_update_post')->where('id', '[0-9]+');
+        Route::get('/{id}/revisions/{lang}', 'CPanelPostController@revisions')->name('cpanel_post_revisions')->where('id', '[0-9]+');
+        Route::get('/{id}/revisions/{revision}/compare/{lang}', 'CPanelPostController@revisionDiff')->name('cpanel_post_revision_diff')->where(['id' => '[0-9]+', 'revision' => '[0-9]+']);
         Route::post('/{id}/revisions/{revision}/restore/{lang}', 'CPanelPostController@restoreRevision')->name('cpanel_restore_post_revision')->where(['id' => '[0-9]+', 'revision' => '[0-9]+']);
         Route::get('/{id}/restore', 'CPanelPostController@restore')->name('cpanel_restore_post')->where('id', '[0-9]+');
         Route::delete('/{id}/destroy', 'CPanelPostController@destroyAjax')->name('cpanel_destroy_post')->where('id', '[0-9]+');

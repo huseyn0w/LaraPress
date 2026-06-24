@@ -111,6 +111,33 @@ class PostRevisionTest extends TestCase
         $this->assertStringContainsString('edited body', Revision::orderByDesc('id')->firstOrFail()->data['content']);
     }
 
+    public function test_revisions_list_page_renders(): void
+    {
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $translation = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
+        $this->actingAs($this->admin)->put('/cmstack-laravel-admin/posts/'.$translation->post_id.'/update', $this->postPayload(['content' => 'edited body']));
+
+        $this->actingAs($this->admin)
+            ->get('/cmstack-laravel-admin/posts/'.$translation->post_id.'/revisions/en')
+            ->assertOk()
+            ->assertSee('v1')
+            ->assertSee($this->admin->username);
+    }
+
+    public function test_revision_diff_page_renders_and_marks_changes(): void
+    {
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $translation = PostTranslation::where('slug', 'round-trip-post')->firstOrFail();
+        $this->actingAs($this->admin)->put('/cmstack-laravel-admin/posts/'.$translation->post_id.'/update', $this->postPayload(['content' => 'edited body']));
+        $revision = Revision::firstOrFail();
+
+        $this->actingAs($this->admin)
+            ->get('/cmstack-laravel-admin/posts/'.$translation->post_id.'/revisions/'.$revision->id.'/compare/en')
+            ->assertOk()
+            ->assertSee('original body')
+            ->assertSee('edited body');
+    }
+
     public function test_cannot_restore_a_revision_belonging_to_another_post(): void
     {
         // Post A with one revision.

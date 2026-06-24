@@ -19,15 +19,21 @@
     @endphp
 
     <div class="mx-auto max-w-6xl">
-        <div class="mb-6">
-            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/pages.edit_page_headline')</h1>
-            <p class="mt-1 text-sm text-ink-500">
-                @lang('cpanel/pages.url_preview')
-                <a href="{{env('APP_URL')}}/{{ old('slug',$page_slug) }}" class="font-medium text-brand-700 hover:text-brand-800">{{env('APP_URL')}}/{{ old('slug',$page_slug) }}</a>
-            </p>
+        <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/pages.edit_page_headline')</h1>
+                <p class="mt-1 text-sm text-ink-500">
+                    @lang('cpanel/pages.url_preview')
+                    <a href="{{env('APP_URL')}}/{{ old('slug',$page_slug) }}" class="font-medium text-brand-700 hover:text-brand-800">{{env('APP_URL')}}/{{ old('slug',$page_slug) }}</a>
+                </p>
+            </div>
+            <a href="{{ route('cpanel_page_revisions', ['id' => $entity->id, 'lang' => get_current_lang()]) }}" class="btn btn-ghost">@lang('cpanel/revisions.revisions_link')</a>
         </div>
 
         @include('cpanel.core.flash')
+        @if (Session::get('revision_restored'))
+            <div class="alert alert-success"><strong>@lang('cpanel/revisions.restored_success')</strong></div>
+        @endif
         @if (($update_message = Session::get('message')) !== null)
             <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/pages.updated_success') : __('cpanel/pages.updated_error') }}</strong></div>
         @endif

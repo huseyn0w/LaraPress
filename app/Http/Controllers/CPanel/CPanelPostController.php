@@ -101,6 +101,40 @@ class CPanelPostController extends CPanelBaseController
         return parent::update($id, $request);
     }
 
+    public function revisions($id, $lang)
+    {
+        $data = $this->service->revisionsFor((int) $id, $lang);
+
+        return view('cpanel.revisions.list', [
+            'entity_id' => (int) $id,
+            'lang' => $lang,
+            'current' => $data['current'],
+            'revisions' => $data['revisions'],
+            'edit_route' => 'cpanel_edit_post',
+            'diff_route' => 'cpanel_post_revision_diff',
+            'restore_route' => 'cpanel_restore_post_revision',
+        ]);
+    }
+
+    public function revisionDiff($id, $revision, $lang)
+    {
+        $data = $this->service->revisionDiff((int) $id, $lang, (int) $revision);
+
+        if (is_null($data)) {
+            abort(404);
+        }
+
+        return view('cpanel.revisions.diff', [
+            'entity_id' => (int) $id,
+            'lang' => $lang,
+            'current' => $data['current'],
+            'revision' => $data['revision'],
+            'fields' => $data['fields'],
+            'list_route' => 'cpanel_post_revisions',
+            'restore_route' => 'cpanel_restore_post_revision',
+        ]);
+    }
+
     public function restoreRevision($id, $revision, $lang)
     {
         $restored = $this->service->restoreRevision((int) $id, $lang, (int) $revision);

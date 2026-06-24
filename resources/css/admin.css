@@ -327,6 +327,9 @@
     .theme-admin .badge-muted {
         @apply bg-ink-100 text-ink-600;
     }
+    .theme-admin .badge-warning {
+        @apply bg-amber-50 text-amber-700;
+    }
 
     /* ---------------------------------------------------------------------
      | Bootstrap-style modal replacement (driven by resources/js/admin.js).
