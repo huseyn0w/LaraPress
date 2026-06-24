@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'LaraPress'),
+    'name' => env('APP_NAME', 'Cmstack-Laravel'),
 
     /*
     |--------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: seo-settings.blade.php
  * Phase 7 (SEO/GEO): global SEO settings admin page.
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: BaseRepository.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 25.07.2019

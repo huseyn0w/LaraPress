@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: menus_list.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 04.09.2019

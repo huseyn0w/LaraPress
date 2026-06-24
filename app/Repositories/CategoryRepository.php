@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: PageRepository.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 24.10.2019

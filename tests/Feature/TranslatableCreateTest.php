@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Regression guard for the Laravel 11 / Symfony 7 upgrade: LaraPressRequest used
+ * Regression guard for the Laravel 11 / Symfony 7 upgrade: CmstackLaravelRequest used
  * to redeclare `protected $locale`, which fatally collides with Symfony's typed
  * `?string $locale`, breaking EVERY translatable create/update form (categories,
  * posts, pages, menus). This exercises the shared path end-to-end.
@@ -24,7 +24,7 @@ class TranslatableCreateTest extends TestCase
         $this->seed(DatabaseSeeder::class);
         $admin = User::where('username', 'admin')->firstOrFail();
 
-        $response = $this->actingAs($admin)->post('/larapress-admin/categories/new', [
+        $response = $this->actingAs($admin)->post('/cmstack-laravel-admin/categories/new', [
             'title'            => 'QA Category',
             'slug'             => 'qa-category',
             'description'      => 'desc',

@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: left-nav.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 21.07.2019
@@ -36,7 +36,7 @@ $settingsActive = in_array($current_route, ['cpanel_general_settings', 'cpanel_s
     {{-- Brand --}}
     <div class="flex h-16 shrink-0 items-center gap-2.5 border-b border-ink-800/60 px-5">
         <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-sm font-bold text-white">L</span>
-        <span class="text-sm font-semibold tracking-tight text-white">LaraPress CMS</span>
+        <span class="text-sm font-semibold tracking-tight text-white">Cmstack-Laravel</span>
     </div>
 
     @php

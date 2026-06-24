@@ -19,7 +19,7 @@ class CPanelPagesSeeder extends Seeder
             'en' => array (
                 'headline' =>
                     array (
-                        'value' => 'LaraPress CMS',
+                        'value' => 'Cmstack-Laravel',
                         'type' => 'text',
                         'admin_label' => 'Headline',
                     ),
@@ -61,7 +61,7 @@ class CPanelPagesSeeder extends Seeder
                     ),
                 'about-big-text' =>
                     array (
-                        'value' => '<p><strong>Elman Hüseynov</strong> - Full Stack Web Developer with more than 3 years of experience at freelance/office/remote jobs, completed more than 50 of projects and websites from scratch, currently Remote Full Stack Wordpress Developer - located in Baku / Azerbaijan.</p>',
+                        'value' => '<p><strong>Elman Hüseynov</strong> - Full Stack Web Developer with more than 3 years of experience at freelance/office/remote jobs, completed more than 50 of projects and websites from scratch, currently Remote Full Stack Web Developer - located in Baku / Azerbaijan.</p>',
                         'type' => 'textarea',
                         'admin_label' => 'About Full Description',
                     ),
@@ -87,7 +87,7 @@ class CPanelPagesSeeder extends Seeder
                                             ),
                                         'author-position' =>
                                             array (
-                                                'value' => 'LaraPress CMS Author',
+                                                'value' => 'Cmstack-Laravel Author',
                                                 'type' => 'text',
                                                 'admin_label' => 'Author Position',
                                             ),
@@ -110,7 +110,7 @@ class CPanelPagesSeeder extends Seeder
             'ru' => array (
                 'headline' =>
                     array (
-                        'value' => 'LaraPress CMS',
+                        'value' => 'Cmstack-Laravel',
                         'type' => 'text',
                         'admin_label' => 'Заголовок',
                     ),
@@ -178,7 +178,7 @@ class CPanelPagesSeeder extends Seeder
                                             ),
                                         'author-position' =>
                                             array (
-                                                'value' => 'Создатель LaraPress CMS',
+                                                'value' => 'Создатель Cmstack-Laravel',
                                                 'type' => 'text',
                                                 'admin_label' => 'Должность',
                                             ),
@@ -214,7 +214,7 @@ class CPanelPagesSeeder extends Seeder
                 'author_id' => 1,
                 'status' => 1,
                 'meta_keywords' => 'page, homepage',
-                'meta_description' => 'This is homepage of CMS LaraPress',
+                'meta_description' => 'This is homepage of CMS Cmstack-Laravel',
                 'custom_fields' => json_encode($home_page_custom_fields['en']),
                 'template' => 'home',
                 'created_at' => Carbon::now(),
@@ -228,7 +228,7 @@ class CPanelPagesSeeder extends Seeder
                 'author_id' => 1,
                 'status' => 1,
                 'meta_keywords' => 'страница, главная',
-                'meta_description' => 'Это главная страница CMS LaraPress',
+                'meta_description' => 'Это главная страница CMS Cmstack-Laravel',
                 'custom_fields' => json_encode($home_page_custom_fields['ru']),
                 'template' => 'home',
                 'created_at' => Carbon::now(),

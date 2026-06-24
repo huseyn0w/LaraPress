@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: category.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 01.11.2019

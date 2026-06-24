@@ -27,7 +27,7 @@ class UsersTableSeeder extends Seeder
                     'role_id' => 1,
                     'gender'  => "male",
                     'avatar'  => env('APP_URL').'/filemanager/images/5dbb536d16ce8.jpg',
-                    'about_me' => "Founder of CMS LaraPress",
+                    'about_me' => "Founder of CMS Cmstack-Laravel",
                     'linkedin_url' => "https://linkedin.com/in/huseyn0w",
                     'password' => bcrypt('elman123'),
                 ],
@@ -41,9 +41,9 @@ class UsersTableSeeder extends Seeder
                     'role_id' => 1,
                     'gender'  => "male",
                     'avatar'  => '',
-                    'about_me' => "ADMIN of CMS LaraPress",
+                    'about_me' => "ADMIN of CMS Cmstack-Laravel",
                     'linkedin_url' => "",
-                    'password' => bcrypt('larapressadmin123'),
+                    'password' => bcrypt('cmstackadmin123'),
                 ]
             ]
         );

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 
 
-class MenuRequest extends LaraPressRequest
+class MenuRequest extends CmstackLaravelRequest
 {
     protected $table = 'menu_translations';
 

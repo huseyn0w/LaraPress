@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Http\Models\PostTranslation;
 
-class PostTranslationObserver extends LaraPressObserver
+class PostTranslationObserver extends CmstackLaravelObserver
 {
 
     /**

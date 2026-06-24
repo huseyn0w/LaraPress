@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: seo.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 25.10.2019

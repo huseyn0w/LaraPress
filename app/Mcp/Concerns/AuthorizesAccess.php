@@ -6,7 +6,7 @@ use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
 
 /**
- * Per-tool authorization for the LaraPress MCP server.
+ * Per-tool authorization for the Cmstack-Laravel MCP server.
  *
  * Authentication (who the caller is) is handled by the OAuth `auth:api`
  * middleware on the route. This trait handles *authorization* (what that

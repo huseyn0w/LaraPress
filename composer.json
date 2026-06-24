@@ -1,7 +1,7 @@
 {
-    "name": "huseyn0w/larapress",
+    "name": "cmstack/laravel",
     "type": "project",
-    "description": "LaraPress — the Laravel version of WordPress.",
+    "description": "Cmstack-Laravel — a modern, open-source CMS built on Laravel.",
     "keywords": [
         "framework",
         "laravel"
@@ -56,7 +56,7 @@
             "Database\\Seeders\\": "database/seeds/"
         },
         "files": [
-            "bootstrap/larapress-helpers.php"
+            "bootstrap/cmstack-laravel-helpers.php"
         ]
     },
     "autoload-dev": {

@@ -1,13 +1,13 @@
 <p align="center">
-<img alt="LaraPress Logo" src="https://raw.githubusercontent.com/huseyn0w/LaraPress-CMS/master/public/front/default/img/readme.png">
+<img alt="Cmstack-Laravel Logo" src="https://raw.githubusercontent.com/huseyn0w/cmstack-laravel/master/public/front/default/img/readme.png">
 </p>
 
-# LaraPress CMS
+# Cmstack-Laravel
 
-**LaraPress — the Laravel version of WordPress.** A modern, multilingual, SEO/GEO-ready
+**Cmstack-Laravel — a modern, open-source CMS built on Laravel.** A multilingual, SEO/GEO-ready
 content management system built on **Laravel 11 / PHP 8.3**, with a Tailwind + Vite
-front-end and a first-class admin panel. It plays the same role as WordPress, DLE or
-Joomla, but on a clean, testable Laravel codebase that developers actually enjoy extending.
+front-end and a first-class admin panel. It plays the same role as a traditional content
+management system, but on a clean, testable Laravel codebase that developers actually enjoy extending.
 
 Built and maintained by **[Elman Group](https://elman.group)**.
 
@@ -35,18 +35,18 @@ Built and maintained by **[Elman Group](https://elman.group)**.
 
 ## Features
 
-* **Full CMS**: pages, posts, categories, menus, comments, media / file manager
-* **Modern responsive UI** (Tailwind CSS 3 + Alpine.js) for both the public site and the admin panel
-* **Built-in SEO/GEO** — Open Graph, Twitter cards, canonical + `hreflang`, JSON-LD structured data, dynamic `sitemap.xml`, `robots.txt`, and `llms.txt`
-* **Multilingual content** via `astrotomic/laravel-translatable` (en/ru out of the box, easily extended)
-* **Social-media authentication** (Facebook, GitHub, LinkedIn, and other Socialite providers)
-* **Users, roles & granular permissions** (custom role/permission middleware — one capability per middleware)
-* **Custom fields** and a **flexible template-switching system**
-* **Website search**
-* **Spam protection** via Google reCAPTCHA v3 (gracefully disabled when no keys are set)
-* **Database / model caching**
-* **AI / MCP connector** — manage the live site from Claude (posts, pages, users, settings, theme) over an authenticated MCP server (see [AI / MCP connector](#ai--mcp-connector-manage-your-site-from-claude))
-* **164 automated tests** (PHPUnit) running on isolated in-memory SQLite
+- **Full CMS**: pages, posts, categories, menus, comments, media / file manager
+- **Modern responsive UI** (Tailwind CSS 3 + Alpine.js) for both the public site and the admin panel
+- **Built-in SEO/GEO** — Open Graph, Twitter cards, canonical + `hreflang`, JSON-LD structured data, dynamic `sitemap.xml`, `robots.txt`, and `llms.txt`
+- **Multilingual content** via `astrotomic/laravel-translatable` (en/ru out of the box, easily extended)
+- **Social-media authentication** (Facebook, GitHub, LinkedIn, and other Socialite providers)
+- **Users, roles & granular permissions** (custom role/permission middleware — one capability per middleware)
+- **Custom fields** and a **flexible template-switching system**
+- **Website search**
+- **Spam protection** via Google reCAPTCHA v3 (gracefully disabled when no keys are set)
+- **Database / model caching**
+- **AI / MCP connector** — manage the live site from Claude (posts, pages, users, settings, theme) over an authenticated MCP server (see [AI / MCP connector](#ai--mcp-connector-manage-your-site-from-claude))
+- **164 automated tests** (PHPUnit) running on isolated in-memory SQLite
 
 ### Why it's easy to extend
 
@@ -56,29 +56,29 @@ Laravel File Manager.
 
 ### Planned
 
-* E-Commerce extension
-* REST API for posts and pages
+- E-Commerce extension
+- REST API for posts and pages
 
 ---
 
 ## Tech stack
 
-* **Laravel 11** (PHP 8.3)
-* **Tailwind CSS 3** + **Alpine.js**, bundled with **Vite** — lightweight front-end, no jQuery/plugin bloat
-* **MySQL 8** with `astrotomic/laravel-translatable` for multilingual content
-* Repository pattern, custom role/permission middleware, model caching
-* Google reCAPTCHA (v3) for spam protection
-* Docker stack for local development (nginx + php-fpm + MySQL 8)
+- **Laravel 11** (PHP 8.3)
+- **Tailwind CSS 3** + **Alpine.js**, bundled with **Vite** — lightweight front-end, no jQuery/plugin bloat
+- **MySQL 8** with `astrotomic/laravel-translatable` for multilingual content
+- Repository pattern, custom role/permission middleware, model caching
+- Google reCAPTCHA (v3) for spam protection
+- Docker stack for local development (nginx + php-fpm + MySQL 8)
 
 ---
 
 ## Requirements
 
-* **PHP 8.2+** (developed and tested on PHP 8.3) with the `imagick` extension
-* **Composer 2**
-* **MySQL 8** — SQLite is used only for the test suite (in-memory)
-* **Node.js 20+** and npm (for the Vite/Tailwind asset build)
-* *(optional)* **Docker + Docker Compose** for the one-command local stack
+- **PHP 8.2+** (developed and tested on PHP 8.3) with the `imagick` extension
+- **Composer 2**
+- **MySQL 8** — SQLite is used only for the test suite (in-memory)
+- **Node.js 20+** and npm (for the Vite/Tailwind asset build)
+- _(optional)_ **Docker + Docker Compose** for the one-command local stack
 
 ---
 
@@ -88,7 +88,7 @@ The fastest path. The Docker stack (nginx + PHP 8.3-FPM with imagick + MySQL 8) 
 **local development convenience** — it is **not** required at runtime in production.
 
 ```bash
-git clone <your-repo-url> larapress && cd larapress
+git clone <your-repo-url> cmstack-laravel && cd cmstack-laravel
 make setup
 ```
 
@@ -104,33 +104,33 @@ make setup
 
 When it finishes:
 
-* **App:** http://localhost:8080
-* **Admin:** http://localhost:8080/larapress-admin (see [credentials](#admin-credentials))
+- **App:** http://localhost:8080
+- **Admin:** http://localhost:8080/cmstack-laravel-admin (see [credentials](#admin-credentials))
 
 ### Available `make` targets
 
-| Target        | Description                                                        |
-|---------------|--------------------------------------------------------------------|
-| `make setup`  | First-time bootstrap (everything above)                            |
-| `make up`     | Start the Docker stack                                             |
-| `make down`   | Stop the stack (keeps the DB volume)                               |
-| `make fresh`  | `migrate:fresh --seed` (rebuild the database)                      |
-| `make test`   | Run the PHPUnit suite inside the container                         |
-| `make build`  | Build front-end assets (Vite production build)                     |
-| `make shell`  | Open a shell in the app container                                  |
-| `make logs`   | Tail container logs                                                |
-| `make clean`  | Stop the stack **and remove the DB volume** (destroys data)        |
+| Target       | Description                                                 |
+| ------------ | ----------------------------------------------------------- |
+| `make setup` | First-time bootstrap (everything above)                     |
+| `make up`    | Start the Docker stack                                      |
+| `make down`  | Stop the stack (keeps the DB volume)                        |
+| `make fresh` | `migrate:fresh --seed` (rebuild the database)               |
+| `make test`  | Run the PHPUnit suite inside the container                  |
+| `make build` | Build front-end assets (Vite production build)              |
+| `make shell` | Open a shell in the app container                           |
+| `make logs`  | Tail container logs                                         |
+| `make clean` | Stop the stack **and remove the DB volume** (destroys data) |
 
 Run `make help` to see all targets.
 
 ### Optional Docker services
 
-* **Mailpit** (catches local outgoing mail, UI on http://localhost:8025):
+- **Mailpit** (catches local outgoing mail, UI on http://localhost:8025):
   ```bash
   docker compose --profile mail up -d mailpit
   ```
   Then set in `.env`: `MAIL_MAILER=smtp`, `MAIL_HOST=mailpit`, `MAIL_PORT=1025`.
-* **Vite HMR** (live reload instead of a one-off build):
+- **Vite HMR** (live reload instead of a one-off build):
   ```bash
   docker compose --profile dev up node     # Vite on http://localhost:5173
   ```
@@ -139,13 +139,13 @@ Run `make help` to see all targets.
 
 The project directory is bind-mounted into the containers (`./:/var/www/html`), so:
 
-* **PHP, Blade, routes, config, helpers, classes** — changes apply **immediately** on
+- **PHP, Blade, routes, config, helpers, classes** — changes apply **immediately** on
   the next request. No `docker compose restart` needed.
-* **Tailwind CSS / JS** — bundled by Vite, so run **`npm run dev`** (or the `node`
+- **Tailwind CSS / JS** — bundled by Vite, so run **`npm run dev`** (or the `node`
   service above) for hot reload, or `npm run build` for a one-off rebuild.
-* **`.env` infrastructure vars** (DB host, etc.) are injected at container start —
+- **`.env` infrastructure vars** (DB host, etc.) are injected at container start —
   re-run `docker compose up -d` after changing those.
-* Avoid `php artisan config:cache` / `route:cache` in dev (they freeze edits until
+- Avoid `php artisan config:cache` / `route:cache` in dev (they freeze edits until
   `php artisan config:clear`); they're a production-only optimization.
 
 > **Docker-only files:** `Dockerfile`, `docker-compose.yml`, `docker/nginx/default.conf`,
@@ -159,25 +159,30 @@ The project directory is bind-mounted into the containers (`./:/var/www/html`), 
 Requires a local PHP 8.3 + Composer + Node + a running MySQL 8 server.
 
 1. Copy the env file and fill in your settings (database, mail, API keys, default language):
+
    ```bash
    cp .env.example .env
    ```
+
    For a **local MySQL** server, set `DB_HOST=127.0.0.1` (the `.env.example` default of
-   `DB_HOST=mysql` is the Docker service name). Create a database named `larapress`
+   `DB_HOST=mysql` is the Docker service name). Create a database named `cmstack_laravel`
    (or update `DB_DATABASE`/`DB_USERNAME`/`DB_PASSWORD` accordingly).
 
 2. Install PHP and front-end dependencies:
+
    ```bash
    composer install
    npm install
    ```
 
 3. Generate the app key, run migrations + seeders, link storage, and build assets:
+
    ```bash
    php artisan key:generate
    composer setup            # = migrate --seed --force + storage:link (key:generate is idempotent)
    npm run build             # or `npm run dev` for the Vite dev server with HMR
    ```
+
    The `composer setup` script bundles `key:generate`, `migrate --seed`, and `storage:link`
    for the non-Docker path. You can also run those artisan commands individually.
 
@@ -219,7 +224,7 @@ Docker data — no DB setup required to run tests.
 
 ### Browser / e2e tests (Laravel Dusk)
 
-Real headless-Chrome tests that verify **functionality *and* that styles are applied**
+Real headless-Chrome tests that verify **functionality _and_ that styles are applied**
 (login form, admin sidebar contrast, language switch, link ports, GEO settings) — things
 the HTTP-level suite can't see:
 
@@ -228,25 +233,25 @@ make dusk                              # one command: serves the app + runs the 
 make dusk ARGS="--filter=AuthAndAdminTest"
 ```
 
-Runs on the host against a **dedicated `larapress_dusk`** database (never the dev DB).
+Runs on the host against a **dedicated `cmstack_laravel_dusk`** database (never the dev DB).
 Full guide: [`docs/e2e-testing.md`](docs/e2e-testing.md).
 
 ---
 
 ## SEO / GEO
 
-LaraPress ships SEO/GEO support out of the box, built to stay fast (no WordPress-style
+Cmstack-Laravel ships SEO/GEO support out of the box, built to stay fast (no
 script bloat — public pages load only the Vite bundle and, optionally, a single async
 analytics tag):
 
-* Per-page `<title>` / `<meta description>`, `<link rel="canonical">`, per-entity `noindex` / canonical overrides.
-* **Open Graph** + **Twitter Card** tags (with a configurable default social image).
-* **`hreflang`** alternates (en/ru + `x-default`) for multilingual content.
-* **JSON-LD structured data** (schema.org) — `WebSite` + `SearchAction` + `Organization` on the homepage,
+- Per-page `<title>` / `<meta description>`, `<link rel="canonical">`, per-entity `noindex` / canonical overrides.
+- **Open Graph** + **Twitter Card** tags (with a configurable default social image).
+- **`hreflang`** alternates (en/ru + `x-default`) for multilingual content.
+- **JSON-LD structured data** (schema.org) — `WebSite` + `SearchAction` + `Organization` on the homepage,
   `BlogPosting` + `BreadcrumbList` on posts, `CollectionPage` on categories, `ProfilePage` / `Person`
   on profiles — which also helps generative engines (GEO).
-* Dynamic **`/sitemap.xml`** (pages/posts/categories with `hreflang`), **`/robots.txt`**, and **`/llms.txt`**.
-* Lazy-loaded images with width/height (CLS-safe), `preconnect` fonts with `display=swap`, deferred/module scripts.
+- Dynamic **`/sitemap.xml`** (pages/posts/categories with `hreflang`), **`/robots.txt`**, and **`/llms.txt`**.
+- Lazy-loaded images with width/height (CLS-safe), `preconnect` fonts with `display=swap`, deferred/module scripts.
 
 Configure global SEO defaults in the admin panel under **Settings → SEO** (title separator,
 default description, default OG image, social handles, Google/Bing verification tags, optional
@@ -257,18 +262,18 @@ async GA4/GTM id, a global "discourage search engines" toggle, sitemap toggle, a
 
 ## AI / MCP connector (manage your site from Claude)
 
-LaraPress includes a built-in **Model Context Protocol (MCP) server**, so you can manage
+Cmstack-Laravel includes a built-in **Model Context Protocol (MCP) server**, so you can manage
 your **live** site from an AI client such as **Claude** (Claude Code CLI, the VS Code
-extension, or claude.ai) using natural language — *"create a draft post about X"*,
-*"update the SEO meta description"*, *"add a partial to the theme"*.
+extension, or claude.ai) using natural language — _"create a draft post about X"_,
+_"update the SEO meta description"_, _"add a partial to the theme"_.
 
 It is built on the official [`laravel/mcp`](https://laravel.com/docs/12.x/mcp) package and
 runs **inside the Laravel app** (no separate service). Security is first-class:
 
-* **OAuth 2.1** authentication via Laravel Passport — endpoint `POST /mcp/larapress`.
-* Every tool runs as the authenticated admin and is **gated by the same `manage_*`
+- **OAuth 2.1** authentication via Laravel Passport — endpoint `POST /mcp/cmstack-laravel`.
+- Every tool runs as the authenticated admin and is **gated by the same `manage_*`
   permissions** as the admin panel.
-* **No raw code execution.** The only code surface is editing theme Blade templates,
+- **No raw code execution.** The only code surface is editing theme Blade templates,
   restricted to `*.blade.php` files inside the active theme with path allow-listing.
 
 Tool coverage: **posts, pages, categories** (full CRUD, multilingual), **users & roles**,
@@ -285,7 +290,7 @@ php artisan passport:keys    # generate encryption keys (once per environment)
 Connect from Claude Code:
 
 ```bash
-claude mcp add --transport http larapress https://your-site.com/mcp/larapress
+claude mcp add --transport http cmstack-laravel https://your-site.com/mcp/cmstack-laravel
 # then run /mcp in Claude and authenticate in the browser
 ```
 
@@ -315,14 +320,14 @@ The active locale is resolved per request from `session('locale')`, falling back
 After seeding, the admin panel lives at:
 
 ```
-<APP_URL>/larapress-admin
+<APP_URL>/cmstack-laravel-admin
 ```
 
 Seeded login:
 
 ```
 Username: admin
-Password: larapressadmin123
+Password: cmstackadmin123
 ```
 
 > Change this password immediately in any non-local environment.
@@ -331,7 +336,7 @@ Password: larapressadmin123
 
 ## Deployment
 
-LaraPress runs on traditional PHP hosting with **no runtime dependency on Docker**. Two
+Cmstack-Laravel runs on traditional PHP hosting with **no runtime dependency on Docker**. Two
 supported targets:
 
 ### Hostinger (shared hosting, no Docker)
@@ -380,10 +385,12 @@ break rendering (verified: home returns `200`, admin returns `302` with caches e
 You have two options on a VPS:
 
 **A) Reuse the included Docker stack** (simplest):
+
 ```bash
-git clone <repo> && cd larapress
+git clone <repo> && cd cmstack-laravel
 make setup            # or: docker compose up -d ...
 ```
+
 Then put your real reverse proxy / TLS in front (or expose port 8080 behind one).
 
 **B) Native nginx + php-fpm + MySQL** (no Docker). Install PHP 8.3-FPM (with `imagick`,
@@ -407,7 +414,7 @@ reference config):
 server {
     listen 80;
     server_name your-domain.com;
-    root /var/www/larapress/public;
+    root /var/www/cmstack-laravel/public;
     index index.php index.html;
     charset utf-8;
     client_max_body_size 64M;            # sized for the media/file manager
@@ -440,21 +447,21 @@ using queued jobs or scheduled tasks.
 
 ### Is it ready to deploy?
 
-**Yes.** LaraPress runs cleanly **locally** (Docker via `make setup`, or fully manual), and
+**Yes.** Cmstack-Laravel runs cleanly **locally** (Docker via `make setup`, or fully manual), and
 deploys to both **Hostinger shared hosting** and a **VPS** with no required background
 services. A clean Docker bring-up was verified end to end: migrations + seeders succeed
-against a fresh `larapress` MySQL database, the home page returns `200`, `/larapress-admin`
+against a fresh `cmstack_laravel` MySQL database, the home page returns `200`, `/cmstack-laravel-admin`
 returns `302`, and `/sitemap.xml` returns `200` — and these stay correct with
 `config:cache` + `route:cache` enabled (the production code path).
 
 **Caveats / things to do per environment:**
 
-* Provide real production `.env` values (`APP_KEY`, DB credentials, mail, and reCAPTCHA keys
+- Provide real production `.env` values (`APP_KEY`, DB credentials, mail, and reCAPTCHA keys
   if you enable captcha) and set `APP_ENV=production`, `APP_DEBUG=false`.
-* On shared hosting, **build assets off-host** (`npm run build`) and upload `public/build/`.
-* Ensure the **`imagick`** PHP extension is enabled on the target.
-* Run `php artisan storage:link` so public-disk media is served.
-* Change the seeded admin password.
+- On shared hosting, **build assets off-host** (`npm run build`) and upload `public/build/`.
+- Ensure the **`imagick`** PHP extension is enabled on the target.
+- Run `php artisan storage:link` so public-disk media is served.
+- Change the seeded admin password.
 
 ---
 
@@ -462,7 +469,7 @@ returns `302`, and `/sitemap.xml` returns `200` — and these stay correct with
 
 **Author**
 
-* **Elman Hüseynov** — [huseyn0w](https://linkedin.com/in/huseyn0w) · [Elman Group](https://elman.group)
+- **Elman Hüseynov** — [huseyn0w](https://linkedin.com/in/huseyn0w) · [Elman Group](https://elman.group)
 
 **License**
 

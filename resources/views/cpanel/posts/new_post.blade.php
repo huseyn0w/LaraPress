@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: new_post.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 16.08.2019

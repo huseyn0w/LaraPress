@@ -29,7 +29,7 @@ class GeoSettingsBrowserTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($admin) {
             $browser->loginAs($admin)
-                ->visit('/larapress-admin/geo-settings')
+                ->visit('/cmstack-laravel-admin/geo-settings')
                 ->waitForText('GEO')
                 ->assertPresent('select[name=business_type]')
                 ->assertPresent('textarea[name=services]')

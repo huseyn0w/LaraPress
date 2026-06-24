@@ -15,12 +15,12 @@ switch, saving settings) and **applied styles** (computed colours/layout).
 
 - Runs **on the host** (uses your installed Google Chrome) against the app served at
   `http://127.0.0.1:8000`.
-- Uses a **dedicated database `larapress_dusk`** inside the dockerised MySQL (reached
-  from the host on the published port `33060`). It **never touches the dev `larapress`
+- Uses a **dedicated database `cmstack_laravel_dusk`** inside the dockerised MySQL (reached
+  from the host on the published port `33060`). It **never touches the dev `cmstack_laravel`
   DB**.
 - `.env.dusk.local` (gitignored; bootstrapped from `.env.dusk.local.example`) sets
   `DUSK=true`, which makes `tests/CreatesApplication.php` skip its SQLite `:memory:`
-  pin so the test process and the served app share the MySQL `larapress_dusk` DB.
+  pin so the test process and the served app share the MySQL `cmstack_laravel_dusk` DB.
 
 ## Run it
 

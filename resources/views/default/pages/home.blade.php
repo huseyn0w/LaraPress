@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: home.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 21.07.2019
@@ -42,7 +42,7 @@
         <div class="max-w-3xl">
             <p class="mb-5 inline-flex items-center gap-2 text-sm font-medium tracking-wide text-paper/70">
                 <span class="h-px w-8 bg-brand-400"></span>
-                {{ $home_page_data->title ?? 'LaraPress' }}
+                {{ $home_page_data->title ?? 'Cmstack-Laravel' }}
             </p>
             <div class="font-serif text-4xl font-medium leading-[1.06] tracking-tight text-paper sm:text-5xl lg:text-6xl [text-wrap:balance]">
                 {!! $headline !!}

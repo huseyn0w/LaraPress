@@ -1,11 +1,11 @@
 {{--
-  LaraPress CMS — Phase 7 (SEO/GEO)
+  Cmstack-Laravel — Phase 7 (SEO/GEO)
   File: partials/analytics.blade.php
 
   The single, OPTIONAL third-party script the public theme will ever load, and
   only when an ID is configured in the admin SEO settings. Loaded async so it
   never blocks render. Default (empty settings) = zero output, zero requests.
-  Explicitly unlike WordPress: no tag managers or trackers by default.
+  Explicitly unlike many CMS platforms: no tag managers or trackers by default.
 --}}
 @php
     $seo = get_seo_settings();

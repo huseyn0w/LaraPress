@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: social.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 14.11.2019

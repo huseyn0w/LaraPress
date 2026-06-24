@@ -1,17 +1,17 @@
-# LaraPress MCP server (AI connector)
+# Cmstack-Laravel MCP server (AI connector)
 
-LaraPress ships a built-in **Model Context Protocol (MCP) server** so an AI client
+Cmstack-Laravel ships a built-in **Model Context Protocol (MCP) server** so an AI client
 such as **Claude** (Claude Code CLI, the VS Code extension, or claude.ai) can manage
 your **live** site — posts, pages, categories, users, settings, and theme templates —
 through scoped, authenticated tools.
 
 It is built on the official [`laravel/mcp`](https://laravel.com/docs/12.x/mcp) package
 and runs **inside the Laravel app itself** (no separate Node service). Every tool runs
-as the OAuth-authenticated admin and is gated by that account's existing LaraPress
+as the OAuth-authenticated admin and is gated by that account's existing Cmstack-Laravel
 permissions. There is **no raw code-execution tool** — the only "code" surface is
 editing Blade templates inside the active theme, with strict path allow-listing.
 
-- **Endpoint:** `POST https://<your-site>/mcp/larapress`
+- **Endpoint:** `POST https://<your-site>/mcp/cmstack-laravel`
 - **Auth:** OAuth 2.1 via Laravel Passport (the MCP-standard mechanism)
 - **Transport:** streamable HTTP
 
@@ -20,7 +20,7 @@ editing Blade templates inside the active theme, with strict path allow-listing.
 ## What the AI can do (tools)
 
 All tools validate their inputs and return structured results. "Requires X" is the
-LaraPress permission the connected account must hold, or the tool returns
+Cmstack-Laravel permission the connected account must hold, or the tool returns
 *Permission denied*.
 
 | Domain | Tools | Permission |
@@ -85,17 +85,17 @@ authenticate with.
 ## Connect from Claude
 
 When the client first calls the server it performs the OAuth flow: your browser
-opens to LaraPress, you **log in as the admin** and **approve** the connection, and
+opens to Cmstack-Laravel, you **log in as the admin** and **approve** the connection, and
 the client stores the token. Tokens expire (15 days by default; see
 `AppServiceProvider`) and refresh automatically.
 
 ### Claude Code (CLI)
 
 ```bash
-claude mcp add --transport http larapress https://your-site.com/mcp/larapress
+claude mcp add --transport http cmstack-laravel https://your-site.com/mcp/cmstack-laravel
 ```
 
-Then start Claude and run `/mcp` — choose **larapress → Authenticate** to complete
+Then start Claude and run `/mcp` — choose **cmstack-laravel → Authenticate** to complete
 the OAuth login in your browser. After that you can ask things like
 *"list the latest posts"* or *"create a draft page titled About us"*.
 
@@ -107,9 +107,9 @@ above in the integrated terminal, or add a `.mcp.json` at your project root:
 ```json
 {
   "mcpServers": {
-    "larapress": {
+    "cmstack-laravel": {
       "type": "http",
-      "url": "https://your-site.com/mcp/larapress"
+      "url": "https://your-site.com/mcp/cmstack-laravel"
     }
   }
 }
@@ -120,7 +120,7 @@ Reload the window; the extension will prompt you to authenticate on first use.
 ### claude.ai (web)
 
 Add a **Custom Connector** in Settings and paste the endpoint
-`https://your-site.com/mcp/larapress`; complete the OAuth login when prompted.
+`https://your-site.com/mcp/cmstack-laravel`; complete the OAuth login when prompted.
 
 ---
 
@@ -130,23 +130,23 @@ With the stack running (`make up`) you can exercise the server with the bundled
 MCP Inspector:
 
 ```bash
-php artisan mcp:inspector mcp/larapress
+php artisan mcp:inspector mcp/cmstack-laravel
 ```
 
 Automated tests for authorization and theme-path safety live in
-`tests/Feature/Mcp/LaraPressServerTest.php`:
+`tests/Feature/Mcp/CmstackLaravelServerTest.php`:
 
 ```bash
-php artisan test --filter=LaraPressServerTest
+php artisan test --filter=CmstackLaravelServerTest
 ```
 
 ---
 
 ## How it's wired (for contributors)
 
-- **Route:** `routes/ai.php` — `Mcp::oauthRoutes()` + `Mcp::web('/mcp/larapress', …)`
+- **Route:** `routes/ai.php` — `Mcp::oauthRoutes()` + `Mcp::web('/mcp/cmstack-laravel', …)`
   behind `auth:api` (Passport) and `throttle:120,1`.
-- **Server:** `app/Mcp/Servers/LaraPressServer.php` registers all tools.
+- **Server:** `app/Mcp/Servers/CmstackLaravelServer.php` registers all tools.
 - **Tools:** `app/Mcp/Tools/<Domain>/…` — thin classes that validate input and
   delegate to the existing `CPanel*Repository` classes (same code path as the admin
   panel), so business rules and observers are reused rather than re-implemented.
@@ -160,4 +160,4 @@ php artisan test --filter=LaraPressServerTest
 
 To add a capability: create a tool with `php artisan make:mcp-tool`, gate it with
 `AuthorizesAccess::deny()`, delegate to a repository, and register it in
-`LaraPressServer::$tools`.
+`CmstackLaravelServer::$tools`.

@@ -1,5 +1,5 @@
 # =============================================================================
-# LaraPress CMS - LOCAL DEVELOPMENT image only.
+# Cmstack-Laravel - LOCAL DEVELOPMENT image only.
 #
 # This Dockerfile is a developer convenience for running the app locally via
 # docker compose. It is NOT used in production. Production deploys to Hostinger

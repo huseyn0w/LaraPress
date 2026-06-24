@@ -5,7 +5,7 @@ namespace App\Observers;
 use App\Http\Models\Category;
 use App\Http\Models\Post;
 
-class PostObserver extends LaraPressObserver
+class PostObserver extends CmstackLaravelObserver
 {
 
     /**

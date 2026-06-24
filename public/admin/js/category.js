@@ -32,7 +32,7 @@ $(function () {
         var delete_conf = confirm(delete_confirmation);
         if(delete_conf){
             $.ajax({
-                url: "/larapress-admin/categories/" + deleted_category_id + "/delete/",
+                url: "/cmstack-laravel-admin/categories/" + deleted_category_id + "/delete/",
                 type: 'DELETE',
                 data: {
                     "id": deleted_category_id

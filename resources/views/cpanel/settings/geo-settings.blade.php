@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: geo-settings.blade.php
  * GEO (Generative Engine Optimization) admin settings page.
  */

@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rule;
 
-class CategoryRequest extends LaraPressRequest
+class CategoryRequest extends CmstackLaravelRequest
 {
     protected $table = 'category_translations';
 

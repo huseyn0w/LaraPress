@@ -100,7 +100,7 @@ class RepositoryBehaviorTest extends TestCase
 
         $repo = app(CPanelUserRolesRepository::class);
 
-        $request = Request::create('/larapress-admin/roles/new', 'POST', [
+        $request = Request::create('/cmstack-laravel-admin/roles/new', 'POST', [
             'name'        => 'UnitRole',
             'permissions' => ['manage_posts', 'totally_made_up'],
         ]);

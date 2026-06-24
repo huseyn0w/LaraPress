@@ -19,7 +19,7 @@ $(function () {
         var del_conf = confirm(delete_confirmation);
         if(del_conf){
             $.ajax({
-                url: "/larapress-admin/menus/" + deleted_menu_id + "/delete/",
+                url: "/cmstack-laravel-admin/menus/" + deleted_menu_id + "/delete/",
                 type: 'DELETE',
                 data: {
                     "id": deleted_menu_id

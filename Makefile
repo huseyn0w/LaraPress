@@ -1,5 +1,5 @@
 # =============================================================================
-# LaraPress CMS - convenience targets for local development (Docker).
+# Cmstack-Laravel - convenience targets for local development (Docker).
 #
 # The Docker stack is a LOCAL DEV convenience only; production deploys to
 # Hostinger / a VPS without Docker (see README "Deployment").
@@ -36,9 +36,9 @@ setup: ## First-time bootstrap: bring up Docker, install deps, migrate+seed, bui
 	npm install
 	npm run build
 	@echo ""
-	@echo "  LaraPress is up:  http://localhost:8080"
-	@echo "  Admin panel:      http://localhost:8080/larapress-admin"
-	@echo "  Login: admin / larapressadmin123"
+	@echo "  Cmstack-Laravel is up:  http://localhost:8080"
+	@echo "  Admin panel:      http://localhost:8080/cmstack-laravel-admin"
+	@echo "  Login: admin / cmstackadmin123"
 
 up: ## Start the Docker stack
 	$(DC) up -d

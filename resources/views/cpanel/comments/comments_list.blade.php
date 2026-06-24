@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: comments_list.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 08.11.2019

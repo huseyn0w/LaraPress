@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: login.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 21.11.2019

@@ -33,7 +33,7 @@ Route::get('/llms.txt', 'SeoController@llms')->name('llms');
 |--------------------------------------------------------------------------
 */
 
-Route::prefix('larapress-admin')->middleware(['auth', 'see_admin_panel'])->namespace('CPanel')->group(function () {
+Route::prefix('cmstack-laravel-admin')->middleware(['auth', 'see_admin_panel'])->namespace('CPanel')->group(function () {
 
     Route::get('/locale/{locale}', 'CPanelLanguageController@index')->name('lang_route');
 

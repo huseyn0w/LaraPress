@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: footer.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 19.07.2019
@@ -22,7 +22,7 @@ $languages = get_translation_links();
     <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8">
         <div class="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
             <div class="max-w-md">
-                <a href="{{env('APP_URL')}}" class="font-serif text-2xl font-semibold tracking-tightest text-ink-900">LaraPress</a>
+                <a href="{{env('APP_URL')}}" class="font-serif text-2xl font-semibold tracking-tightest text-ink-900">Cmstack-Laravel</a>
                 <div class="mt-3 text-sm leading-relaxed text-ink-500">{!! $copyright !!}</div>
                 <p class="mt-2 text-xs text-ink-400">
                     Developed by

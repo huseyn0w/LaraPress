@@ -35,10 +35,10 @@ use Laravel\Mcp\Server\Attributes\Instructions;
 use Laravel\Mcp\Server\Attributes\Name;
 use Laravel\Mcp\Server\Attributes\Version;
 
-#[Name('LaraPress')]
+#[Name('Cmstack-Laravel')]
 #[Version('1.0.0')]
 #[Instructions(<<<'TXT'
-This server lets an AI assistant manage a LaraPress CMS installation: posts,
+This server lets an AI assistant manage a Cmstack-Laravel installation: posts,
 pages, categories, users, site settings, and theme (Blade) templates.
 
 Authorization: every tool runs as the OAuth-authenticated user and is gated by
@@ -52,9 +52,9 @@ the site's default language. Use list/get tools to discover existing slugs and i
 before updating or deleting.
 
 Theme tools edit Blade template files under the active theme only and never
-execute code. There is no plugin system in LaraPress.
+execute code. There is no plugin system in Cmstack-Laravel.
 TXT)]
-class LaraPressServer extends Server
+class CmstackLaravelServer extends Server
 {
     /**
      * The tools registered with this MCP server.

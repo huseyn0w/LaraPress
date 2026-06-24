@@ -1,6 +1,6 @@
 <?php
 /**
- * LaraPress CMS
+ * Cmstack-Laravel
  * File: settings.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 19.11.2019

@@ -4,7 +4,7 @@ namespace Tests\Feature\Mcp;
 
 use App\Http\Models\User;
 use App\Http\Models\UserRoles;
-use App\Mcp\Servers\LaraPressServer;
+use App\Mcp\Servers\CmstackLaravelServer;
 use App\Mcp\Tools\Posts\ListPostsTool;
 use App\Mcp\Tools\Theme\ListThemeFilesTool;
 use App\Mcp\Tools\Theme\ReadThemeFileTool;
@@ -18,7 +18,7 @@ use Tests\TestCase;
  * and the theme tools must never escape the theme directory. These tests pin
  * that down without depending on the (request-coupled) content write path.
  */
-class LaraPressServerTest extends TestCase
+class CmstackLaravelServerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -34,7 +34,7 @@ class LaraPressServerTest extends TestCase
 
     public function test_unauthenticated_calls_are_rejected(): void
     {
-        LaraPressServer::tool(ListPostsTool::class, [])
+        CmstackLaravelServer::tool(ListPostsTool::class, [])
             ->assertSee('Authentication required');
     }
 
@@ -42,7 +42,7 @@ class LaraPressServerTest extends TestCase
     {
         $user = $this->userWithPermissions(['manage_posts' => 0]);
 
-        LaraPressServer::actingAs($user)
+        CmstackLaravelServer::actingAs($user)
             ->tool(ListPostsTool::class, [])
             ->assertSee('Permission denied');
     }
@@ -51,7 +51,7 @@ class LaraPressServerTest extends TestCase
     {
         $user = $this->userWithPermissions(['manage_posts' => 1]);
 
-        LaraPressServer::actingAs($user)
+        CmstackLaravelServer::actingAs($user)
             ->tool(ListPostsTool::class, ['per_page' => 5])
             ->assertOk();
     }
@@ -60,7 +60,7 @@ class LaraPressServerTest extends TestCase
     {
         $user = $this->userWithPermissions(['manage_general_settings' => 1]);
 
-        LaraPressServer::actingAs($user)
+        CmstackLaravelServer::actingAs($user)
             ->tool(ListThemeFilesTool::class, [])
             ->assertOk()
             ->assertSee('index.blade.php');
@@ -70,7 +70,7 @@ class LaraPressServerTest extends TestCase
     {
         $user = $this->userWithPermissions(['manage_general_settings' => 1]);
 
-        LaraPressServer::actingAs($user)
+        CmstackLaravelServer::actingAs($user)
             ->tool(ReadThemeFileTool::class, ['path' => '../../../../config/app.blade.php'])
             ->assertSee('Rejected path');
     }
@@ -79,7 +79,7 @@ class LaraPressServerTest extends TestCase
     {
         $user = $this->userWithPermissions(['manage_general_settings' => 1]);
 
-        LaraPressServer::actingAs($user)
+        CmstackLaravelServer::actingAs($user)
             ->tool(ReadThemeFileTool::class, ['path' => 'index.php'])
             ->assertSee('Rejected path');
     }

@@ -43,12 +43,12 @@ class AuthAndAdminTest extends DuskTestCase
 
             // FUNCTION: sign in with the seeded admin credentials.
             $browser->type('email', 'admin')
-                ->type('password', 'larapressadmin123')
+                ->type('password', 'cmstackadmin123')
                 ->click('form[action*="/login"] button[type=submit]')
                 ->waitUntilMissing('input[name=password]');
 
             // Reaching the panel proves authentication succeeded.
-            $browser->visit('/larapress-admin')
+            $browser->visit('/cmstack-laravel-admin')
                 ->waitForText('Dashboard')
                 ->assertSee('Dashboard');
         });
@@ -60,7 +60,7 @@ class AuthAndAdminTest extends DuskTestCase
 
         $this->browse(function (Browser $browser) use ($admin) {
             $browser->loginAs($admin)
-                ->visit('/larapress-admin')
+                ->visit('/cmstack-laravel-admin')
                 ->waitFor('aside')
                 ->assertSee('Pages')
                 ->assertSee('Users');

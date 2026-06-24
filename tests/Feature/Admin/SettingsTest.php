@@ -32,14 +32,14 @@ class SettingsTest extends TestCase
     public function test_general_settings_page_renders(): void
     {
         $this->actingAs($this->admin)
-            ->get('/larapress-admin/general-settings')
+            ->get('/cmstack-laravel-admin/general-settings')
             ->assertStatus(200);
     }
 
     public function test_admin_can_persist_general_settings(): void
     {
         $this->actingAs($this->admin)
-            ->post('/larapress-admin/general-settings', [
+            ->post('/cmstack-laravel-admin/general-settings', [
                 'website_name'         => 'Persisted Name',
                 'tagline'              => 'Persisted Tagline',
                 'posts_per_page'       => 9,
@@ -58,14 +58,14 @@ class SettingsTest extends TestCase
     public function test_site_options_page_renders(): void
     {
         $this->actingAs($this->admin)
-            ->get('/larapress-admin/site-options')
+            ->get('/cmstack-laravel-admin/site-options')
             ->assertStatus(200);
     }
 
     public function test_admin_can_persist_site_options(): void
     {
         $this->actingAs($this->admin)
-            ->post('/larapress-admin/site-options', [
+            ->post('/cmstack-laravel-admin/site-options', [
                 'logo_url'     => 'https://example.com/logo.png',
                 'copyright'    => 'Copyright 2026',
                 'github_url'   => 'https://github.com/example/repo',
@@ -81,8 +81,8 @@ class SettingsTest extends TestCase
     public function test_site_options_validation_rejects_non_urls(): void
     {
         $this->actingAs($this->admin)
-            ->from('/larapress-admin/site-options')
-            ->post('/larapress-admin/site-options', [
+            ->from('/cmstack-laravel-admin/site-options')
+            ->post('/cmstack-laravel-admin/site-options', [
                 'logo_url'     => 'not-a-url',
                 'copyright'    => '',
                 'github_url'   => 'not-a-url',
@@ -99,7 +99,7 @@ class SettingsTest extends TestCase
         ]);
         $user = User::factory()->create(['role_id' => $role->id]);
 
-        $this->actingAs($user)->get('/larapress-admin/general-settings')->assertStatus(401);
-        $this->actingAs($user)->get('/larapress-admin/site-options')->assertStatus(401);
+        $this->actingAs($user)->get('/cmstack-laravel-admin/general-settings')->assertStatus(401);
+        $this->actingAs($user)->get('/cmstack-laravel-admin/site-options')->assertStatus(401);
     }
 }
