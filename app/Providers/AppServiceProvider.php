@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Support\Hooks;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Passport\Passport;
 
@@ -15,7 +17,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // P9: the hook engine is a process-wide singleton wrapping the event
+        // dispatcher, also aliased as 'hooks' for the @hook Blade directive.
+        $this->app->singleton(Hooks::class, fn ($app) => new Hooks($app['events']));
+        $this->app->alias(Hooks::class, 'hooks');
     }
 
     /**
@@ -29,6 +34,9 @@ class AppServiceProvider extends ServiceProvider
         // paginator so ->links() (and the pretty_url()/pretty_search_url()
         // helpers that wrap it) emit Tailwind markup instead of Bootstrap.
         Paginator::useTailwind();
+
+        // P9: render a named plugin render-region, e.g. @hook('footer').
+        Blade::directive('hook', fn ($expression) => "<?php echo app('hooks')->region({$expression}); ?>");
 
         // The MCP server authenticates AI clients (e.g. Claude) over OAuth 2.1
         // via Passport. This is the consent screen shown to a logged-in admin
