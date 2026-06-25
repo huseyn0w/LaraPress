@@ -3,19 +3,21 @@
 > Living handoff for the canon-convergence effort. Read this + `REFACTOR_PLAN.md` +
 > `../FEATURE_MATRIX.md` + `../DESIGN_SYSTEM.md` before continuing. Last updated 2026-06-24.
 >
-> **Latest:** suite **229 green**, PHPStan + Pint clean. Architecture refactor complete;
+> **Latest:** suite **238 green**, PHPStan + Pint clean. Architecture refactor complete;
 > comment-notification + rate-limiting DONE; Tags taxonomy DONE; Revisions + restore UI DONE;
-> Soft-delete for pages DONE; **Category tree admin UI DONE** (made the previously-inert parent
-> picker functional + cycle-safe: tree-ordered `parentOptions` excluding self+descendants,
-> server-side `Rule::notIn` cycle guard, fractional-id bypass closed, MCP UpdateCategoryTool cycle
-> guard) & adversarially verified (3 skeptics, all findings fixed). Resume at PENDING **Scheduled
-> publishing** (P6). Optional leftovers: tags in search (§4) + admin tag-list/CRUD; revision
-> storage pruning + morph map; sitemap is 1h-cached (eventually-consistent for all content changes).
+> Soft-delete for pages DONE; Category tree admin UI DONE; **Scheduled publishing DONE**
+> (`post_translations.scheduled_at` + `posts:publish-due` command scheduled every minute; future-
+> scheduled posts hidden on EVERY public read path via `Post::scopeNotScheduledForFuture`,
+> status-aware so published posts stay visible; admin datetime-local schedule field) &
+> adversarially verified (3 skeptics — no leaked path, no regressions). Resume at PENDING
+> **RSS/Atom feeds** (P7). Optional leftovers: tags in search (§4) + admin tag-list/CRUD; revision
+> storage pruning + morph map; **front never filters plain drafts (status=0, no schedule) — they're
+> publicly reachable by slug (pre-existing)**; MCP post tools don't expose scheduled_at.
 
 ## Where things stand
 
 **Branch:** `refactor/canon-convergence` (off `master`). All work committed there.
-**Suite:** `php artisan test` → **229 passed (595 assertions)**, ~22s (in-memory SQLite).
+**Suite:** `php artisan test` → **238 passed (613 assertions)**, ~23s (in-memory SQLite).
 **Static analysis:** `composer analyse` (PHPStan/Larastan level 5 + baseline) → **green**.
 **Lint:** `composer lint` (Pint, Laravel preset) → clean on all touched files.
 
@@ -68,9 +70,9 @@ Service -> Event -> Listener/Observer   (for side effects of writes)
 > skeptics → fix → commit → refresh this file. Keep services repo-only and side effects in
 > events/observers (with sync/async classification in `REFACTOR_PLAN.md`).
 
-> DONE since last handoff: **Category tree admin UI** (P4) — item 5 below; +6 tests
-> (suite 222 → 229), adversarially verified. Earlier this effort: Soft-delete for pages (§1),
-> Revisions + restore UI (§1), comment-notification + rate-limiting (§18/§3), Tags taxonomy (§2).
+> DONE since last handoff: **Scheduled publishing** (P6) — item 6 below; +9 tests
+> (suite 229 → 238), adversarially verified. Earlier this effort: Category tree admin UI (§2),
+> Soft-delete for pages (§1), Revisions + restore UI (§1), comment-notification (§18/§3), Tags (§2).
 
 1. **Tags taxonomy** (P1) — **DONE end-to-end** (schema `tags`/`tag_translations`/`post_tag`;
    `Tag`/`TagTranslation`; `Post::tags()`; `TagRepository` find-or-create+sync + `postsForTag`;
@@ -100,12 +102,18 @@ Service -> Event -> Listener/Observer   (for side effects of writes)
    `CategoryRequest` cycle guard via `Rule::notIn(self+descendants)` with int normalisation;
    MCP `UpdateCategoryTool` cycle guard; 6 tests). Adversarially verified. Optional leftover:
    show the tree/parent in the category LIST view (parent picker itself satisfies the matrix).
-6. **Scheduled publishing** (P6, **resume here**): `scheduled_at` column on `post_translations`
-   (per-locale, like the other content fields) + a `posts:publish-due` console command that
-   flips due DRAFT posts to published + a `routes/console.php` scheduler entry. NB: post
-   `status` is an int (0 private / 1 published) on `post_translations`; add `scheduled_at`
-   nullable; the command publishes rows where `scheduled_at <= now()` and status != published.
-7. **RSS/Atom feeds** (P7, net-new): `/rss.xml` (+ per-category), published posts only.
+6. **Scheduled publishing** (P6) — **DONE** (`post_translations.scheduled_at` nullable+indexed;
+   `CPanelPostRepository::publishDue` + `CPanelPostService::publishDue` + `posts:publish-due`
+   command scheduled `everyMinute()->withoutOverlapping()` in `App\Console\Kernel`. Front hides
+   future-scheduled *drafts* via `Post::scopeNotScheduledForFuture` (status-aware) applied to ALL
+   public read paths: detail (via `BaseRepository::applyFrontReadScope` hook, overridden in front
+   `PostRepository`), sitemap, category/tag archives, search, home helper. Admin datetime-local
+   schedule field + `ValidatePostData` `scheduled_at`; en/ru lang. 9 tests). Adversarially verified.
+7. **RSS/Atom feeds** (P7, **resume here**, net-new): `/rss.xml` (+ optionally per-category) of
+   PUBLISHED posts only. Build it the same way as the sitemap: a `Front\*` service + thin
+   controller method + route registered BEFORE the front catch-all (see `SeoController::sitemap`
+   / `SeoFeedService` for the cached-XML pattern). Reuse `PostRepository` (apply
+   `notScheduledForFuture()` so scheduled posts never leak into the feed); cache like the sitemap.
 8. **Membership toggle + email-verification enforcement** (P8): wire the dangling settings.
 9. **Plugin/hook registry** (P9): adopt django's action/filter/render-region model (largest).
 10. **Coverage → ≥80% on services/repos + 100% critical paths**, and **CI pipeline**
@@ -201,7 +209,7 @@ Operating rules (unchanged):
   <noreply@anthropic.com>). When context drops below ~50%, refresh HANDOFF.md (incl. this
   continuation prompt) and tell me in Russian to open a new window.
 
-Start with PENDING **Scheduled publishing** (P6). Already DONE this effort: architecture
-refactor, comment-notification + rate-limiting (§18/§3), Tags taxonomy (§2), Revisions +
-restore UI (§1), Soft-delete for pages (§1, P3), and Category tree admin UI (§2, P4).
+Start with PENDING **RSS/Atom feeds** (P7). Already DONE this effort: architecture refactor,
+comment-notification + rate-limiting (§18/§3), Tags taxonomy (§2), Revisions + restore UI (§1),
+Soft-delete for pages (§1, P3), Category tree admin UI (§2, P4), and Scheduled publishing (§1, P6).
 ```

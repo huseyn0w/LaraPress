@@ -307,3 +307,16 @@ mail *is* the primary user action, not a side effect of a DB write.)
   `prepareForValidation` + rule `integer`; (2) MCP `UpdateCategoryTool` skipped the cycle check →
   added the same guard. +6 tests (web + MCP). Suite **229 green**, Pint + PHPStan clean.
   Remaining: parity P6–P9, UI redesign, coverage→80%/CI, README.
+- 2026-06-25: Parity **Scheduled publishing** (P6) DONE (FEATURE_MATRIX §1, net-new for all
+  stacks). `post_translations.scheduled_at` (nullable, indexed); `CPanelPostRepository::publishDue`
+  → `CPanelPostService::publishDue` → `posts:publish-due` command (pure boundary), scheduled
+  `everyMinute()->withoutOverlapping()`. Future-scheduled *drafts* are hidden from EVERY public
+  read path via `Post::scopeNotScheduledForFuture` (status-aware: published posts always visible),
+  applied at post detail (new `BaseRepository::applyFrontReadScope` hook — no-op default so other
+  entities/admin are unaffected — overridden in the front `PostRepository`), sitemap, category/tag
+  archives, search, and the home helper. Admin datetime-local schedule field + `ValidatePostData`.
+  3 adversarial skeptics: no leaked public path, no regressions, layering clean; fix — made the
+  scope status-aware so publishing overrides a lingering schedule. +9 tests. Suite **238 green**,
+  Pint + PHPStan clean. Pre-existing gaps noted (NOT this feature): front never filters plain
+  drafts (status=0, no schedule); MCP post tools don't expose scheduled_at. Remaining: parity
+  P7–P9, UI redesign, coverage→80%/CI, README.
