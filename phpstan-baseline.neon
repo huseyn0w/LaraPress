@@ -19,18 +19,6 @@ parameters:
 			path: app/Exceptions/Handler.php
 
 		-
-			message: '#^Method App\\Http\\Controllers\\Auth\\LoginController\:\:handleProviderCallback\(\) should return Illuminate\\Http\\Response but returns Illuminate\\Http\\RedirectResponse\.$#'
-			identifier: return.type
-			count: 3
-			path: app/Http/Controllers/Auth/LoginController.php
-
-		-
-			message: '#^Method App\\Http\\Controllers\\Auth\\LoginController\:\:redirectToProvider\(\) should return Illuminate\\Http\\Response but returns Symfony\\Component\\HttpFoundation\\RedirectResponse\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Http/Controllers/Auth/LoginController.php
-
-		-
 			message: '#^Access to an undefined property App\\Http\\Controllers\\BaseController\:\:\$lang_prefixes\.$#'
 			identifier: property.notFound
 			count: 3

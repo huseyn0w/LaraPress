@@ -4,8 +4,8 @@ namespace App\Providers;
 
 use App\Events\CommentSubmitted;
 use App\Listeners\SendCommentNotification;
+use App\Listeners\SendVerificationNotificationIfEnabled;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 
@@ -18,7 +18,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         Registered::class => [
-            SendEmailVerificationNotification::class,
+            SendVerificationNotificationIfEnabled::class,
         ],
         CommentSubmitted::class => [
             SendCommentNotification::class,
@@ -34,6 +34,20 @@ class EventServiceProvider extends ServiceProvider
     {
         parent::boot();
 
+        //
+    }
+
+    /**
+     * Override Laravel's automatic email-verification listener registration.
+     *
+     * The framework would otherwise attach its unconditional
+     * SendEmailVerificationNotification to the Registered event (because User
+     * implements MustVerifyEmail), emailing every new user. We dispatch the
+     * notification ourselves via SendVerificationNotificationIfEnabled, gated on
+     * the "email_verification" general setting, so verification stays togglable.
+     */
+    protected function configureEmailVerification()
+    {
         //
     }
 }

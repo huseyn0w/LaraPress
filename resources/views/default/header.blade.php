@@ -113,7 +113,9 @@ $current_lang = get_current_lang_prefix();
                 <a href="{{route('logout')}}" class="btn-ghost ml-1 px-4 py-2">@lang('default/header.logout')</a>
             @else
                 <a href="{{route('login')}}" class="nav-link">@lang('default/header.login')</a>
+                @if(get_general_settings('membership'))
                 <a href="{{route('register')}}" class="btn-primary ml-1 px-5 py-2.5">@lang('default/header.register')</a>
+                @endif
             @endauth
         </div>
 
@@ -155,7 +157,9 @@ $current_lang = get_current_lang_prefix();
                 <a href="{{route('logout')}}" class="nav-link">@lang('default/header.logout')</a>
             @else
                 <a href="{{route('login')}}" class="nav-link">@lang('default/header.login')</a>
+                @if(get_general_settings('membership'))
                 <a href="{{route('register')}}" class="nav-link text-brand-700">@lang('default/header.register')</a>
+                @endif
             @endauth
         </div>
     </div>

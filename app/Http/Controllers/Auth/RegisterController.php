@@ -38,6 +38,7 @@ class RegisterController extends Controller
     public function __construct(private UserRegistrationService $registrar)
     {
         $this->middleware('guest');
+        $this->middleware('registration_enabled');
     }
 
     /**

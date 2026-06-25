@@ -18,6 +18,7 @@ return [
     'tagline_content' => 'В двух словах объясните, о чем этот сайт.',
     'contact_email' => 'Контактный Email',
     'membership' => 'Регистрация',
+    'email_verification' => 'Требовать подтверждение email для новых пользователей',
     'active_template' => 'Название активного шаблона',
     'no_template' => 'Нет шаблонов',
     'posts_per_page' => 'Количество постов на странице категории',

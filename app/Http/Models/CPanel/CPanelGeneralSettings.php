@@ -19,7 +19,13 @@ class CPanelGeneralSettings extends Model
         'contact_email',
         'posts_per_page',
         'membership',
+        'email_verification',
         'comments_per_page',
         'active_template_name',
+    ];
+
+    protected $casts = [
+        'membership' => 'boolean',
+        'email_verification' => 'boolean',
     ];
 }

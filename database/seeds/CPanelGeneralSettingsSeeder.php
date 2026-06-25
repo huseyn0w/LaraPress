@@ -21,6 +21,7 @@ class CPanelGeneralSettingsSeeder extends Seeder
             'posts_per_page' => 10,
             'comments_per_page' => 5,
             'membership' => '1',
+            'email_verification' => '0',
             'active_template_name' => 'default',
         ]);
     }

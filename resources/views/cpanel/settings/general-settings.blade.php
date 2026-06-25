@@ -15,6 +15,7 @@
         $tagline = $general_settings->tagline;
         $email = $general_settings->contact_email;
         $membership = $general_settings->membership;
+        $email_verification = $general_settings->email_verification;
         $active_template_name = $general_settings->active_template_name;
         $posts_per_page = $general_settings->posts_per_page;
         $comments_per_page = $general_settings->comments_per_page;
@@ -54,6 +55,12 @@
                         <label for="membership" class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
                             <input class="form-check-input" id="membership" name="membership" type="checkbox" {{$membership == 1 ? 'checked value=1' : null}}>
                             @lang('cpanel/settings.membership')
+                        </label>
+                    </div>
+                    <div class="field">
+                        <label for="email_verification" class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
+                            <input class="form-check-input" id="email_verification" name="email_verification" type="checkbox" {{$email_verification == 1 ? 'checked value=1' : null}}>
+                            @lang('cpanel/settings.email_verification')
                         </label>
                     </div>
                     <div class="field">

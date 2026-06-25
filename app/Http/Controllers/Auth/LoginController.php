@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Services\Auth\SocialAuthService;
 use Auth;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Socialite;
+use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
 class LoginController extends Controller
 {
@@ -40,7 +41,7 @@ class LoginController extends Controller
     /**
      * Redirect the user to the GitHub authentication page.
      *
-     * @return Response
+     * @return SymfonyRedirectResponse
      */
     public function redirectToProvider($provider)
     {
@@ -50,7 +51,7 @@ class LoginController extends Controller
     /**
      * Obtain the user information from GitHub.
      *
-     * @return Response
+     * @return RedirectResponse
      */
     public function handleProviderCallback($provider)
     {
@@ -62,6 +63,14 @@ class LoginController extends Controller
             Auth::login($authUser, true);
 
             return redirect($this->redirectTo);
+        }
+
+        // Creating a brand-new account via a provider is a signup, so it is
+        // gated by the same membership toggle as the register form. Linking an
+        // existing account above is a login and stays allowed.
+        if (! get_general_settings('membership')) {
+            return redirect()->route('login')
+                ->with('status', trans('default/auth.registration_disabled'));
         }
 
         $validator = $this->socialAuth->validateNew($socialUser);

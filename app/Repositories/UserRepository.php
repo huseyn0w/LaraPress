@@ -156,6 +156,10 @@ class UserRepository extends BaseRepository
 
             $newUser->provider = $provider;
             $newUser->provider_id = $socialUser->id;
+            // The provider has already verified this email address, so the
+            // account is created pre-verified (never blocked by the optional
+            // email-verification enforcement).
+            $newUser->email_verified_at = now();
             $newUser->save();
 
             return $newUser;

@@ -30,6 +30,7 @@ class UsersTableSeeder extends Seeder
                     'about_me' => 'Founder of CMS Cmstack-Laravel',
                     'linkedin_url' => 'https://linkedin.com/in/huseyn0w',
                     'password' => bcrypt('elman123'),
+                    'email_verified_at' => now(),
                 ],
                 [
                     'name' => 'Admin',
@@ -44,6 +45,7 @@ class UsersTableSeeder extends Seeder
                     'about_me' => 'ADMIN of CMS Cmstack-Laravel',
                     'linkedin_url' => '',
                     'password' => bcrypt('cmstackadmin123'),
+                    'email_verified_at' => now(),
                 ],
             ]
         );

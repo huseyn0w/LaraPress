@@ -18,6 +18,7 @@ return [
     'tagline_content' => 'In a few words, explain what this site is about.',
     'contact_email' => 'Contact Email',
     'membership' => 'Membership',
+    'email_verification' => 'Require email verification for new members',
     'active_template' => 'Active template name',
     'no_template' => 'No templates',
     'posts_per_page' => 'Posts per page',

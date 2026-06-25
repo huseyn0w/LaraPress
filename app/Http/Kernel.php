@@ -6,6 +6,8 @@ use App\Http\Middleware\AdminPanelMiddleware;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\CheckForMaintenanceMode;
 use App\Http\Middleware\EncryptCookies;
+use App\Http\Middleware\EnsureEmailIsVerifiedWhenRequired;
+use App\Http\Middleware\EnsureRegistrationEnabled;
 use App\Http\Middleware\Localization;
 use App\Http\Middleware\ManageCategories;
 use App\Http\Middleware\ManageComments;
@@ -95,9 +97,11 @@ class Kernel extends HttpKernel
         'cache.headers' => SetCacheHeaders::class,
         'can' => Authorize::class,
         'guest' => RedirectIfAuthenticated::class,
+        'registration_enabled' => EnsureRegistrationEnabled::class,
         'signed' => ValidateSignature::class,
         'throttle' => ThrottleRequests::class,
         'verified' => EnsureEmailIsVerified::class,
+        'verified_if_required' => EnsureEmailIsVerifiedWhenRequired::class,
     ];
 
     /**

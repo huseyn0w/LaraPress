@@ -24,13 +24,12 @@ class ValidateGeneralSettings extends FormRequest
      */
     public function rules()
     {
-        $membership = $this->request->get('membership');
-
-        if ($membership === 'on') {
-            $this->request->add(['membership' => '1']);
-        } else {
-            $this->request->add(['membership' => '0']);
-        }
+        // HTML checkboxes submit "on" when ticked and nothing when unticked;
+        // normalise both toggles to 0/1 before validation.
+        $this->request->add([
+            'membership' => $this->request->get('membership') === 'on' ? '1' : '0',
+            'email_verification' => $this->request->get('email_verification') === 'on' ? '1' : '0',
+        ]);
 
         return [
             'website_name' => 'required|string',
@@ -39,8 +38,8 @@ class ValidateGeneralSettings extends FormRequest
             'comments_per_page' => 'required|integer',
             'contact_email' => 'required|email',
             'membership' => 'required|in:0,1',
+            'email_verification' => 'required|in:0,1',
             'active_template_name' => 'nullable|string',
         ];
-
     }
 }

@@ -11,7 +11,7 @@
 |
 */
 
-Auth::routes();
+Auth::routes(['verify' => true]);
 
 Route::get('/logout', '\App\Http\Controllers\Auth\LoginController@logout')->name('cpanel-logout');
 
@@ -181,10 +181,10 @@ Route::group([], function () {
     Route::prefix('/posts')->group(function () {
 
         Route::get('/{slug}', 'PostController@index')->name('posts');
-        Route::post('/handlelike/{id}', 'PostController@handleLike')->middleware('auth')->name('handle_post_likes')->where('id', '[1-9]+[0-9]*');
-        Route::put('/handlecomment/', 'PostCommentController@update')->middleware(['auth', 'throttle:8,1'])->name('update_post_comment');
-        Route::post('/handlecomment/{id}', 'PostCommentController@store')->middleware(['auth', 'throttle:8,1'])->name('store_post_comments')->where('id', '[1-9]+[0-9]*');
-        Route::delete('/deletecomment/{id}', 'PostCommentController@delete')->middleware(['auth', 'throttle:8,1'])->name('delete_post_comments')->where('id', '[1-9]+[0-9]*');
+        Route::post('/handlelike/{id}', 'PostController@handleLike')->middleware(['auth', 'verified_if_required'])->name('handle_post_likes')->where('id', '[1-9]+[0-9]*');
+        Route::put('/handlecomment/', 'PostCommentController@update')->middleware(['auth', 'verified_if_required', 'throttle:8,1'])->name('update_post_comment');
+        Route::post('/handlecomment/{id}', 'PostCommentController@store')->middleware(['auth', 'verified_if_required', 'throttle:8,1'])->name('store_post_comments')->where('id', '[1-9]+[0-9]*');
+        Route::delete('/deletecomment/{id}', 'PostCommentController@delete')->middleware(['auth', 'verified_if_required', 'throttle:8,1'])->name('delete_post_comments')->where('id', '[1-9]+[0-9]*');
 
     });
 
@@ -204,7 +204,7 @@ Route::group([], function () {
         Route::get('/{slug}/page/{page?}', 'TagController@index')->name('tags_display_pages')->where('page', '[1-9]+[0-9]*');
     });
 
-    Route::prefix('profile')->middleware('auth')->group(function () {
+    Route::prefix('profile')->middleware(['auth', 'verified_if_required'])->group(function () {
         Route::get('/edit', 'UserController@yourProfile')->name('get_user_info');
         Route::put('/update', 'UserController@update')->name('update_user_info');
         Route::get('/change_password', 'UserController@password')->name('get_change_password_interface');
