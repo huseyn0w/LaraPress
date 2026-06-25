@@ -31,6 +31,14 @@ class CategoryRequest extends CmstackLaravelRequest
         if ($this->has('meta_noindex')) {
             $this->merge(['meta_noindex' => $this->boolean('meta_noindex')]);
         }
+
+        // Normalise a numeric parent id to a real int BEFORE validation so the
+        // value the cycle guard (Rule::notIn) sees is the same int that gets
+        // persisted — otherwise a fractional string ("5.5") passes notIn yet
+        // truncates to 5 on the integer column, slipping a cycle through.
+        if ($this->filled('parent_category_id') && is_numeric($this->input('parent_category_id'))) {
+            $this->merge(['parent_category_id' => (int) $this->input('parent_category_id')]);
+        }
     }
 
     /**
@@ -49,7 +57,7 @@ class CategoryRequest extends CmstackLaravelRequest
             'meta_noindex' => 'sometimes|boolean',
             'title' => ['required', 'string', 'max:30'],
             'slug' => ['required', 'string', 'max:30'],
-            'parent_category_id' => ['nullable', 'numeric'],
+            'parent_category_id' => ['nullable', 'integer'],
         ];
 
         $title = $this->newRecordRule('title');

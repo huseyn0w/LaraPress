@@ -29,7 +29,7 @@ class TranslatableCreateTest extends TestCase
             'description' => 'desc',
             'meta_description' => 'md',
             'meta_keywords' => 'mk',
-            'parent_category' => '',
+            'parent_category_id' => '',
         ]);
 
         $response->assertSessionHasNoErrors();

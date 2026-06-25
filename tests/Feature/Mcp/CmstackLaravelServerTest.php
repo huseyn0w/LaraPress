@@ -2,9 +2,12 @@
 
 namespace Tests\Feature\Mcp;
 
+use App\Http\Models\Category;
+use App\Http\Models\CategoryTranslation;
 use App\Http\Models\User;
 use App\Http\Models\UserRoles;
 use App\Mcp\Servers\CmstackLaravelServer;
+use App\Mcp\Tools\Categories\UpdateCategoryTool;
 use App\Mcp\Tools\Posts\ListPostsTool;
 use App\Mcp\Tools\Theme\ListThemeFilesTool;
 use App\Mcp\Tools\Theme\ReadThemeFileTool;
@@ -82,5 +85,47 @@ class CmstackLaravelServerTest extends TestCase
         CmstackLaravelServer::actingAs($user)
             ->tool(ReadThemeFileTool::class, ['path' => 'index.php'])
             ->assertSee('Rejected path');
+    }
+
+    public function test_update_category_tool_rejects_a_cycle(): void
+    {
+        $user = $this->userWithPermissions(['manage_post_categories' => 1]);
+
+        // A is a parent of B (en).
+        $a = $this->makeCategory('Alpha', 'alpha', $user->id);
+        $b = $this->makeCategory('Beta', 'beta', $user->id, $a);
+
+        // Parenting A to its descendant B -> cycle, must be rejected.
+        CmstackLaravelServer::actingAs($user)
+            ->tool(UpdateCategoryTool::class, ['id' => $a, 'parent_category_id' => $b])
+            ->assertSee('cycle');
+
+        // Parenting A to itself -> cycle, must be rejected.
+        CmstackLaravelServer::actingAs($user)
+            ->tool(UpdateCategoryTool::class, ['id' => $a, 'parent_category_id' => $a])
+            ->assertSee('cycle');
+
+        // B is untouched (still parented to A).
+        $this->assertSame($a, (int) CategoryTranslation::where('category_id', $b)->where('locale', 'en')->firstOrFail()->parent_category_id);
+    }
+
+    private function makeCategory(string $title, string $slug, int $authorId, ?int $parentId = null): int
+    {
+        $category = new Category;
+        $category->save();
+
+        CategoryTranslation::create([
+            'category_id' => $category->id,
+            'locale' => 'en',
+            'title' => $title,
+            'slug' => $slug,
+            'author_id' => $authorId,
+            'description' => '',
+            'meta_description' => '',
+            'meta_keywords' => '',
+            'parent_category_id' => $parentId,
+        ]);
+
+        return $category->id;
     }
 }

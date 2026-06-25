@@ -102,6 +102,33 @@ class CategoryTreeTest extends TestCase
         $this->assertSame($b, (int) CategoryTranslation::where('category_id', $c)->where('locale', 'en')->firstOrFail()->parent_category_id);
     }
 
+    public function test_cycle_guard_is_not_bypassed_by_a_fractional_parent_id(): void
+    {
+        // "<id>.5" passes a loose numeric/notIn compare but truncates to <id> as
+        // an int when persisted — the guard must normalise it first.
+        $a = $this->create('A', 'cat-a');
+        $b = $this->create('B', 'cat-b', $a);
+
+        // Descendant via fraction (B is A's child).
+        $this->actingAs($this->admin)
+            ->from('/cmstack-laravel-admin/categories/'.$a.'/en')
+            ->put('/cmstack-laravel-admin/categories/'.$a.'/update', $this->payload([
+                'title' => 'A', 'slug' => 'cat-a', 'parent_category_id' => $b.'.5',
+            ]))
+            ->assertSessionHasErrors('parent_category_id');
+
+        // Self via fraction.
+        $this->actingAs($this->admin)
+            ->from('/cmstack-laravel-admin/categories/'.$a.'/en')
+            ->put('/cmstack-laravel-admin/categories/'.$a.'/update', $this->payload([
+                'title' => 'A', 'slug' => 'cat-a', 'parent_category_id' => $a.'.9',
+            ]))
+            ->assertSessionHasErrors('parent_category_id');
+
+        // A's parent stayed null (no cycle written).
+        $this->assertNull(CategoryTranslation::where('category_id', $a)->where('locale', 'en')->firstOrFail()->parent_category_id);
+    }
+
     public function test_parent_dropdown_excludes_self_and_descendants_on_edit(): void
     {
         $a = $this->create('Alpha', 'alpha');

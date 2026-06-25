@@ -62,6 +62,17 @@ class UpdateCategoryTool extends Tool
             return Response::error('Nothing to update: provide at least one field besides id and locale.');
         }
 
+        // Cycle guard (mirrors CategoryRequest): a category may not be parented
+        // to itself or one of its descendants. Runs after applyLocale so the
+        // descendant tree is resolved in the locale being written.
+        if (array_key_exists('parent_category_id', $validated) && $validated['parent_category_id'] !== null) {
+            $forbidden = array_merge([(int) $id], $this->categories->descendantIds((int) $id));
+
+            if (in_array((int) $validated['parent_category_id'], $forbidden, true)) {
+                return Response::error('parent_category_id would create a cycle: a category cannot be its own parent or a descendant.');
+            }
+        }
+
         $this->hydrateRequest($validated);
 
         $ok = $this->categories->update($id, $validated);
