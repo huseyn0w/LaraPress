@@ -57,6 +57,15 @@ class ScheduledPostHiddenOnFrontTest extends TestCase
         $this->get('/posts/shown-post')->assertOk()->assertSee('shown-post');
     }
 
+    public function test_published_post_with_lingering_future_schedule_stays_visible(): void
+    {
+        // Publishing (status 1) wins over a pending schedule: a published post is
+        // always public, even if a future scheduled_at lingers on the row.
+        $this->makePost('published-lingering', now()->addDay(), status: 1);
+
+        $this->get('/posts/published-lingering')->assertOk();
+    }
+
     public function test_future_scheduled_post_is_excluded_from_sitemap(): void
     {
         $this->makePost('sitemap-hidden', now()->addDay(), status: 0);

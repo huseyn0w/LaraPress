@@ -15,6 +15,9 @@ class Post extends Model implements TranslatableContract
     use SoftDeletes;
     use Translatable;
 
+    /** Published status value on post_translations.status (0 = private/draft). */
+    public const STATUS_PUBLISHED = 1;
+
     public $timestamps = false;
 
     public $translatedAttributes = [
@@ -48,9 +51,12 @@ class Post extends Model implements TranslatableContract
     }
 
     /**
-     * Restrict a query (joined to post_translations) to posts that are NOT
-     * scheduled for a future time — i.e. their schedule is unset or already due.
-     * Used by every public read path so a scheduled post stays hidden until then.
+     * Restrict a query (joined to post_translations) to posts that are NOT a
+     * pending future-scheduled draft. A post is hidden only while it is awaiting
+     * its schedule — i.e. it is NOT yet published (status != 1) AND its
+     * scheduled_at is still in the future. Already-published posts are always
+     * visible (publishing overrides a lingering schedule), and posts with no
+     * schedule are unaffected. Used by every public read path.
      *
      * @param  Builder  $query
      * @return Builder
@@ -59,7 +65,8 @@ class Post extends Model implements TranslatableContract
     {
         return $query->where(function ($q) {
             $q->whereNull('post_translations.scheduled_at')
-                ->orWhere('post_translations.scheduled_at', '<=', now());
+                ->orWhere('post_translations.scheduled_at', '<=', now())
+                ->orWhere('post_translations.status', '=', self::STATUS_PUBLISHED);
         });
     }
 
