@@ -26,5 +26,10 @@ class PostTranslation extends Model
         'meta_keywords',
         'canonical_url',
         'meta_noindex',
+        'scheduled_at',
+    ];
+
+    protected $casts = [
+        'scheduled_at' => 'datetime',
     ];
 }

@@ -29,6 +29,7 @@ class Post extends Model implements TranslatableContract
         'content',
         'meta_keywords',
         'meta_description',
+        'scheduled_at',
     ];
 
     /**

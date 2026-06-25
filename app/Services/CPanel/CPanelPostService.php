@@ -26,6 +26,14 @@ class CPanelPostService extends BaseCrudService
     }
 
     /**
+     * Publish all posts whose schedule is due. Returns the count published.
+     */
+    public function publishDue(): int
+    {
+        return $this->repo->publishDue();
+    }
+
+    /**
      * Dispatch a bulk action (restore/destroy) against the given posts.
      * Returns the underlying repository result, or false for an unknown action.
      */

@@ -23,8 +23,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        // Flip due scheduled posts to published. Cheap indexed query; runs often
+        // so a scheduled post goes live close to its time.
+        $schedule->command('posts:publish-due')->everyMinute()->withoutOverlapping();
     }
 
     /**

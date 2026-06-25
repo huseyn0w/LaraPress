@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Log;
 
 class CPanelPostRepository extends BaseRepository
 {
+    /** Published status on post_translations (0 = private/draft). */
+    private const STATUS_PUBLISHED = 1;
+
     protected $main_table = 'posts';
 
     protected $translated_table = 'post_translations';
@@ -75,6 +78,33 @@ class CPanelPostRepository extends BaseRepository
         }
 
         return $data;
+    }
+
+    /**
+     * Publish every post translation whose schedule is due and which isn't
+     * already published, clearing the schedule. Saves through the model so the
+     * model-cache flush + observers fire (consistent with an admin edit).
+     * Returns the number of translations published.
+     */
+    public function publishDue(): int
+    {
+        $due = PostTranslation::whereNotNull('scheduled_at')
+            ->where('scheduled_at', '<=', now())
+            ->where('status', '!=', self::STATUS_PUBLISHED)
+            ->get();
+
+        $count = 0;
+
+        foreach ($due as $translation) {
+            $translation->status = self::STATUS_PUBLISHED;
+            $translation->scheduled_at = null;
+
+            if ($translation->save()) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     public function delete($id)
