@@ -33,7 +33,7 @@ class CPanelCategoryController extends CPanelBaseController
         return view('cpanel.post_categories.edit_category',
             [
                 'entity' => $this->result,
-                'categories_list' => get_post_categories_list(),
+                'parent_options' => $this->service->parentOptions((int) $id),
                 'translation_links' => get_entity_translation_links('categories', $id),
             ]
         );
@@ -49,7 +49,7 @@ class CPanelCategoryController extends CPanelBaseController
     public function addCategory()
     {
         $array = [
-            'categories_list' => get_post_categories_list(),
+            'parent_options' => $this->service->parentOptions(),
         ];
 
         if (request()->route('lang')) {

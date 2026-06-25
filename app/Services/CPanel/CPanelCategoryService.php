@@ -16,4 +16,15 @@ class CPanelCategoryService extends BaseCrudService
     {
         parent::__construct($repo);
     }
+
+    /**
+     * Tree-ordered parent options for the category form's parent picker,
+     * excluding the edited category and its descendants (cycle-safe).
+     *
+     * @return array<int, object>
+     */
+    public function parentOptions(?int $excludeId = null): array
+    {
+        return $this->repo->parentOptions($excludeId);
+    }
 }

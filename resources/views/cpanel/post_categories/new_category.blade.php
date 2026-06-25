@@ -43,10 +43,10 @@
 
                     <div class="field">
                         <label class="field-label">@lang('cpanel/categories.parent_category')</label>
-                        <select name="parent_category" class="form-control">
+                        <select name="parent_category_id" class="form-control">
                             <option value="">@lang('cpanel/categories.no_parent_category')</option>
-                            @foreach($categories_list as $category)
-                                <option value="{{$category->id}}">{{$category->title}}</option>
+                            @foreach($parent_options as $option)
+                                <option value="{{ $option->category_id }}" {{ (int) old('parent_category_id') === $option->category_id ? 'selected' : '' }}>{!! str_repeat('&nbsp;&nbsp;&nbsp;', $option->depth) !!}{{ $option->title }}</option>
                             @endforeach
                         </select>
                         <div class="field-desc"><p>@lang('cpanel/categories.parent_category_desc')</p></div>

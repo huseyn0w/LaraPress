@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Repositories\CPanelCategoryRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
@@ -48,7 +49,7 @@ class CategoryRequest extends CmstackLaravelRequest
             'meta_noindex' => 'sometimes|boolean',
             'title' => ['required', 'string', 'max:30'],
             'slug' => ['required', 'string', 'max:30'],
-            'parent_category' => ['nullable', 'numeric'],
+            'parent_category_id' => ['nullable', 'numeric'],
         ];
 
         $title = $this->newRecordRule('title');
@@ -58,7 +59,17 @@ class CategoryRequest extends CmstackLaravelRequest
             $title = $this->updateRecordRule('title');
             $slug = $this->updateRecordRule('slug');
 
-            $rules['parent_category'][] = Rule::notIn([$this->term_id]);
+            // A category may not be parented to itself or any of its descendants
+            // (would create a cycle). The dropdown already hides these; this is
+            // the server-side guard. Read the id from the route here (not the
+            // constructor's $term_id, which is unset before route binding).
+            $termId = (int) $this->route('id');
+            $forbidden = array_merge(
+                [$termId],
+                app(CPanelCategoryRepository::class)->descendantIds($termId)
+            );
+
+            $rules['parent_category_id'][] = Rule::notIn($forbidden);
         }
 
         $rules['title'][] = $title;
