@@ -4,7 +4,7 @@
 
 **Goal:** Make Pest 4 the canonical test runner, enforce the controller→service→repository→model layering with Pest `arch()` presets, migrate the Dusk browser suite to Pest 4 browser testing, document a per-layer test-status table with no layer at zero tests, and stand up a CI pipeline (lint → analyse → test → build → e2e) that measures ≥80% coverage where a driver is available.
 
-**Architecture:** Pest 4 runs *on top of* PHPUnit 11, so the 70 existing class-based PHPUnit tests keep running unchanged; we add a `tests/Pest.php` (hand-written, NOT via `--init`, to avoid clobbering the safety-pinned `phpunit.xml`) plus new Pest-function-style files for `arch()` and browser. Coverage and the browser e2e run in **CI** (GitHub Actions) because this sandbox has no PCOV/Xdebug and no MySQL; locally we can only run the unit/feature suite under SQLite.
+**Architecture:** Pest 4 runs *on top of* PHPUnit (it requires **PHPUnit ^12** — so this migration also bumps `phpunit/phpunit` from `^11` to `^12`; Laravel 11.54 + PHP 8.3 tolerate this since Pest manages the PHPUnit layer). The 70 existing class-based PHPUnit tests keep running unchanged; we add a `tests/Pest.php` (hand-written, NOT via `--init`, to avoid clobbering the safety-pinned `phpunit.xml`) plus new Pest-function-style files for `arch()` and browser. Coverage and the browser e2e run in **CI** (GitHub Actions) because this sandbox has no PCOV/Xdebug and no MySQL; locally we can only run the unit/feature suite under SQLite.
 
 **Tech Stack:** Laravel 11.54 / PHP 8.3, Pest 4 (`pestphp/pest`), `pestphp/pest-plugin-browser` + Playwright (Chromium), Larastan level 5, Pint, GitHub Actions, PCOV (CI only).
 
@@ -59,15 +59,17 @@ Expected: `Tests:    290 passed (720 assertions)`
 
 - [ ] **Step 2: Install Pest 4 (network required; do NOT run `pest --init`)**
 
-Run:
+Pest 4 requires PHPUnit `^12`, so first bump the constraint in `composer.json` `require-dev`: `"phpunit/phpunit": "^11.0"` → `"^12.0"`. Then:
 ```bash
 composer require pestphp/pest:^4.0 --dev --with-all-dependencies
 ```
-Expected: Pest + `pestphp/pest-plugin-*` resolved; `phpunit/phpunit` stays `^11`. If composer reports a conflict with `nunomaduro/collision` or `phpunit`, allow `--with-all-dependencies` to bump them (Pest 4 requires PHPUnit 11.4+ / collision 8). Confirm the binary exists:
+Expected: Pest + `pestphp/pest-plugin-*` resolved; `phpunit/phpunit` resolves to `^12.x`; `nunomaduro/collision` bumps to `^8`. Confirm the binary exists:
 ```bash
 ls vendor/bin/pest
 ```
 Expected: `vendor/bin/pest`
+
+> **PHPUnit 11→12 risk:** PHPUnit 12 dropped some deprecated APIs (e.g. metadata in doc-comments, a few assertion signatures). If MANY existing tests now error with PHPUnit-12 API messages (not assertion failures), report BLOCKED with the exact errors — the fallback is Pest 3 (PHPUnit-11 compatible, still supports `arch()`/`uses()`/browser). Do not mass-rewrite tests to chase PHPUnit 12 without escalating first.
 
 - [ ] **Step 3: Verify `phpunit.xml` was NOT modified**
 
