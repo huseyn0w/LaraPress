@@ -295,3 +295,15 @@ mail *is* the primary user action, not a side effect of a DB write.)
   Note: sitemap.xml is `Cache::remember`-cached for 1h (eventually-consistent for ALL content
   changes, pre-existing — not specific to soft-delete). Remaining: parity P4/P6–P9, UI redesign,
   coverage→80%/CI, README.
+- 2026-06-25: Parity **Category tree admin UI** (P4) DONE (FEATURE_MATRIX §2). The category form's
+  parent picker was inert (field `parent_category` vs column `parent_category_id`; options used a
+  missing `->id`; no cycle guard). Now functional: `CPanelCategoryRepository::parentOptions`/
+  `descendantIds` build the current-locale tree (orphan-safe, cycle-safe) and exclude self +
+  descendants; field renamed to `parent_category_id` (Astrotomic routes it to the translated
+  column); indented dropdown + selected state. `CategoryRequest` enforces the cycle server-side via
+  `Rule::notIn(self+descendants)` reading the route id (not the unbound constructor `$term_id`).
+  3 adversarial skeptics: layering clean; fixes — (1) a fractional id ("5.5") bypassed
+  `numeric`+loose-`notIn` then truncated to an int cycle → now normalised to int in
+  `prepareForValidation` + rule `integer`; (2) MCP `UpdateCategoryTool` skipped the cycle check →
+  added the same guard. +6 tests (web + MCP). Suite **229 green**, Pint + PHPStan clean.
+  Remaining: parity P6–P9, UI redesign, coverage→80%/CI, README.
