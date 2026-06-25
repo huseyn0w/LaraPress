@@ -25,6 +25,8 @@ Route::get('/logout', '\App\Http\Controllers\Auth\LoginController@logout')->name
 Route::get('/sitemap.xml', 'SeoController@sitemap')->name('sitemap');
 Route::get('/robots.txt', 'SeoController@robots')->name('robots');
 Route::get('/llms.txt', 'SeoController@llms')->name('llms');
+Route::get('/rss.xml', 'SeoController@rss')->name('rss');
+Route::get('/atom.xml', 'SeoController@atom')->name('atom');
 
 /*
 |--------------------------------------------------------------------------

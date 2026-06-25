@@ -3,21 +3,24 @@
 > Living handoff for the canon-convergence effort. Read this + `REFACTOR_PLAN.md` +
 > `../FEATURE_MATRIX.md` + `../DESIGN_SYSTEM.md` before continuing. Last updated 2026-06-24.
 >
-> **Latest:** suite **238 green**, PHPStan + Pint clean. Architecture refactor complete;
+> **Latest:** suite **245 green**, PHPStan + Pint clean. Architecture refactor complete;
 > comment-notification + rate-limiting DONE; Tags taxonomy DONE; Revisions + restore UI DONE;
-> Soft-delete for pages DONE; Category tree admin UI DONE; **Scheduled publishing DONE**
-> (`post_translations.scheduled_at` + `posts:publish-due` command scheduled every minute; future-
-> scheduled posts hidden on EVERY public read path via `Post::scopeNotScheduledForFuture`,
-> status-aware so published posts stay visible; admin datetime-local schedule field) &
-> adversarially verified (3 skeptics — no leaked path, no regressions). Resume at PENDING
-> **RSS/Atom feeds** (P7). Optional leftovers: tags in search (§4) + admin tag-list/CRUD; revision
-> storage pruning + morph map; **front never filters plain drafts (status=0, no schedule) — they're
-> publicly reachable by slug (pre-existing)**; MCP post tools don't expose scheduled_at.
+> Soft-delete for pages DONE; Category tree admin UI DONE; Scheduled publishing DONE;
+> **RSS/Atom feeds DONE** (`/rss.xml` RSS 2.0 + `/atom.xml` Atom 1.0 of the 20 most recent
+> PUBLISHED posts via `Front\FeedService` + `PostRepository::feedEntries`; cached 1h like the
+> sitemap; routes before the catch-all; feed autodiscovery `<link>`s in `seo-meta`; drafts +
+> future-scheduled never leak) & adversarially verified (3 skeptics — found an `esc()` weakness
+> [`ENT_XML1` left `"` raw → Atom `href` attribute breakout, and C0 control chars broke
+> well-formedness]; FIXED [strip illegal XML chars + `ENT_QUOTES|ENT_XML1`] + regression test).
+> Resume at PENDING **Membership toggle + email-verification enforcement** (P8). Optional
+> leftovers: tags in search (§4) + admin tag-list/CRUD; revision storage pruning + morph map;
+> **front never filters plain drafts (status=0, no schedule) — they're publicly reachable by slug
+> (pre-existing)**; MCP post tools don't expose scheduled_at; per-category RSS not built (optional).
 
 ## Where things stand
 
 **Branch:** `refactor/canon-convergence` (off `master`). All work committed there.
-**Suite:** `php artisan test` → **238 passed (613 assertions)**, ~23s (in-memory SQLite).
+**Suite:** `php artisan test` → **245 passed (645 assertions)**, ~23s (in-memory SQLite).
 **Static analysis:** `composer analyse` (PHPStan/Larastan level 5 + baseline) → **green**.
 **Lint:** `composer lint` (Pint, Laravel preset) → clean on all touched files.
 
@@ -70,8 +73,9 @@ Service -> Event -> Listener/Observer   (for side effects of writes)
 > skeptics → fix → commit → refresh this file. Keep services repo-only and side effects in
 > events/observers (with sync/async classification in `REFACTOR_PLAN.md`).
 
-> DONE since last handoff: **Scheduled publishing** (P6) — item 6 below; +9 tests
-> (suite 229 → 238), adversarially verified. Earlier this effort: Category tree admin UI (§2),
+> DONE since last handoff: **RSS/Atom feeds** (P7) — item 7 below; +7 tests
+> (suite 238 → 245), adversarially verified (esc() attribute-injection + control-char weakness
+> found and fixed). Earlier this effort: Scheduled publishing (P6), Category tree admin UI (§2),
 > Soft-delete for pages (§1), Revisions + restore UI (§1), comment-notification (§18/§3), Tags (§2).
 
 1. **Tags taxonomy** (P1) — **DONE end-to-end** (schema `tags`/`tag_translations`/`post_tag`;
@@ -109,12 +113,19 @@ Service -> Event -> Listener/Observer   (for side effects of writes)
    public read paths: detail (via `BaseRepository::applyFrontReadScope` hook, overridden in front
    `PostRepository`), sitemap, category/tag archives, search, home helper. Admin datetime-local
    schedule field + `ValidatePostData` `scheduled_at`; en/ru lang. 9 tests). Adversarially verified.
-7. **RSS/Atom feeds** (P7, **resume here**, net-new): `/rss.xml` (+ optionally per-category) of
-   PUBLISHED posts only. Build it the same way as the sitemap: a `Front\*` service + thin
-   controller method + route registered BEFORE the front catch-all (see `SeoController::sitemap`
-   / `SeoFeedService` for the cached-XML pattern). Reuse `PostRepository` (apply
-   `notScheduledForFuture()` so scheduled posts never leak into the feed); cache like the sitemap.
-8. **Membership toggle + email-verification enforcement** (P8): wire the dangling settings.
+7. **RSS/Atom feeds** (P7) — **DONE end-to-end** (`/rss.xml` RSS 2.0 + `/atom.xml` Atom 1.0 of the
+   20 most recent PUBLISHED posts in the default locale, newest first; `App\Services\Front\FeedService`
+   builds the XML, `PostRepository::feedEntries` is the single bounded query [`status=1` +
+   `notScheduledForFuture()` + locale + `limit`], `SeoController::rss/atom` wrap it in `Cache::remember`
+   1h + correct `Content-Type` [`application/rss+xml` / `application/atom+xml`]; routes registered
+   before the front catch-all; feed autodiscovery `<link rel="alternate">`s added to
+   `seo-meta.blade.php`; 7 tests in `tests/Feature/Front/FeedTest.php`). Drafts + future-scheduled
+   posts never leak (proven by tests). Adversarially verified — skeptics found `esc()` used
+   `ENT_XML1` (leaves `"` raw → Atom `href="..."` attribute breakout) and let C0 control chars
+   through (broke XML well-formedness); FIXED in `FeedService::esc()` (strip
+   `/[\x00-\x08\x0B\x0C\x0E-\x1F]/` then `ENT_QUOTES|ENT_XML1`) + a hostile-content regression test.
+   **Optional leftover:** per-category RSS feed.
+8. **Membership toggle + email-verification enforcement** (P8, **resume here**): wire the dangling settings.
 9. **Plugin/hook registry** (P9): adopt django's action/filter/render-region model (largest).
 10. **Coverage → ≥80% on services/repos + 100% critical paths**, and **CI pipeline**
     (lint → analyse → test → build → e2e). NOTE: this box has **no Xdebug/PCOV** installed,
@@ -209,7 +220,8 @@ Operating rules (unchanged):
   <noreply@anthropic.com>). When context drops below ~50%, refresh HANDOFF.md (incl. this
   continuation prompt) and tell me in Russian to open a new window.
 
-Start with PENDING **RSS/Atom feeds** (P7). Already DONE this effort: architecture refactor,
-comment-notification + rate-limiting (§18/§3), Tags taxonomy (§2), Revisions + restore UI (§1),
-Soft-delete for pages (§1, P3), Category tree admin UI (§2, P4), and Scheduled publishing (§1, P6).
+Start with PENDING **Membership toggle + email-verification enforcement** (P8). Already DONE this
+effort: architecture refactor, comment-notification + rate-limiting (§18/§3), Tags taxonomy (§2),
+Revisions + restore UI (§1), Soft-delete for pages (§1, P3), Category tree admin UI (§2, P4),
+Scheduled publishing (§1, P6), and RSS/Atom feeds (P7).
 ```

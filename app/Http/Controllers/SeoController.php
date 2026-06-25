@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\Front\FeedService;
 use App\Services\Front\SeoFeedService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Response;
@@ -16,7 +17,10 @@ use Illuminate\Support\Facades\Response;
  */
 class SeoController extends Controller
 {
-    public function __construct(private SeoFeedService $service) {}
+    public function __construct(
+        private SeoFeedService $service,
+        private FeedService $feeds,
+    ) {}
 
     /**
      * Dynamic XML sitemap with hreflang alternates.
@@ -57,5 +61,29 @@ class SeoController extends Controller
         return Response::make($this->service->buildLlms(), 200, [
             'Content-Type' => 'text/plain; charset=UTF-8',
         ]);
+    }
+
+    /**
+     * RSS 2.0 syndication feed of the most recent published posts.
+     */
+    public function rss()
+    {
+        $xml = Cache::remember('cmstack_laravel.rss.xml', now()->addHour(), function () {
+            return $this->feeds->buildRss();
+        });
+
+        return Response::make($xml, 200, ['Content-Type' => 'application/rss+xml; charset=UTF-8']);
+    }
+
+    /**
+     * Atom 1.0 syndication feed of the most recent published posts.
+     */
+    public function atom()
+    {
+        $xml = Cache::remember('cmstack_laravel.atom.xml', now()->addHour(), function () {
+            return $this->feeds->buildAtom();
+        });
+
+        return Response::make($xml, 200, ['Content-Type' => 'application/atom+xml; charset=UTF-8']);
     }
 }

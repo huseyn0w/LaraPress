@@ -114,6 +114,10 @@
 <link rel="alternate" hreflang="x-default" href="{{ $alternates[config('app.locale')] ?? $canonical }}">
 @endif
 
+{{-- Feed autodiscovery (RSS 2.0 / Atom 1.0) --}}
+<link rel="alternate" type="application/rss+xml" title="{{ get_general_settings('website_name') ?: config('app.name') }} &raquo; RSS" href="{{ url('/rss.xml') }}">
+<link rel="alternate" type="application/atom+xml" title="{{ get_general_settings('website_name') ?: config('app.name') }} &raquo; Atom" href="{{ url('/atom.xml') }}">
+
 {{-- Open Graph --}}
 <meta property="og:title" content="{{ $entityTitle }}">
 <meta property="og:description" content="{{ $metaDescription }}">

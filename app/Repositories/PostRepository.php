@@ -12,6 +12,7 @@ namespace App\Repositories;
 use App\Http\Models\Likes;
 use App\Http\Models\Post;
 use App\Http\Models\PostTranslation;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class PostRepository extends BaseRepository
@@ -55,6 +56,33 @@ class PostRepository extends BaseRepository
         return Post::join('post_translations', 'posts.id', '=', 'post_translations.post_id')
             ->select('posts.id', 'post_translations.slug', 'post_translations.locale', 'post_translations.updated_at', 'post_translations.post_id')
             ->notScheduledForFuture()
+            ->get();
+    }
+
+    /**
+     * Feed rows for the public syndication feeds (RSS/Atom): the most recent
+     * PUBLISHED posts in the given locale, newest first. Drafts (status != 1) and
+     * future-scheduled posts are excluded so unpublished content never leaks.
+     *
+     * @return Collection
+     */
+    public function feedEntries(string $locale, int $limit = 20)
+    {
+        return Post::join('post_translations', 'posts.id', '=', 'post_translations.post_id')
+            ->select(
+                'posts.id',
+                'post_translations.title',
+                'post_translations.slug',
+                'post_translations.preview',
+                'post_translations.content',
+                'post_translations.created_at',
+                'post_translations.updated_at',
+            )
+            ->where('post_translations.locale', $locale)
+            ->where('post_translations.status', Post::STATUS_PUBLISHED)
+            ->notScheduledForFuture()
+            ->orderByDesc('post_translations.created_at')
+            ->limit($limit)
             ->get();
     }
 
