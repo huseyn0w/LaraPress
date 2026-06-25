@@ -282,3 +282,16 @@ mail *is* the primary user action, not a side effect of a DB write.)
   Known v1 limitations (tracked, acceptable): `revisions.data` stores the full translation row as
   JSON per edit (no pruning/dedup — revisit if storage grows); `revisionable_type` stores the FQCN
   (no morph map). Remaining: parity P3/P4/P6–P9, UI redesign, coverage→80%/CI, README.
+- 2026-06-25: Parity **Soft-delete for pages** (P3) DONE (FEATURE_MATRIX §1). `Page` now uses
+  `SoftDeletes` (`pages.deleted_at` migration); CPanelPage{Repository,Service,Controller} mirror
+  the posts trash/restore/permanent-destroy + bulk-action design; pages_list gains the
+  published/trashed tab + bulk bar + row actions (+ page.js destroy); en/ru lang. Delete is now a
+  soft-delete (was hard); force-delete cascades page_translations via the existing FK. 3
+  adversarial skeptics (front-regression / security / architecture): new code clean; fixes —
+  permanent-destroy restricted to `onlyTrashed()` rows in BOTH posts & pages (can no longer nuke a
+  live row in one step), and a pre-existing **shadowed** single-post-restore route fixed (GET
+  `/{id}/restore` moved before the greedy `/{id}/{lang}` editor route). +11 tests incl.
+  front-404/sitemap-exclusion + authz on the new routes. Suite **222 green**, Pint + PHPStan clean.
+  Note: sitemap.xml is `Cache::remember`-cached for 1h (eventually-consistent for ALL content
+  changes, pre-existing — not specific to soft-delete). Remaining: parity P4/P6–P9, UI redesign,
+  coverage→80%/CI, README.
