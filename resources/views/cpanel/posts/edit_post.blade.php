@@ -106,6 +106,11 @@
                                 </select>
                             </div>
                             <div class="field">
+                                <label class="field-label">@lang('cpanel/posts.schedule')</label>
+                                <input class="form-control" type="datetime-local" name="scheduled_at" value="{{ old('scheduled_at', optional($entity->scheduled_at)->format('Y-m-d\TH:i')) }}">
+                                <div class="field-desc"><p>@lang('cpanel/posts.schedule_hint')</p></div>
+                            </div>
+                            <div class="field">
                                 <label for="custom_input_image" class="field-label">@lang('cpanel/posts.thumbnail')</label>
                                 <span class="input-group-btn">
                                     <a id="lfm" data-input="thumbnail" data-preview="holder" class="choose-image">

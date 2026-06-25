@@ -65,5 +65,7 @@ return [
     'publish_button_label' => 'Publish',
     'status_published' => 'Published',
     'status_private' => 'Private',
+    'schedule' => 'Schedule (publish at)',
+    'schedule_hint' => 'Optional. Set a future date/time and keep the status Private to auto-publish then. Leave empty to publish normally.',
 
 ];

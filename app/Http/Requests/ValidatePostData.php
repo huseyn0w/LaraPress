@@ -54,6 +54,8 @@ class ValidatePostData extends CmstackLaravelRequest
             'category' => 'required|array',
             'thumbnail' => 'nullable|url',
             'status' => 'required|numeric',
+            // Optional future publish time; empty clears the schedule.
+            'scheduled_at' => 'nullable|date',
         ];
 
         $title = $this->newRecordRule('title');
