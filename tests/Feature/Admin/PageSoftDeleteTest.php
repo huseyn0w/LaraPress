@@ -6,8 +6,10 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Models\Page;
 use App\Http\Models\PageTranslation;
 use App\Http\Models\User;
+use App\Http\Models\UserRoles;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
@@ -116,6 +118,53 @@ class PageSoftDeleteTest extends TestCase
         $this->assertNull(Page::withTrashed()->find($pageId), 'Page row should be gone.');
         // The FK cascade removes the translations too.
         $this->assertSame(0, PageTranslation::where('page_id', $pageId)->count());
+    }
+
+    public function test_destroy_endpoint_cannot_permanently_delete_a_live_page(): void
+    {
+        // A live (non-trashed) page must survive a direct hit on the destroy
+        // endpoint — permanent-delete is restricted to already-trashed rows.
+        $pageId = $this->createPage();
+
+        $this->actingAs($this->admin)->delete('/cmstack-laravel-admin/pages/'.$pageId.'/destroy');
+
+        $this->assertNotNull(Page::find($pageId), 'A live page must not be force-deleted via destroy.');
+    }
+
+    public function test_user_without_page_permission_cannot_reach_trash_actions(): void
+    {
+        $role = UserRoles::create([
+            'name' => 'PanelNoPagesTrash',
+            'permissions' => json_encode(['see_admin_panel' => 1, 'manage_pages' => 0]),
+        ]);
+        $user = User::factory()->create(['role_id' => $role->id]);
+
+        $this->actingAs($user)->get('/cmstack-laravel-admin/pages/trashed')->assertStatus(401);
+        $this->actingAs($user)->get('/cmstack-laravel-admin/pages/1/restore')->assertStatus(401);
+        $this->actingAs($user)->delete('/cmstack-laravel-admin/pages/1/destroy')->assertStatus(401);
+        $this->actingAs($user)->post('/cmstack-laravel-admin/pages/multiple', [
+            'pages_action' => 'destroy', 'pages' => [1],
+        ])->assertStatus(401);
+    }
+
+    public function test_soft_deleted_page_is_hidden_from_front_and_sitemap(): void
+    {
+        // The seeded "contact" page is public + in the sitemap; trashing it must
+        // remove it from both (the SoftDeletes scope applies to every front query).
+        $contact = PageTranslation::where('slug', 'contact')->firstOrFail();
+        $this->get('/sitemap.xml')->assertSee('contact', false);
+
+        Page::findOrFail($contact->page_id)->delete();
+
+        // The front page resolution (not cached) 404s immediately.
+        $this->get('/contact')->assertNotFound();
+
+        // The sitemap is cached for an hour (eventually-consistent for ALL content
+        // changes, by design); bust that cache to assert the QUERY itself excludes
+        // trashed pages — guarding against a future raw-query refactor leaking them.
+        Cache::forget('cmstack_laravel.sitemap.xml');
+        $sitemap = $this->get('/sitemap.xml')->getContent();
+        $this->assertStringNotContainsString('/contact', $sitemap, 'Trashed page must drop from the sitemap query.');
     }
 
     public function test_admin_can_bulk_restore_trashed_pages(): void

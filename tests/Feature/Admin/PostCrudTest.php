@@ -95,6 +95,32 @@ class PostCrudTest extends TestCase
         $this->assertNotNull(Post::withTrashed()->find($postId), 'Soft deleted post row should remain.');
     }
 
+    public function test_admin_can_restore_a_soft_deleted_post(): void
+    {
+        // Single restore: GET /posts/{id}/restore must actually restore (the
+        // route must not be shadowed by the greedy /{id}/{lang} editor route).
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $postId = PostTranslation::where('slug', 'round-trip-post')->firstOrFail()->post_id;
+        $this->actingAs($this->admin)->delete('/cmstack-laravel-admin/posts/'.$postId.'/delete');
+        $this->assertNull(Post::find($postId), 'Post should be trashed first.');
+
+        $this->actingAs($this->admin)
+            ->get('/cmstack-laravel-admin/posts/'.$postId.'/restore')
+            ->assertRedirect();
+
+        $this->assertNotNull(Post::find($postId), 'Post should be restored.');
+    }
+
+    public function test_destroy_endpoint_cannot_permanently_delete_a_live_post(): void
+    {
+        $this->actingAs($this->admin)->post('/cmstack-laravel-admin/posts/new', $this->postPayload());
+        $postId = PostTranslation::where('slug', 'round-trip-post')->firstOrFail()->post_id;
+
+        $this->actingAs($this->admin)->delete('/cmstack-laravel-admin/posts/'.$postId.'/destroy');
+
+        $this->assertNotNull(Post::find($postId), 'A live post must not be force-deleted via destroy.');
+    }
+
     public function test_validation_blocks_post_without_required_fields(): void
     {
         $response = $this->actingAs($this->admin)

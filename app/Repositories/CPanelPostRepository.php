@@ -168,7 +168,9 @@ class CPanelPostRepository extends BaseRepository
         $deleted_post = false;
 
         $result = false;
-        $post = Post::withTrashed()->find($id);
+        // onlyTrashed: permanent-delete may ONLY hit an already-trashed post, so
+        // the destroy endpoint can never nuke a live post in one step.
+        $post = Post::onlyTrashed()->find($id);
         if ($post && $post->forceDelete()) {
             $deleted_post = true;
         }

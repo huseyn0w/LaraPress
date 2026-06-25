@@ -119,7 +119,9 @@ class CPanelPageRepository extends BaseRepository
     private function destroyPage($id)
     {
         $result = false;
-        $page = Page::withTrashed()->find($id);
+        // onlyTrashed: permanent-delete may ONLY hit an already-trashed page, so
+        // the destroy endpoint can never nuke a live page in one step.
+        $page = Page::onlyTrashed()->find($id);
         // forceDelete cascades to page_translations via the FK onDelete(cascade).
         if ($page && $page->forceDelete()) {
             $result = true;
