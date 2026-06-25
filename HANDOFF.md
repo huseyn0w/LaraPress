@@ -3,27 +3,27 @@
 > Living handoff for the canon-convergence effort. Read this + `REFACTOR_PLAN.md` +
 > `../FEATURE_MATRIX.md` + `../DESIGN_SYSTEM.md` before continuing. Last updated 2026-06-25.
 >
-> **Latest:** suite **263 green**, PHPStan + Pint clean. Architecture refactor complete;
-> comment-notification + rate-limiting DONE; Tags taxonomy DONE; Revisions + restore UI DONE;
-> Soft-delete for pages DONE; Category tree admin UI DONE; Scheduled publishing DONE;
-> RSS/Atom feeds DONE; **Membership toggle + email-verification enforcement DONE** (`membership`
-> setting gates self-signup [`registration_enabled` middleware + social-signup gate + hidden
-> register link]; optional `email_verification` setting [new column] ENFORCES verification when on
-> via `verified_if_required` middleware on member routes + a conditional `Registered` listener;
-> `User implements MustVerifyEmail`; social accounts created pre-verified; seeded admin/founder
-> pre-verified). Adversarially verified (3 skeptics): correctness + architecture **cannot refute**;
-> security found a **pre-existing** social-login account-takeover (link-by-email without provider
-> verification) — **FIXED** per user decision [link only when provider email verified, else refuse;
-> `SocialEmailNotVerifiedException`] + tests. Resume at PENDING **Plugin/hook registry** (P9).
-> Optional leftovers: tags in search (§4) + admin tag-list/CRUD; revision storage pruning + morph
-> map; **front never filters plain drafts (status=0, no schedule) — publicly reachable by slug
-> (pre-existing)**; MCP post tools don't expose scheduled_at; per-category RSS (optional); MCP
-> `UpdateGeneralSettingsTool` doesn't expose `email_verification` (optional parity).
+> **Latest:** suite **290 green**, PHPStan + Pint clean. Architecture refactor complete;
+> comment-notification + rate-limiting DONE; Tags DONE; Revisions DONE; Soft-delete pages DONE;
+> Category tree admin UI DONE; Scheduled publishing DONE; RSS/Atom feeds DONE; Membership toggle +
+> email-verification enforcement DONE; **Plugin/hook registry DONE** (P9, Laravel-events engine:
+> `App\Support\Hooks` action/filter/region over the dispatcher + `@hook` Blade directive; in-repo
+> plugins implement `App\Plugins\Contracts\PluginInterface`, discovered by `PluginManager`, synced to
+> a `plugins` table, lazily booted enabled-only via `PluginServiceProvider`; reading-time sample
+> plugin filters `the_content`; admin manager toggles plugins under `manage_general_settings`).
+> Adversarially verified (3 skeptics): architecture **cannot refute**; fixed their findings —
+> HIGH null-content 500 (null-safe filter), MEDIUM region array-fatal + LOW falsy-drop (robust
+> `region()`), LOW arbitrary-slug junk rows (slug validated against `discover()` → 404). Resume at
+> PENDING **Coverage ≥80% + CI** (P10) or **UI redesign** (Task 3). Optional leftovers: tags in
+> search (§4) + admin tag-list/CRUD; revision storage pruning + morph map; **front never filters
+> plain drafts (status=0, no schedule) — publicly reachable by slug (pre-existing)**; MCP post tools
+> don't expose scheduled_at; per-category RSS (optional); MCP settings tool lacks `email_verification`
+> + plugin toggles (optional parity); filter priorities/plugin zip-upload out of scope (YAGNI).
 
 ## Where things stand
 
 **Branch:** `refactor/canon-convergence` (off `master`). All work committed there.
-**Suite:** `php artisan test` → **263 passed (682 assertions)**, ~27s (in-memory SQLite).
+**Suite:** `php artisan test` → **290 passed (720 assertions)**, ~27s (in-memory SQLite).
 **Static analysis:** `composer analyse` (PHPStan/Larastan level 5 + baseline) → **green**.
 **Lint:** `composer lint` (Pint, Laravel preset) → clean on all touched files.
 
@@ -76,11 +76,11 @@ Service -> Event -> Listener/Observer   (for side effects of writes)
 > skeptics → fix → commit → refresh this file. Keep services repo-only and side effects in
 > events/observers (with sync/async classification in `REFACTOR_PLAN.md`).
 
-> DONE since last handoff: **Membership toggle + email-verification enforcement** (P8) — item 8
-> below; +16 tests (suite 245 → 263), adversarially verified (a pre-existing social-login
-> account-takeover was found and fixed). Earlier: RSS/Atom feeds (P7), Scheduled publishing (P6),
-> Category tree admin UI (§2), Soft-delete for pages (§1), Revisions + restore UI (§1),
-> comment-notification (§18/§3), Tags (§2).
+> DONE since last handoff: **Plugin/hook registry** (P9) — item 9 below; +27 tests
+> (suite 263 → 290), brainstorm→spec→plan→TDD, adversarially verified (HIGH null-content 500 +
+> MEDIUM/LOW region issues + LOW arbitrary-slug found and fixed). Earlier: Membership +
+> email-verification (P8), RSS/Atom feeds (P7), Scheduled publishing (P6), Category tree admin UI
+> (§2), Soft-delete for pages (§1), Revisions + restore UI (§1), comment-notification (§18/§3), Tags.
 
 1. **Tags taxonomy** (P1) — **DONE end-to-end** (schema `tags`/`tag_translations`/`post_tag`;
    `Tag`/`TagTranslation`; `Post::tags()`; `TagRepository` find-or-create+sync + `postsForTag`;
@@ -152,8 +152,24 @@ Service -> Event -> Listener/Observer   (for side effects of writes)
    throws `SocialEmailNotVerifiedException` → controller redirects to login with a flash. 23 tests
    (Membership/EmailVerification/SocialMembershipAndVerification + updated SocialAuthService/SocialLoginLinking).
    **Optional leftover:** expose `email_verification` in MCP `UpdateGeneralSettingsTool` for parity.
-9. **Plugin/hook registry** (P9, **resume here**): adopt django's action/filter/render-region model (largest).
-10. **Coverage → ≥80% on services/repos + 100% critical paths**, and **CI pipeline**
+9. **Plugin/hook registry** (P9) — **DONE end-to-end** (Laravel-events engine `App\Support\Hooks`:
+   `action`/`onAction`, `filter`/`onFilter` [mutable `HookValue` container so filters return values on
+   the event bus], `region`/`onRegion` [concatenated HTML, array-fragment-safe], all over the event
+   dispatcher with `hook.{action,filter,region}.<name>` keys; `@hook('region')` Blade directive +
+   `hooks` singleton. In-repo plugins implement `App\Plugins\Contracts\PluginInterface`
+   [slug/name/description/boot(Hooks)]; `App\Support\PluginManager` discovers `app/Plugins/*/*Plugin.php`,
+   `sync()`s slugs into the `plugins` table [new ⇒ disabled], `loadEnabled()` boots enabled-only;
+   `PluginServiceProvider` primes the shared Hooks LAZILY on first resolution [per request/app
+   instance ⇒ toggle without restart; `Schema::hasTable` guard]. Injection: `the_content` filter at
+   `posts/post.blade.php` + `@hook('head'/'header'/'footer')`. Sample `ReadingTimePlugin` filters
+   `the_content`. Admin manager: `CPanelPluginController`→`CPanelPluginService`→`CPanelPluginRepository`,
+   list+toggle under `manage_general_settings`, sidebar link, en/ru lang. 27 tests
+   [`tests/Unit/HooksTest`, `tests/Feature/HookDirectiveTest`, `tests/Feature/Plugins/*`]).
+   Adversarially verified — fixed HIGH null-content 500 (null-safe filter), MEDIUM region array-fatal +
+   LOW falsy-drop (robust `region()`), LOW arbitrary-slug junk rows (toggle validates against
+   `discover()` → 404). **Optional leftovers:** filter priorities, plugin zip-upload, Octane re-prime
+   reset, expose plugin toggles via MCP (all YAGNI/out-of-scope).
+10. **Coverage → ≥80% on services/repos + 100% critical paths** (P10, **resume here**), and **CI pipeline**
     (lint → analyse → test → build → e2e). NOTE: this box has **no Xdebug/PCOV** installed,
     so `--coverage` cannot run here yet — install PCOV (or run in CI) before reporting numbers.
 11. **UI redesign to `../DESIGN_SYSTEM.md`** (Task 3, biggest): tokens → self-hosted fonts
@@ -246,8 +262,10 @@ Operating rules (unchanged):
   <noreply@anthropic.com>). When context drops below ~50%, refresh HANDOFF.md (incl. this
   continuation prompt) and tell me in Russian to open a new window.
 
-Start with PENDING **Membership toggle + email-verification enforcement** (P8). Already DONE this
-effort: architecture refactor, comment-notification + rate-limiting (§18/§3), Tags taxonomy (§2),
+Start with PENDING **Coverage ≥80% + CI pipeline** (P10) — note this box has no Xdebug/PCOV, so
+flag that coverage numbers need PCOV/CI — or **UI redesign to ../DESIGN_SYSTEM.md** (Task 3). Already
+DONE this effort: architecture refactor, comment-notification + rate-limiting (§18/§3), Tags (§2),
 Revisions + restore UI (§1), Soft-delete for pages (§1, P3), Category tree admin UI (§2, P4),
-Scheduled publishing (§1, P6), and RSS/Atom feeds (P7).
+Scheduled publishing (§1, P6), RSS/Atom feeds (P7), Membership + email-verification (P8), and
+Plugin/hook registry (P9).
 ```
