@@ -54,7 +54,19 @@ class PostRepository extends BaseRepository
     {
         return Post::join('post_translations', 'posts.id', '=', 'post_translations.post_id')
             ->select('posts.id', 'post_translations.slug', 'post_translations.locale', 'post_translations.updated_at', 'post_translations.post_id')
+            ->notScheduledForFuture()
             ->get();
+    }
+
+    /**
+     * Hide future-scheduled posts from public single-post reads (post detail).
+     *
+     * @param  mixed  $query
+     * @return mixed
+     */
+    protected function applyFrontReadScope($query)
+    {
+        return $query->notScheduledForFuture();
     }
 
     public function handleLike(int $post_id, int $user_id)

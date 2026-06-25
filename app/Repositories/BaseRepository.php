@@ -310,11 +310,13 @@ abstract class BaseRepository implements BaseRepositoryInterface
         }
 
         try {
-            $data = $this->model::join($this->translated_table, $this->main_table.'.id', '=', $this->translated_table.'.'.$this->translated_table_join_column)
+            $query = $this->model::join($this->translated_table, $this->main_table.'.id', '=', $this->translated_table.'.'.$this->translated_table_join_column)
                 ->select($this->select_fields_ready_array)
                 ->where($this->translated_table.'.locale', $this->locale)
                 ->where($searchColumn.'.'.$param, $value)
-                ->with($this->eager_relations)->first();
+                ->with($this->eager_relations);
+
+            $data = $this->applyFrontReadScope($query)->first();
 
         } catch (QueryException $e) {
             throwAbort();
@@ -325,6 +327,20 @@ abstract class BaseRepository implements BaseRepositoryInterface
         }
 
         return $data;
+    }
+
+    /**
+     * Hook for public (front) read paths to add visibility constraints to a
+     * single-record translated query. No-op by default; the front PostRepository
+     * overrides it to hide future-scheduled posts. Admin repositories keep the
+     * no-op so the panel still sees everything.
+     *
+     * @param  mixed  $query
+     * @return mixed
+     */
+    protected function applyFrontReadScope($query)
+    {
+        return $query;
     }
 
     public function update(int $id, $request)

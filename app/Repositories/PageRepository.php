@@ -145,6 +145,7 @@ class PageRepository extends BaseRepository
         $posts = Post::join('post_translations', 'posts.id', '=', 'post_translations.post_id')
             ->select(['post_translations.title', 'post_translations.slug'])
             ->where('post_translations.locale', $this->locale)
+            ->notScheduledForFuture()
             ->where(function ($q) use ($key) {
                 $q->where('post_translations.title', 'LIKE', '%'.$key.'%')
                     ->orWhere('post_translations.slug', 'LIKE', '%'.$key.'%')

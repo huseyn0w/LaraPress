@@ -106,6 +106,7 @@ class TagRepository extends BaseRepository
             return Post::join($translated_table_name, $main_table_name.'.id', '=', $translated_table_name.'.'.$join_column)
                 ->select($select)
                 ->where($translated_table_name.'.locale', $locale)
+                ->notScheduledForFuture()
                 ->whereHas('tags', function ($query) use ($tag_id) {
                     $query->where('tags.id', $tag_id);
                 })

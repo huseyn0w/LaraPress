@@ -94,6 +94,7 @@ class CategoryRepository extends BaseRepository
             $data = Post::join($translated_table_name, $main_table_name.'.id', '=', $translated_table_name.'.'.$join_column)
                 ->select($select)
                 ->where($translated_table_name.'.locale', $this->locale)
+                ->notScheduledForFuture()
                 ->whereHas('categories', function ($query) use ($category_id) {
                     $query->select('category_id');
                     $query->where('category_id', $category_id);

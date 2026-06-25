@@ -800,6 +800,7 @@ function get_category_posts(array $args, $page = 1)
             ->select($fields)
             ->with('categories')
             ->where('post_translations.locale', $locale)
+            ->notScheduledForFuture()
             ->whereHas('categories', function ($query) use ($id) {
                 $query->select('category_id');
                 $query->where('category_id', $id);

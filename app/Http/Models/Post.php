@@ -5,6 +5,7 @@ namespace App\Http\Models;
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;
 use Astrotomic\Translatable\Translatable;
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -44,6 +45,22 @@ class Post extends Model implements TranslatableContract
     public function author()
     {
         return $this->hasOne('App\Http\Models\User', 'id', 'author_id');
+    }
+
+    /**
+     * Restrict a query (joined to post_translations) to posts that are NOT
+     * scheduled for a future time — i.e. their schedule is unset or already due.
+     * Used by every public read path so a scheduled post stays hidden until then.
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeNotScheduledForFuture($query)
+    {
+        return $query->where(function ($q) {
+            $q->whereNull('post_translations.scheduled_at')
+                ->orWhere('post_translations.scheduled_at', '<=', now());
+        });
     }
 
     public function categories()
