@@ -110,4 +110,34 @@ class PostViewServiceTest extends TestCase
         $this->assertNotNull($result, 'A post with a past schedule must be visible.');
         $this->assertSame('past-scheduled', $result->slug);
     }
+
+    /**
+     * A PUBLISHED post (status=1) WITH a future scheduled_at must STILL be
+     * visible — publishing overrides a lingering schedule. This exercises the
+     * scope's `OR status = STATUS_PUBLISHED` branch (the opposite direction from
+     * the future-scheduled-draft case above).
+     */
+    public function test_published_post_with_future_schedule_is_still_visible(): void
+    {
+        $post = Post::create([]);
+        PostTranslation::create([
+            'post_id' => $post->id,
+            'locale' => 'en',
+            'title' => 'Published But Scheduled',
+            'slug' => 'published-but-scheduled',
+            'author_id' => 1,
+            'status' => 1,                          // published
+            'scheduled_at' => now()->addDay(),       // lingering future schedule
+            'preview' => '',
+            'content' => '',
+            'meta_keywords' => '',
+            'meta_description' => '',
+        ]);
+
+        $service = app(PostViewService::class);
+        $result = $service->resolveBySlug('published-but-scheduled');
+
+        $this->assertNotNull($result, 'A published post must be visible even with a future schedule.');
+        $this->assertSame('published-but-scheduled', $result->slug);
+    }
 }

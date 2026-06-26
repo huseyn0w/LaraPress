@@ -116,8 +116,7 @@ class CPanelPostServiceTest extends TestCase
     {
         $service = app(CPanelPostService::class);
 
-        // First create a post via the seeded row (id=1 exists).
-        // Use seeded post id=1 which has 'post-example' slug.
+        // Use the seeded post (slug 'post-example') as the row to update.
         $existing = PostTranslation::where('slug', 'post-example')->where('locale', 'en')->firstOrFail();
         $postId = $existing->post_id;
 
@@ -132,31 +131,27 @@ class CPanelPostServiceTest extends TestCase
             'status' => 1,
         ];
 
-        // Hydrate request so PostTranslationObserver::saving() sees content/preview.
+        // Hydrate request so PostTranslationObserver::saving() sees content/preview
+        // (the observers read these straight off app('request'), mirroring the form POST).
         $this->hydrateRequest($updatePayload);
 
-        // BaseCrudService::update delegates to CPanelPostRepository::update which
-        // calls BaseRepository::update — it updates the Post (main) model by id.
-        // For translatable models, the translation is updated via checkForTranslation
-        // when a route `id` is present. Since we call directly (no route), we call
-        // the repository's plain update on the PostTranslation model.
-        //
-        // The service update() passes the id of the *parent* Post model. BaseRepository
-        // update finds the Post model by id and calls update($data). In CPanelPostRepository
-        // there is no translated_model override in update() — it hits the Post model which
-        // has no fillable and defers to the translation observer. We therefore drive the
-        // update through the PostTranslation directly (the path the controller uses) to
-        // verify the persistence path works.
-        $translation = PostTranslation::where('post_id', $postId)->where('locale', 'en')->firstOrFail();
-        $updated = $translation->update([
-            'title' => 'Updated Title',
-            'content' => '<p>updated content</p>',
-            'preview' => 'updated preview',
-        ]);
+        // Call the REAL service update — this is what must persist the change.
+        // CPanelPostService::update -> BaseCrudService::update -> repository update;
+        // the translated attributes propagate to post_translations via Astrotomic.
+        $result = $service->update($postId, $updatePayload);
 
-        $this->assertTrue($updated);
-        $fresh = PostTranslation::where('post_id', $postId)->where('locale', 'en')->firstOrFail();
+        $this->assertTrue($result, 'Service update must report success.');
+
+        // Assert via a FRESH DB read that the service call persisted the change.
+        $fresh = PostTranslation::where('post_id', $postId)->where('locale', 'en')->firstOrFail()->fresh();
         $this->assertSame('Updated Title', $fresh->title);
+        $this->assertStringContainsString('updated content', $fresh->content);
+
+        $this->assertDatabaseHas('post_translations', [
+            'post_id' => $postId,
+            'locale' => 'en',
+            'title' => 'Updated Title',
+        ]);
     }
 
     /** trashed() returns only soft-deleted posts. */
@@ -169,6 +164,6 @@ class CPanelPostServiceTest extends TestCase
 
         $trashed = $service->trashed(10);
 
-        $this->assertTrue($trashed->total() >= 1);
+        $this->assertGreaterThanOrEqual(1, $trashed->total());
     }
 }

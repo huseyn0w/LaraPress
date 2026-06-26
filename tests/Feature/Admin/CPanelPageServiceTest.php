@@ -84,7 +84,9 @@ class CPanelPageServiceTest extends TestCase
     /** update() persists changed attributes to an existing page translation. */
     public function test_update_persists_changed_attributes(): void
     {
-        // Use the seeded 'contact' page which has id=2 in the standard seed.
+        $service = app(CPanelPageService::class);
+
+        // Use the seeded 'contact' page as the row to update.
         $existing = PageTranslation::where('slug', 'contact')->where('locale', 'en')->firstOrFail();
         $pageId = $existing->page_id;
 
@@ -99,19 +101,25 @@ class CPanelPageServiceTest extends TestCase
             'meta_description' => 'md',
         ];
 
+        // Hydrate request so PageObserver::updating() sees content/custom_fields.
         $this->hydrateRequest($updatePayload);
 
-        // Drive the update through the page translation directly, since
-        // BaseRepository::update hits the Page (main) model by id and the
-        // translation update path requires a route id to switch models.
-        // We verify the persistence path by updating the translation model,
-        // mirroring what the controller does via the form.
-        $translation = PageTranslation::where('page_id', $pageId)->where('locale', 'en')->firstOrFail();
-        $updated = $translation->update(['title' => 'Updated Contact Page']);
+        // Call the REAL service update — this is what must persist the change.
+        // CPanelPageService::update -> BaseCrudService::update -> repository update;
+        // the translated attributes propagate to page_translations via Astrotomic.
+        $result = $service->update($pageId, $updatePayload);
 
-        $this->assertTrue($updated);
-        $fresh = PageTranslation::where('page_id', $pageId)->where('locale', 'en')->firstOrFail();
+        $this->assertTrue($result, 'Service update must report success.');
+
+        // Assert via a FRESH DB read that the service call persisted the change.
+        $fresh = PageTranslation::where('page_id', $pageId)->where('locale', 'en')->firstOrFail()->fresh();
         $this->assertSame('Updated Contact Page', $fresh->title);
+
+        $this->assertDatabaseHas('page_translations', [
+            'page_id' => $pageId,
+            'locale' => 'en',
+            'title' => 'Updated Contact Page',
+        ]);
     }
 
     /** delete() soft-deletes the page. */
@@ -176,6 +184,6 @@ class CPanelPageServiceTest extends TestCase
 
         $trashed = $service->trashed(10);
 
-        $this->assertTrue($trashed->total() >= 1);
+        $this->assertGreaterThanOrEqual(1, $trashed->total());
     }
 }

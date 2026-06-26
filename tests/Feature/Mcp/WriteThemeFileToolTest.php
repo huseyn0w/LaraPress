@@ -7,7 +7,6 @@ use App\Http\Models\UserRoles;
 use App\Mcp\Servers\CmstackLaravelServer;
 use App\Mcp\Tools\Theme\WriteThemeFileTool;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
 /**
@@ -53,24 +52,34 @@ class WriteThemeFileToolTest extends TestCase
         $this->assertStringNotContainsString('MALICIOUS=1', file_get_contents(base_path('.env')));
     }
 
-    /** Absolute path supplied by the caller must be rejected. */
+    /** Absolute path supplied by the caller must be rejected AND no file written. */
     public function test_rejects_absolute_path(): void
     {
         $user = $this->userWithPermissions(['manage_general_settings' => 1]);
 
+        $absolute = '/tmp/cmstack-write-theme-abs-'.bin2hex(random_bytes(4)).'.blade.php';
+        $this->assertFileDoesNotExist($absolute);
+
         CmstackLaravelServer::actingAs($user)
             ->tool(WriteThemeFileTool::class, [
-                'path' => '/etc/passwd.blade.php',
+                'path' => $absolute,
                 'contents' => 'evil',
                 'create' => true,
             ])
             ->assertSee('Rejected path');
+
+        // The security guarantee is "no write happened", not just a returned message.
+        $this->assertFileDoesNotExist($absolute, 'An absolute path must never be written.');
     }
 
-    /** Paths that do not end in .blade.php must be rejected. */
+    /** Paths that do not end in .blade.php must be rejected AND no file written. */
     public function test_rejects_non_blade_php_extension(): void
     {
         $user = $this->userWithPermissions(['manage_general_settings' => 1]);
+
+        $themeRoot = resource_path('views/'.config('app.template_name', 'default'));
+        $target = $themeRoot.'/partials/evil.php';
+        $this->assertFileDoesNotExist($target);
 
         CmstackLaravelServer::actingAs($user)
             ->tool(WriteThemeFileTool::class, [
@@ -79,6 +88,9 @@ class WriteThemeFileToolTest extends TestCase
                 'create' => true,
             ])
             ->assertSee('Rejected path');
+
+        // The security guarantee is "no write happened" — the .php file must not exist.
+        $this->assertFileDoesNotExist($target, 'A non-.blade.php file must never be written.');
     }
 
     /** A caller without manage_general_settings must receive a Permission denied error. */
