@@ -14,49 +14,52 @@
 @section('content')
     <div class="mx-auto max-w-7xl">
         <div class="mb-6">
-            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/comments.list_headline')</h1>
+            <h1 class="font-serif text-2xl text-fg">@lang('cpanel/comments.list_headline')</h1>
         </div>
 
         @include('cpanel.core.flash')
         @if (($update_message = Session::get('deleted')) !== null)
-            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/comments.bulky_deleted_message') : __('cpanel/comments.bulky_deleted_error_message') }}</strong></div>
+            <x-alert :variant="$update_message ? 'success' : 'error'" class="mb-4">{{ $update_message ? __('cpanel/comments.bulky_deleted_message') : __('cpanel/comments.bulky_deleted_error_message') }}</x-alert>
         @endif
 
-        <div class="card overflow-hidden">
-            <form method="POST" action="{{route('cpanel_comments_bulk_delete')}}">
+        <div class="overflow-hidden rounded-lg border border-border bg-surface">
+            <form method="POST" action="{{route('cpanel_comments_bulk_delete')}}"
+                  x-data="{ selected: 0 }"
+                  x-on:change="selected = $el.querySelectorAll('.comments-checkbox-input:checked').length">
                 @csrf
                 @method('DELETE')
-                <div class="border-b border-ink-100 px-5 py-4">
-                    <div class="select-cover mb-0">
-                        <select id="inputState" name="comments_action" required class="form-control">
-                            <option selected="selected">@lang('cpanel/comments.bulk_action_label')</option>
-                            <option value="delete">@lang('cpanel/comments.bulk_action_delete_label')</option>
-                        </select>
-                        <button type="submit" class="btn btn-ghost">@lang('cpanel/comments.bulk_action_apply')</button>
-                    </div>
+
+                {{-- Bulk-action bar (DESIGN_SYSTEM §5). Retains the .select-cover hook. --}}
+                <div class="select-cover flex flex-wrap items-center gap-3 border-b border-border bg-surface-2 px-5 py-3" aria-live="polite">
+                    <span class="font-mono text-xs uppercase tracking-[0.08em] text-muted" x-text="selected > 0 ? selected + ' selected' : '@lang('cpanel/comments.bulk_action_label')'">@lang('cpanel/comments.bulk_action_label')</span>
+                    <select id="inputState" name="comments_action" required class="h-9 rounded-sm border border-strong bg-surface px-3 text-sm text-fg focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1">
+                        <option selected="selected">@lang('cpanel/comments.bulk_action_label')</option>
+                        <option value="delete">@lang('cpanel/comments.bulk_action_delete_label')</option>
+                    </select>
+                    <x-button type="submit" variant="secondary" size="sm">@lang('cpanel/comments.bulk_action_apply')</x-button>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="data-table users-table">
-                        <thead>
+                    <table class="data-table users-table w-full text-left text-sm">
+                        <thead class="bg-surface-2">
                             <tr>
-                                <th class="w-10"><input class="form-check-input" id="selectAll" name="allcomments" type="checkbox" aria-label="Select all"></th>
-                                <th>@lang('cpanel/comments.table_title')</th>
-                                <th>@lang('cpanel/comments.table_name')</th>
-                                <th>@lang('cpanel/comments.table_author')</th>
-                                <th>@lang('cpanel/comments.table_publish_date')</th>
-                                <th>@lang('cpanel/comments.table_status')</th>
+                                <th class="w-10 px-4 py-3"><input class="form-check-input" id="selectAll" name="allcomments" type="checkbox" aria-label="Select all"></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/comments.table_title')</x-eyebrow></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/comments.table_name')</x-eyebrow></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/comments.table_author')</x-eyebrow></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/comments.table_publish_date')</x-eyebrow></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/comments.table_status')</x-eyebrow></th>
                             </tr>
                         </thead>
                         <tbody>
                         @php($comments_count = 0)
                         @forelse($comments_list as $comment)
                             @php($comments_count++)
-                            <tr>
-                                <td><input class="form-check-input comments-checkbox-input" id="comment_{{$comment->id}}" name="comments[]" type="checkbox" value="{{$comment->id}}" aria-label="Select comment"></td>
-                                <td class="text-ink-600">{{$comment->post->title}}</td>
-                                <td>
-                                    <span class="text-ink-800">{{$comment->comment}}</span>
+                            <tr class="border-b border-border transition-colors last:border-0 hover:bg-surface-2">
+                                <td class="px-4 py-3 align-middle"><input class="form-check-input comments-checkbox-input" id="comment_{{$comment->id}}" name="comments[]" type="checkbox" value="{{$comment->id}}" aria-label="Select comment"></td>
+                                <td class="px-4 py-3 align-middle text-muted">{{$comment->post->title}}</td>
+                                <td class="px-4 py-3 align-middle">
+                                    <span class="text-fg">{{$comment->comment}}</span>
                                     <span class="user_actions">
                                         @if (Auth::user()->can('manage_comments', 'App\Http\Models\UserRoles'))
                                             <button type="button" class="delete_comment">@lang('cpanel/comments.delete')</button>
@@ -69,25 +72,25 @@
                                         @endif
                                     </span>
                                 </td>
-                                <td>{{$comment->user->username}}</td>
-                                <td class="whitespace-nowrap text-ink-600">{{$comment->created_at->format('d.m.Y')}}</td>
-                                <td>
+                                <td class="px-4 py-3 align-middle text-muted">{{$comment->user->username}}</td>
+                                <td class="whitespace-nowrap px-4 py-3 align-middle text-muted">{{$comment->created_at->format('d.m.Y')}}</td>
+                                <td class="px-4 py-3 align-middle">
                                     @if($comment->status == 1)
-                                        <span class="badge badge-success">@lang('cpanel/comments.status_approved')</span>
+                                        <x-badge variant="success">@lang('cpanel/comments.status_approved')</x-badge>
                                     @else
-                                        <span class="badge badge-muted">@lang('cpanel/comments.status_pending')</span>
+                                        <x-badge variant="warning">@lang('cpanel/comments.status_pending')</x-badge>
                                     @endif
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="py-10 text-center text-ink-400">@lang('cpanel/comments.not_found')</td></tr>
+                            <tr><td colspan="6"><x-empty-state :headline="__('cpanel/comments.not_found')" /></td></tr>
                         @endforelse
                         </tbody>
                     </table>
                 </div>
             </form>
-            <div class="border-t border-ink-100 px-5 py-4">
-                {{ $comments_list->links() }}
+            <div class="border-t border-border px-5 py-4">
+                <x-pagination :paginator="$comments_list" />
             </div>
         </div>
     </div>

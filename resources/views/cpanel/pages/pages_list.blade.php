@@ -20,73 +20,75 @@ $is_trash = $route_name == "cpanel_trashed_pages_list";
 @section('content')
     <div class="mx-auto max-w-7xl">
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/pages.list_headline')</h1>
-            <a href="{{route('cpanel_add_new_page')}}" class="btn btn-info">
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1Z"/></svg>
+            <h1 class="font-serif text-2xl text-fg">@lang('cpanel/pages.list_headline')</h1>
+            <x-button as="a" :href="route('cpanel_add_new_page')" variant="primary" size="sm">
                 @lang('cpanel/pages.add_new_page')
-            </a>
+            </x-button>
         </div>
 
         @include('cpanel.core.flash')
         @if (Session::get('page_added'))
-            <div class="alert alert-success"><strong>@lang('cpanel/pages.page_added')</strong></div>
+            <x-alert variant="success" class="mb-4">@lang('cpanel/pages.page_added')</x-alert>
         @endif
         @if (($update_message = Session::get('deleted')) !== null)
-            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/pages.bulky_deleted_message') : __('cpanel/pages.bulky_error_message') }}</strong></div>
+            <x-alert :variant="$update_message ? 'success' : 'error'" class="mb-4">{{ $update_message ? __('cpanel/pages.bulky_deleted_message') : __('cpanel/pages.bulky_error_message') }}</x-alert>
         @endif
         @if (($update_message = Session::get('restored')) !== null)
-            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/pages.bulky_restored_message') : __('cpanel/pages.bulky_error_message') }}</strong></div>
+            <x-alert :variant="$update_message ? 'success' : 'error'" class="mb-4">{{ $update_message ? __('cpanel/pages.bulky_restored_message') : __('cpanel/pages.bulky_error_message') }}</x-alert>
         @endif
         @if (($update_message = Session::get('destroyed')) !== null)
-            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/pages.bulky_destroyed_message') : __('cpanel/pages.bulky_error_message') }}</strong></div>
+            <x-alert :variant="$update_message ? 'success' : 'error'" class="mb-4">{{ $update_message ? __('cpanel/pages.bulky_destroyed_message') : __('cpanel/pages.bulky_error_message') }}</x-alert>
         @endif
 
-        {{-- Tab switch: published vs trashed --}}
-        <div class="mb-4 inline-flex rounded-lg border border-ink-200 bg-surface p-1 shadow-sm">
-            <a href="{{route('cpanel_pages_list')}}" class="rounded-md px-3.5 py-1.5 text-sm font-medium transition {{ !$is_trash ? 'bg-brand-600 text-white shadow-sm' : 'text-ink-600 hover:text-ink-900' }}">@lang('cpanel/pages.general_pages')</a>
-            <a href="{{route('cpanel_trashed_pages_list')}}" class="rounded-md px-3.5 py-1.5 text-sm font-medium transition {{ $is_trash ? 'bg-brand-600 text-white shadow-sm' : 'text-ink-600 hover:text-ink-900' }}">@lang('cpanel/pages.trashed_pages')</a>
-        </div>
+        {{-- Status filter tabs: published vs trashed (DESIGN_SYSTEM §5 / Tabs) --}}
+        <nav aria-label="@lang('cpanel/pages.general_pages')" class="mb-4 flex gap-1 border-b border-border">
+            <a href="{{route('cpanel_pages_list')}}" @if(!$is_trash) aria-current="page" @endif class="-mb-px border-b-2 px-4 py-2.5 text-sm font-sans transition-colors duration-[var(--dur-fast)] {{ !$is_trash ? 'border-primary font-medium text-fg' : 'border-transparent text-muted hover:text-fg' }}">@lang('cpanel/pages.general_pages')</a>
+            <a href="{{route('cpanel_trashed_pages_list')}}" @if($is_trash) aria-current="page" @endif class="-mb-px border-b-2 px-4 py-2.5 text-sm font-sans transition-colors duration-[var(--dur-fast)] {{ $is_trash ? 'border-primary font-medium text-fg' : 'border-transparent text-muted hover:text-fg' }}">@lang('cpanel/pages.trashed_pages')</a>
+        </nav>
 
-        <div class="card overflow-hidden">
-            <form method="POST" action="{{ $is_trash ? route('cpanel_pages_bulk_action') : route('cpanel_pages_bulk_delete') }}">
+        <div class="overflow-hidden rounded-lg border border-border bg-surface">
+            <form method="POST" action="{{ $is_trash ? route('cpanel_pages_bulk_action') : route('cpanel_pages_bulk_delete') }}"
+                  x-data="{ selected: 0 }"
+                  x-on:change="selected = $el.querySelectorAll('.pages-checkbox-input:checked').length">
                 @csrf
                 @if($is_trash) @method('POST') @else @method('DELETE') @endif
-                <div class="border-b border-ink-100 px-5 py-4">
-                    <div class="select-cover mb-0">
-                        <select id="inputState" name="pages_action" required class="form-control">
-                            <option selected="selected">@lang('cpanel/pages.bulk_action_label')</option>
-                            @if($is_trash)
-                                <option value="destroy">@lang('cpanel/pages.bulk_action_destroy_label')</option>
-                                <option value="restore">@lang('cpanel/pages.bulk_action_restore_label')</option>
-                            @else
-                                <option value="delete">@lang('cpanel/pages.bulk_action_delete_label')</option>
-                            @endif
-                        </select>
-                        <button type="submit" class="btn btn-ghost">@lang('cpanel/pages.bulk_action_apply')</button>
-                    </div>
+
+                {{-- Bulk-action bar (DESIGN_SYSTEM §5). Retains the .select-cover hook. --}}
+                <div class="select-cover flex flex-wrap items-center gap-3 border-b border-border bg-surface-2 px-5 py-3" aria-live="polite">
+                    <span class="font-mono text-xs uppercase tracking-[0.08em] text-muted" x-text="selected > 0 ? selected + ' selected' : '@lang('cpanel/pages.bulk_action_label')'">@lang('cpanel/pages.bulk_action_label')</span>
+                    <select id="inputState" name="pages_action" required class="h-9 rounded-sm border border-strong bg-surface px-3 text-sm text-fg focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1">
+                        <option selected="selected">@lang('cpanel/pages.bulk_action_label')</option>
+                        @if($is_trash)
+                            <option value="destroy">@lang('cpanel/pages.bulk_action_destroy_label')</option>
+                            <option value="restore">@lang('cpanel/pages.bulk_action_restore_label')</option>
+                        @else
+                            <option value="delete">@lang('cpanel/pages.bulk_action_delete_label')</option>
+                        @endif
+                    </select>
+                    <x-button type="submit" variant="secondary" size="sm">@lang('cpanel/pages.bulk_action_apply')</x-button>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="data-table users-table">
-                        <thead>
+                    <table class="data-table users-table w-full text-left text-sm">
+                        <thead class="bg-surface-2">
                             <tr>
-                                <th class="w-10"><input class="form-check-input" id="selectAll" name="allusers" type="checkbox" aria-label="Select all"></th>
-                                <th class="w-12">№</th>
-                                <th>@lang('cpanel/pages.table_name')</th>
-                                <th>@lang('cpanel/pages.table_author')</th>
-                                <th>@lang('cpanel/pages.table_publish_date')</th>
-                                <th>@lang('cpanel/pages.table_status')</th>
+                                <th class="w-10 px-4 py-3"><input class="form-check-input" id="selectAll" name="allusers" type="checkbox" aria-label="Select all"></th>
+                                <th class="w-12 px-4 py-3"><x-eyebrow>№</x-eyebrow></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/pages.table_name')</x-eyebrow></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/pages.table_author')</x-eyebrow></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/pages.table_publish_date')</x-eyebrow></th>
+                                <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/pages.table_status')</x-eyebrow></th>
                             </tr>
                         </thead>
                         <tbody>
                         @php($pages_count = 0)
                         @forelse($pages_list as $page)
                             @php($pages_count++)
-                            <tr>
-                                <td><input class="form-check-input pages-checkbox-input" id="page_{{$page->id}}" name="pages[]" type="checkbox" value="{{$page->id}}" aria-label="Select page"></td>
-                                <td class="text-ink-400">{{$pages_count}}</td>
-                                <td>
-                                    <span class="font-medium text-ink-900">{{$page->title}}</span>
+                            <tr class="border-b border-border transition-colors last:border-0 hover:bg-surface-2">
+                                <td class="px-4 py-3 align-middle"><input class="form-check-input pages-checkbox-input" id="page_{{$page->id}}" name="pages[]" type="checkbox" value="{{$page->id}}" aria-label="Select page"></td>
+                                <td class="px-4 py-3 align-middle text-subtle">{{$pages_count}}</td>
+                                <td class="px-4 py-3 align-middle">
+                                    <span class="font-medium text-fg">{{$page->title}}</span>
                                     <span class="user_actions">
                                         @if (Auth::user()->can('manage_pages', 'App\Http\Models\UserRoles'))
                                             <a href="{{route('cpanel_edit_page', ['id' => $page->id, 'lang' => get_current_lang()])}}" target="_blank">@lang('cpanel/pages.edit_page')</a>
@@ -100,25 +102,25 @@ $is_trash = $route_name == "cpanel_trashed_pages_list";
                                         @endif
                                     </span>
                                 </td>
-                                <td>{{$page->author->username}}</td>
-                                <td class="whitespace-nowrap text-ink-600">{{ Carbon\Carbon::parse($page->created_at)->format('d.m.Y')}}</td>
-                                <td>
+                                <td class="px-4 py-3 align-middle text-muted">{{$page->author->username}}</td>
+                                <td class="whitespace-nowrap px-4 py-3 align-middle text-muted">{{ Carbon\Carbon::parse($page->created_at)->format('d.m.Y')}}</td>
+                                <td class="px-4 py-3 align-middle">
                                     @if($page->status == 1)
-                                        <span class="badge badge-success">@lang('cpanel/pages.page_published')</span>
+                                        <x-badge variant="success">@lang('cpanel/pages.page_published')</x-badge>
                                     @else
-                                        <span class="badge badge-muted">@lang('cpanel/pages.page_pending')</span>
+                                        <x-badge variant="neutral">@lang('cpanel/pages.page_pending')</x-badge>
                                     @endif
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="py-10 text-center text-ink-400">@lang('cpanel/pages.not_found')</td></tr>
+                            <tr><td colspan="6"><x-empty-state :headline="__('cpanel/pages.not_found')" /></td></tr>
                         @endforelse
                         </tbody>
                     </table>
                 </div>
             </form>
-            <div class="border-t border-ink-100 px-5 py-4">
-                {{ $pages_list->links() }}
+            <div class="border-t border-border px-5 py-4">
+                <x-pagination :paginator="$pages_list" />
             </div>
         </div>
     </div>

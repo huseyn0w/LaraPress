@@ -15,36 +15,35 @@
 @section('content')
     <div class="mx-auto max-w-7xl">
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/menus.list_headline')</h1>
-            <a href="{{route('cpanel_add_new_menu')}}" class="btn btn-info">
-                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 4a1 1 0 0 1 1 1v4h4a1 1 0 1 1 0 2h-4v4a1 1 0 1 1-2 0v-4H5a1 1 0 1 1 0-2h4V5a1 1 0 0 1 1-1Z"/></svg>
+            <h1 class="font-serif text-2xl text-fg">@lang('cpanel/menus.list_headline')</h1>
+            <x-button as="a" :href="route('cpanel_add_new_menu')" variant="primary" size="sm">
                 @lang('cpanel/menus.add_new_menu')
-            </a>
+            </x-button>
         </div>
 
         @include('cpanel.core.flash')
         @if (Session::get('menu_added'))
-            <div class="alert alert-success"><strong>@lang('cpanel/menus.menu_added')</strong></div>
+            <x-alert variant="success" class="mb-4">@lang('cpanel/menus.menu_added')</x-alert>
         @endif
 
-        <div class="card overflow-hidden">
+        <div class="overflow-hidden rounded-lg border border-border bg-surface">
             <div class="overflow-x-auto">
-                <table class="data-table users-table">
-                    <thead>
+                <table class="data-table users-table w-full text-left text-sm">
+                    <thead class="bg-surface-2">
                         <tr>
-                            <th class="w-12">№</th>
-                            <th>@lang('cpanel/menus.table_name')</th>
-                            <th>@lang('cpanel/menus.table_action')</th>
+                            <th class="w-12 px-4 py-3"><x-eyebrow>№</x-eyebrow></th>
+                            <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/menus.table_name')</x-eyebrow></th>
+                            <th class="px-4 py-3"><x-eyebrow>@lang('cpanel/menus.table_action')</x-eyebrow></th>
                         </tr>
                     </thead>
                     <tbody>
                     @php($menus_count = 0)
                     @forelse($menus_list as $menu)
                         @php($menus_count++)
-                        <tr>
-                            <td class="text-ink-400">{{$menus_count}}</td>
-                            <td class="font-medium text-ink-900">{{$menu->title}}</td>
-                            <td>
+                        <tr class="border-b border-border transition-colors last:border-0 hover:bg-surface-2">
+                            <td class="px-4 py-3 align-middle text-subtle">{{$menus_count}}</td>
+                            <td class="px-4 py-3 align-middle font-medium text-fg">{{$menu->title}}</td>
+                            <td class="px-4 py-3 align-middle">
                                 <span class="user_actions">
                                     @if (Auth::user()->can('manage_menus', 'App\Http\Models\UserRoles'))
                                         <a href="{{route('cpanel_edit_menu', ['id' => $menu->id, 'lang' => get_current_lang()])}}" target="_blank">@lang('cpanel/menus.edit')</a>
@@ -57,13 +56,13 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="3" class="py-10 text-center text-ink-400">@lang('cpanel/menus.not_found')</td></tr>
+                        <tr><td colspan="3"><x-empty-state :headline="__('cpanel/menus.not_found')" /></td></tr>
                     @endforelse
                     </tbody>
                 </table>
             </div>
-            <div class="border-t border-ink-100 px-5 py-4">
-                {{ $menus_list->links() }}
+            <div class="border-t border-border px-5 py-4">
+                <x-pagination :paginator="$menus_list" />
             </div>
         </div>
     </div>
