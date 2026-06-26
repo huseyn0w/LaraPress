@@ -32,10 +32,45 @@
 ## Where things stand
 
 **Branch:** `refactor/canon-convergence` (off `master`). All work committed there.
-**Runner:** **Pest 4** (`./vendor/bin/pest`) is canonical; `php artisan test` still proxies to it.
-**Suite:** **322 passed (791 assertions)**, ~33s (in-memory SQLite; browser tests excluded/skipped).
+**Runner:** **Pest 4** is canonical. NOTE: `./vendor/bin/pest` throws a spurious
+`ShouldNotHappen: OutputInterface cannot be resolved` in SOME interactive shells (a Pest-binary
+DI quirk, not a code problem) — **use `php artisan test` (same engine) when that happens**; CI and
+fresh subagent shells run the binary fine.
+**Suite:** **479 passed**, ~39s (in-memory SQLite; browser tests excluded/skipped). 0 risky.
 **Static analysis:** `composer analyse` (PHPStan/Larastan level 5 + baseline) → **green**.
 **Lint:** `composer lint` (Pint, Laravel preset) → clean on all touched files.
+
+### Task 3 — UI redesign to DESIGN_SYSTEM.md (IN PROGRESS — Phases 1–4 of 8 DONE)
+Plan: `docs/superpowers/plans/2026-06-26-task3-ui-redesign.md` (public+admin dark toggle in scope).
+Ledger: `.git/sdd/progress.md` "Task 3" section. Commits `088419a`..`049f02a`.
+- **P1 tokens DONE** — `resources/css/tokens.css` (`:root` light + `.dark` dark, exact §2 hex + §4
+  radius/spacing + §6 motion vars); `tailwind.config.js` bridges utilities to vars + `darkMode:'class'`.
+  Utility vocabulary: `bg-bg`/`bg-surface`/`bg-surface-2`, `text-fg`/`text-muted`/`text-subtle`,
+  `text-primary`/`bg-primary`/`text-primary-contrast`, `border-border`/`border-strong`, `ring-ring`,
+  `bg-success-bg`/`text-success` (+warning/error), `text-accent`. Radii `rounded-sm/md/lg/xl/full`=§4
+  (legacy `brand`/`ink`/`paper` ramps kept for un-migrated views).
+- **P2 fonts DONE** — self-hosted `@fontsource-variable/{newsreader,inter,geist-mono}` → `font-serif`
+  (Newsreader Variable) / `font-sans` (Inter Variable, NOT Inter Tight) / `font-mono` (Geist Mono
+  Variable); Google Fonts + admin FA MaxCDN removed from the shells. DEFERRED CDNs: `vendor/laravel-
+  filemanager/*` (BS3+FA4) → P6; `cpanel/menus/*` jQuery-UI googleapis → P7. Geist Mono pushes latin
+  fonts to ~133KB (>120KB §7) → subset in P8. Font `preload` deferred to P8 (Vite hashing).
+- **P3 component library DONE** — 16 anonymous Blade components in `resources/views/components/`
+  (icon, eyebrow, button, badge, field, alert, card, card.post, breadcrumb[+item], pagination, avatar,
+  empty-state, dropdown[+item], modal, tabs[+tab], toast-region) + ~157 component tests (0 risky).
+  **API contracts captured in scratchpad** `t3-phase3a/b/c-report.md` — read those before applying.
+  Key: `<x-button variant size as href loading icon>`, `<x-field label name error help required>`
+  (caller sets id/aria on the control), `<x-card.post :title :url :excerpt :category :date :author
+  :image>`, `<x-tabs :tabs="['en'=>'English'] " default>` + `<x-slot:panel_en>`, `<x-modal name title
+  size>` (open via `$dispatch('open-modal','name')`).
+- **P4 public shell DONE** — header/footer/breadcrumb rebuilt to §5 (sticky scroll-shadow, skip-link,
+  `<nav aria-label>`, locale switcher as `<x-dropdown>`, **public dark/light toggle** [localStorage key
+  `cmstack-theme` SHARED with admin, no-FOUC inline `<head>` script], focus-trapped mobile drawer in
+  `front.js`); all `<head>`/seo-meta/`@vite`/`@yield`/`@stack`/locale wiring preserved; `@hook('footer')`.
+- **REMAINING: P5 public pages** (post/archives/home/pages/profile + port the 4 STILL-Bootstrap-4 auth
+  views: register, passwords/email, passwords/reset, verify), **P6 admin shell** (sidebar/topbar/dark
+  toggle + replace filemanager FA), **P7 admin section views (30)**, **P8 perf+a11y** (subset fonts +
+  preload + responsive images + Lighthouse CI — all CI/served-env measured, NOT this sandbox).
+  Apply the P3 components; keep `php artisan test` green each slice; update `tests/Browser/*` data-testid.
 
 ### Architecture map (current)
 
