@@ -1,27 +1,18 @@
 <?php
 /**
- * Cmstack-Laravel
- * File: post.blade.php
- * Created by Elman (https://linkedin.com/in/huseyn0w)
- * Date: 30.10.2019
- * Template Name: "Standart";
- * Phase 4: rewritten from Bootstrap 4 to Tailwind CSS (editorial theme).
- *           Like/comment interactivity reimplemented with Alpine.js + fetch.
+ * Cmstack-Laravel — post detail view.
+ * Phase 5: redesigned to DESIGN_SYSTEM §5 (prose, avatar, badges, pagination, field).
+ * Functional wiring preserved: postLike, commentThread, editCommentDialog, comment form.
  */
 ?>
 
 @php
     $category_title = $data->categories[0]->title;
-    $category_slug = $data->categories[0]->slug;
-
-    $author = $data->author->name .' '.$data->author->surname;
-
-    $post_liked = check_if_post_liked_by_current_user($data->id);
-
-    $post_comments_count = count($data->comments);
-
-    if(is_logged_in()) $user_id = \Auth()->user()->id;
-
+    $category_slug  = $data->categories[0]->slug;
+    $author         = $data->author->name . ' ' . $data->author->surname;
+    $post_liked     = check_if_post_liked_by_current_user($data->id);
+    $post_comments_count = $data->comments->total();
+    if (is_logged_in()) $user_id = \Auth()->user()->id;
     $current_lang = get_current_lang_prefix();
 @endphp
 
@@ -32,47 +23,67 @@
 @include(config('app.template_name').'.partials.banner', [
     'title'  => $data->title,
     'crumbs' => [
-        ['label' => $home_page_data->title, 'url' => env('APP_URL')],
-        ['label' => $category_title, 'url' => env('APP_URL').'/'.$current_lang.'category/'.$category_slug],
+        ['label' => $home_page_data->title, 'url' => config('app.url')],
+        ['label' => $category_title, 'url' => config('app.url').'/'.$current_lang.'category/'.$category_slug],
         ['label' => $data->title, 'url' => null],
     ],
 ])
 
-<article class="mx-auto max-w-3xl px-5 py-14 sm:px-8 sm:py-16">
+<article class="mx-auto max-w-[720px] px-5 py-14 sm:px-8 sm:py-16">
+
+    {{-- Category eyebrow --}}
+    <a href="{{ config('app.url') }}/{{ $current_lang }}category/{{ $category_slug }}" class="hover:text-primary transition-colors">
+        <x-eyebrow class="mb-2">{{ $category_title }}</x-eyebrow>
+    </a>
+
+    {{-- Post title --}}
+    <h1 class="mt-3 font-serif text-fg leading-[1.08] tracking-[-0.01em]" style="font-size: clamp(2.25rem,4vw,3.052rem)">
+        {{ $data->title }}
+    </h1>
 
     {{-- Byline --}}
-    <div class="flex items-center gap-3 border-b border-ink-100 pb-8">
-        <img src="{{ image_src($data->author->avatar, true) }}" {!! image_fallback(true) !!} alt="{{$author}}" width="44" height="44" loading="lazy" class="h-11 w-11 rounded-full object-cover ring-1 ring-ink-100">
-        <div>
-            <a href="{{route('show_user',['username' => $data->author->username])}}" class="font-serif text-base font-medium text-ink-900 hover:text-brand-700">{{$author}}</a>
-            <div class="text-sm text-ink-400">{{Carbon\Carbon::parse($data->updated_at)->format('d.m.Y')}}</div>
+    <div class="mt-6 flex items-center gap-3 border-b border-border pb-6">
+        <x-avatar :user="$data->author" size="md" />
+        <div class="min-w-0">
+            <a href="{{ route('show_user', ['username' => $data->author->username]) }}"
+               class="font-serif text-base font-medium text-fg hover:text-primary transition-colors">{{ $author }}</a>
+            <div class="text-xs text-muted font-mono mt-0.5">
+                <time datetime="{{ $data->updated_at->toIso8601String() }}">
+                    {{ Carbon\Carbon::parse($data->updated_at)->format('d.m.Y') }}
+                </time>
+            </div>
         </div>
     </div>
 
+    {{-- Hero image --}}
     @if(!empty($data->thumbnail))
-        <figure class="mt-10 overflow-hidden rounded-2xl bg-ink-100 shadow-card">
-            <img src="{{$data->thumbnail}}" {!! image_fallback() !!} alt="{{$data->title}}" width="1280" height="720" loading="eager" class="aspect-[16/9] w-full object-cover">
+        <figure class="mt-10 overflow-hidden rounded-xl bg-surface-2">
+            <img src="{{ $data->thumbnail }}" {!! image_fallback() !!} alt="{{ $data->title }}"
+                 width="1280" height="720" loading="eager"
+                 class="aspect-[16/9] w-full object-cover">
         </figure>
     @endif
 
     {{-- Post body (passed through the `the_content` plugin filter) --}}
-    <div class="article-prose mt-12">
+    <div class="article-prose mt-10">
         {!! app('hooks')->filter('the_content', $data->content) !!}
     </div>
 
     {{-- Tags --}}
     @if(!empty($data->tags) && count($data->tags) > 0)
         <div class="mt-10 flex flex-wrap items-center gap-2">
-            <span class="mr-1 text-xs font-medium uppercase tracking-wider text-ink-400">@lang('default/post.tags')</span>
+            <span class="mr-1 font-mono text-xs uppercase tracking-[0.08em] text-muted">@lang('default/post.tags')</span>
             @foreach($data->tags as $tag)
-                <a href="{{ env('APP_URL').'/'.$current_lang.'tag/'.$tag->slug }}"
-                   class="inline-flex items-center rounded-full border border-ink-200 px-3 py-1 text-sm text-ink-600 transition hover:border-brand-300 hover:text-brand-700">{{ $tag->name }}</a>
+                <x-badge variant="neutral">
+                    <a href="{{ config('app.url') }}/{{ $current_lang }}tag/{{ $tag->slug }}"
+                       class="hover:text-fg transition-colors">{{ $tag->name }}</a>
+                </x-badge>
             @endforeach
         </div>
     @endif
 
     {{-- Like bar --}}
-    <div class="mt-14 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-ink-100 bg-ink-50/60 px-6 py-5">
+    <div class="mt-12 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface px-6 py-5">
         @if(is_logged_in())
             <div
                 x-data="postLike({
@@ -99,19 +110,19 @@
                     type="button"
                     @click="toggle()"
                     :disabled="busy"
-                    :class="liked ? 'border-brand-600 bg-brand-600 text-white' : 'border-ink-200 bg-surface text-ink-700 hover:border-brand-300 hover:text-brand-700'"
-                    class="inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition duration-200 ease-out-expo active:scale-[0.97] disabled:opacity-60"
+                    :class="liked ? 'bg-primary text-primary-contrast border-primary' : 'border-border text-fg hover:border-border-strong'"
+                    class="inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium font-sans transition duration-[var(--dur-fast)] ease-[var(--ease-out)] active:scale-[0.98] disabled:opacity-60 motion-reduce:active:scale-100"
                 >
-                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 17.5 3.5 11a4 4 0 1 1 6.5-4.6A4 4 0 1 1 16.5 11z"/></svg>
+                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 17.5 3.5 11a4 4 0 1 1 6.5-4.6A4 4 0 1 1 16.5 11z"/></svg>
                     <span x-text="label">@lang($post_liked ? 'default/post.dislike' : 'default/post.like')</span>
                 </button>
-                <p class="text-sm text-ink-500" x-text="summary"></p>
+                <p class="text-sm text-muted font-sans" x-text="summary"></p>
             </div>
         @else
-            <div class="flex items-center gap-2.5 text-sm text-ink-500">
-                <svg class="h-5 w-5 text-brand-500" viewBox="0 0 20 20" fill="currentColor"><path d="M10 17.5 3.5 11a4 4 0 1 1 6.5-4.6A4 4 0 1 1 16.5 11z"/></svg>
+            <div class="flex items-center gap-2.5 text-sm text-muted font-sans">
+                <svg class="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 17.5 3.5 11a4 4 0 1 1 6.5-4.6A4 4 0 1 1 16.5 11z"/></svg>
                 @if($data->likes > 0)
-                    <span><span class="font-semibold text-ink-700">{{$data->likes}}</span> @lang('default/post.multiple_like_after')</span>
+                    <span><span class="font-semibold text-fg">{{ $data->likes }}</span> @lang('default/post.multiple_like_after')</span>
                 @else
                     <span>@lang('default/post.nobody_likes')</span>
                 @endif
@@ -119,12 +130,12 @@
         @endif
     </div>
 
-    {{-- Comments --}}
+    {{-- Comments section --}}
     <section class="mt-16" x-data="commentThread({
         deleteUrl: '{{ route('delete_post_comments', ['id' => $data->id]) }}',
         confirmText: @json(__('default/post.delete') . '?')
     })">
-        <h2 class="text-2xl font-medium text-ink-900">{{$post_comments_count}} @lang('default/post.comments')</h2>
+        <h2 class="font-serif text-2xl text-fg">{{ $post_comments_count }} @lang('default/post.comments')</h2>
 
         @if($post_comments_count > 0)
             <div class="mt-8 space-y-8">
@@ -132,7 +143,7 @@
                     @include(config('app.template_name').'.partials.comment', ['comment' => $comment, 'user_id' => $user_id ?? null, 'is_reply' => false])
 
                     @if(count($comment->replies) > 0)
-                        <div data-comment-replies class="ml-6 space-y-8 border-l border-ink-100 pl-6 sm:ml-10 sm:pl-8">
+                        <div data-comment-replies class="ml-6 space-y-8 border-l border-border pl-6 sm:ml-10 sm:pl-8">
                             @foreach($comment->replies as $child_comment)
                                 @include(config('app.template_name').'.partials.comment', ['comment' => $child_comment, 'user_id' => $user_id ?? null, 'is_reply' => true])
                             @endforeach
@@ -142,51 +153,67 @@
             </div>
 
             <div class="mt-10">
-                {!! pretty_url($data->comments->links()) !!}
+                <x-pagination :paginator="$data->comments" />
             </div>
         @else
-            <p class="mt-6 text-ink-500">@lang('default/post.no_comments')</p>
+            <p class="mt-6 text-muted font-sans">@lang('default/post.no_comments')</p>
         @endif
     </section>
 
     {{-- Comment form --}}
     <section class="mt-16 scroll-mt-24" id="comment-area">
         @auth
-            <h2 class="text-2xl font-medium text-ink-900">@lang('default/post.leave_reply')</h2>
+            <h2 class="font-serif text-2xl text-fg">@lang('default/post.leave_reply')</h2>
 
             @if ($errors->any())
-                <div class="mt-6 rounded-xl border border-brand-200 bg-brand-50 px-4 py-3.5 text-sm text-brand-800" role="alert">
-                    <ul class="list-disc space-y-1 pl-5">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-            @if ($update_message = Session::get('comment_added'))
-                <div class="mt-6 flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-medium text-emerald-800" role="status">
-                    <svg class="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="10" cy="10" r="8"/><path d="m6.5 10 2.5 2.5 4.5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    @if (Auth::user()->can('manage_comments', 'App\Http\Models\UserRoles'))
-                        @lang('default/post.comment_added')
-                    @else
-                        @lang('default/post.comment_send_to_approve')
-                    @endif
+                <div class="mt-6">
+                    <x-alert variant="error">
+                        <ul class="list-disc space-y-1 pl-5">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </x-alert>
                 </div>
             @endif
 
-            <form action="{{route('store_post_comments', ['id' => $data->id])}}" method="POST" class="mt-6">
+            @if ($update_message = Session::get('comment_added'))
+                <div class="mt-6">
+                    <x-alert variant="success">
+                        @if (Auth::user()->can('manage_comments', 'App\Http\Models\UserRoles'))
+                            @lang('default/post.comment_added')
+                        @else
+                            @lang('default/post.comment_send_to_approve')
+                        @endif
+                    </x-alert>
+                </div>
+            @endif
+
+            <form action="{{ route('store_post_comments', ['id' => $data->id]) }}" method="POST" class="mt-8">
                 @csrf
-                <textarea id="comment-field" name="comment" rows="5" required
-                          placeholder="@lang('default/post.comment')"
-                          class="field-input resize-y"></textarea>
+                <x-field name="comment" label="@lang('default/post.comment')" :error="$errors->first('comment')">
+                    <textarea
+                        id="comment"
+                        name="comment"
+                        rows="5"
+                        required
+                        placeholder="@lang('default/post.comment')"
+                        class="w-full resize-y bg-surface border border-border-strong rounded-sm px-3 py-2.5 text-fg placeholder:text-subtle focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/30 font-sans text-base"
+                        @if($errors->has('comment')) aria-invalid="true" aria-describedby="comment-error" @endif
+                    ></textarea>
+                </x-field>
                 <input type="hidden" name="parent_id" id="comment_parent_id" value="">
-                <input type="hidden" name="post_id" value="{{$data->id}}">
-                <button type="submit" class="btn-primary mt-4">@lang('default/post.comment')</button>
+                <input type="hidden" name="post_id" value="{{ $data->id }}">
+                <div class="mt-4">
+                    <x-button type="submit" variant="primary">@lang('default/post.comment')</x-button>
+                </div>
             </form>
         @else
-            <div class="rounded-2xl border border-ink-100 bg-ink-50/60 px-6 py-8 text-center">
-                <p class="text-ink-600">@lang('default/post.comment_auth')</p>
-                <a href="{{route('login')}}" class="btn-primary mt-4">@lang('default/header.login')</a>
+            <div class="rounded-lg border border-border bg-surface px-6 py-8 text-center">
+                <p class="text-muted font-sans">@lang('default/post.comment_auth')</p>
+                <div class="mt-4">
+                    <x-button href="{{ route('login') }}">@lang('default/header.login')</x-button>
+                </div>
             </div>
         @endauth
     </section>
@@ -197,6 +224,3 @@
 @endauth
 
 @endsection
-
-{{-- Phase 7: removed the legacy AddThis third-party share widget (render-blocking,
-     tracker-heavy). The public theme now loads only the Vite bundle. --}}
