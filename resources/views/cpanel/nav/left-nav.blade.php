@@ -49,7 +49,7 @@ $settingsActive = in_array($current_route, ['cpanel_general_settings', 'cpanel_s
         $iconCls    = 'h-5 w-5 shrink-0';
     @endphp
 
-    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Main">
+    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4" aria-label="Main" data-testid="admin-sidebar">
         <a href="{{route('cpanel_home')}}" class="{{ $linkBase }} {{ $isActive('cpanel_home') ? $linkActive : $linkIdle }}">
             <svg class="{{ $iconCls }}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">{!! $icons['dashboard'] !!}</svg>
             <span>@lang('cpanel/nav/left.dashboard')</span>

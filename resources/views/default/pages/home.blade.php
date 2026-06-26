@@ -74,7 +74,7 @@
                 $post_thumbnail = image_src($post->thumbnail);
             @endphp
             <article x-data="reveal({{ $loop->index * 70 }})" class="reveal-init group">
-                <a href="{{env('APP_URL')}}/posts/{{$post->slug}}" class="block overflow-hidden rounded-2xl bg-ink-100 shadow-card">
+                <a href="{{env('APP_URL')}}/posts/{{$post->slug}}" class="block overflow-hidden rounded-2xl bg-ink-100 shadow-card" data-testid="post-link">
                     <img src="{{$post_thumbnail}}" {!! image_fallback() !!} alt="{{$post->title}}" width="640" height="400" loading="lazy"
                          class="aspect-[16/10] w-full object-cover transition duration-700 ease-out-expo group-hover:scale-[1.03]">
                 </a>

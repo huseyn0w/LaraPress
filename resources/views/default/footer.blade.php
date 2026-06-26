@@ -61,7 +61,8 @@ $languages = get_translation_links();
                             </span>
                         @else
                             <a href="{{$language['url']}}"
-                               class="inline-flex items-center gap-2 rounded-full border border-ink-200 px-3.5 py-1.5 text-sm text-ink-600 transition hover:border-ink-300 hover:bg-ink-50 hover:text-ink-900 active:scale-95">
+                               class="inline-flex items-center gap-2 rounded-full border border-ink-200 px-3.5 py-1.5 text-sm text-ink-600 transition hover:border-ink-300 hover:bg-ink-50 hover:text-ink-900 active:scale-95"
+                               data-testid="lang-{{ $code }}">
                                 <img src="{{$language['icon']}}" alt="{{$language['title']}}" class="h-4 w-4 rounded-sm">
                                 {{$language['title']}}
                             </a>

@@ -39,12 +39,12 @@
                     <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-400">@lang('cpanel/settings.geo_identity_section')</h2>
                     <div class="field">
                         <label class="field-label">@lang('cpanel/settings.geo_business_name')</label>
-                        <input type="text" name="business_name" class="form-control" value="{{ old('business_name', $geo_settings->business_name) }}">
+                        <input type="text" name="business_name" class="form-control" value="{{ old('business_name', $geo_settings->business_name) }}" data-testid="geo-business-name">
                     </div>
                     <div class="field">
                         <label class="field-label">@lang('cpanel/settings.geo_business_type')</label>
                         @php $type = old('business_type', $geo_settings->business_type ?? 'Organization'); @endphp
-                        <select name="business_type" class="form-control">
+                        <select name="business_type" class="form-control" data-testid="geo-business-type">
                             <option value="Organization" @selected($type === 'Organization')>@lang('cpanel/settings.geo_type_organization')</option>
                             <option value="LocalBusiness" @selected($type === 'LocalBusiness')>@lang('cpanel/settings.geo_type_localbusiness')</option>
                             <option value="ProfessionalService" @selected($type === 'ProfessionalService')>@lang('cpanel/settings.geo_type_professionalservice')</option>
@@ -53,7 +53,7 @@
                     </div>
                     <div class="field">
                         <label class="field-label">@lang('cpanel/settings.geo_description')</label>
-                        <textarea rows="3" name="description" class="form-control">{{ old('description', $geo_settings->description) }}</textarea>
+                        <textarea rows="3" name="description" class="form-control" data-testid="geo-description">{{ old('description', $geo_settings->description) }}</textarea>
                     </div>
                     <div class="field">
                         <label class="field-label">@lang('cpanel/settings.geo_founder_name')</label>
@@ -68,12 +68,12 @@
                     <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-ink-400">@lang('cpanel/settings.geo_services_section')</h2>
                     <div class="field">
                         <label class="field-label">@lang('cpanel/settings.geo_services')</label>
-                        <textarea rows="5" name="services" class="form-control" placeholder="Laravel development&#10;Custom CMS&#10;AI / MCP integration">{{ old('services', $geo_settings->services) }}</textarea>
+                        <textarea rows="5" name="services" class="form-control" placeholder="Laravel development&#10;Custom CMS&#10;AI / MCP integration" data-testid="geo-services">{{ old('services', $geo_settings->services) }}</textarea>
                         <div class="field-desc"><p>@lang('cpanel/settings.geo_services_help')</p></div>
                     </div>
                     <div class="field">
                         <label class="field-label">@lang('cpanel/settings.geo_service_area')</label>
-                        <input type="text" name="service_area" class="form-control" value="{{ old('service_area', $geo_settings->service_area) }}">
+                        <input type="text" name="service_area" class="form-control" value="{{ old('service_area', $geo_settings->service_area) }}" data-testid="geo-service-area">
                         <div class="field-desc"><p>@lang('cpanel/settings.geo_service_area_help')</p></div>
                     </div>
                 </div>
@@ -134,13 +134,13 @@
                     </div>
                     <div class="field">
                         <label for="include_in_llms" class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
-                            <input class="form-check-input" id="include_in_llms" name="include_in_llms" type="checkbox" value="1" {{ old('include_in_llms', $geo_settings->include_in_llms ?? true) ? 'checked' : '' }}>
+                            <input class="form-check-input" id="include_in_llms" name="include_in_llms" type="checkbox" value="1" {{ old('include_in_llms', $geo_settings->include_in_llms ?? true) ? 'checked' : '' }} data-testid="geo-include-in-llms">
                             @lang('cpanel/settings.geo_include_in_llms')
                         </label>
                     </div>
                 </div>
                 <div class="flex justify-end border-t border-ink-100 px-5 py-4">
-                    <button type="submit" class="btn btn-info">@lang('cpanel/settings.update_button_label')</button>
+                    <button type="submit" class="btn btn-info" data-testid="geo-submit">@lang('cpanel/settings.update_button_label')</button>
                 </div>
             </div>
         </form>

@@ -27,7 +27,8 @@
                 <label for="email" class="field-label">@lang('login.username_or_email')</label>
                 <input id="email" type="text"
                        class="field-input @error('username') border-brand-400 @enderror @error('email') border-brand-400 @enderror"
-                       name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                       name="email" value="{{ old('email') }}" required autocomplete="email" autofocus
+                       data-testid="login-username">
                 @error('email')
                     <p class="mt-1.5 text-sm text-brand-700" role="alert">{{ $message }}</p>
                 @enderror
@@ -40,7 +41,8 @@
                 <label for="password" class="field-label">@lang('login.password')</label>
                 <input id="password" type="password"
                        class="field-input @error('password') border-brand-400 @enderror"
-                       name="password" required autocomplete="current-password">
+                       name="password" required autocomplete="current-password"
+                       data-testid="login-password">
                 @error('password')
                     <p class="mt-1.5 text-sm text-brand-700" role="alert">{{ $message }}</p>
                 @enderror
@@ -53,7 +55,7 @@
             </label>
 
             <div class="flex items-center justify-between gap-4 pt-2">
-                <button type="submit" class="btn-primary">@lang('login.login')</button>
+                <button type="submit" class="btn-primary" data-testid="login-submit">@lang('login.login')</button>
 
                 @if (Route::has('password.request'))
                     <a class="text-sm font-medium text-ink-500 transition hover:text-brand-700"
