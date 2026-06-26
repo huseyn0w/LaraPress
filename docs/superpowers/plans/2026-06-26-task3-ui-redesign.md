@@ -14,7 +14,7 @@
   - Sans UI font is **Inter** (current code uses "Inter Tight" — switch to Inter).
   - Fonts are **self-hosted** woff2, `preload`ed, subset, `font-display: swap`, **no font CDN** (remove the Google Fonts `<link>` in `header.blade.php:49-51` and the Font Awesome MaxCDN `<link>` in `cpanel/core/header-styles.blade.php`). Total font weight ≤ 120KB.
   - Add the **`--*` token layer** (§2) as the single source of truth; Tailwind colors reference the vars, not raw hex.
-  - Dark mode exists via a `.dark` class (admin gets a toggle; public site light by default unless a later decision adds a toggle).
+  - Dark mode exists via a `.dark` class. **Both the public site AND the admin get a user dark/light toggle** (decided: public toggle is in scope). Default to `prefers-color-scheme`, persist the user's choice in `localStorage`, apply the class before first paint (inline head script) to avoid a flash. Public toggle lives in the header right cluster; admin toggle in the topbar.
 - **Branch:** `refactor/canon-convergence`. Commit each verified slice; plain message, **NO `Co-Authored-By` / Claude attribution trailer**.
 - **Keep the test suite green** (`./vendor/bin/pest`, currently **322 passed**) and SHOW output after every slice. The HTTP feature tests assert markup/routes — they must keep passing as views change. The Pest browser suite (`tests/Browser/`, CI-only) asserts *computed styles*; update its `data-testid` hooks + assertions to the new design as part of the relevant slices.
 - **Preflight stays disabled globally** (`tailwind.config.js corePlugins.preflight: false`); the public reset is scoped under `.theme-default`, admin under `.theme-admin`. Do not enable global preflight (it would clobber the other theme). Dark tokens flip under `.dark` *within* each theme scope.
@@ -214,6 +214,7 @@ it('renders a primary button with focus ring and aria-busy when loading', functi
 - [ ] **Step 2:** Rebuild the footer per §5 (columns: wordmark+tagline, nav groups, locale switcher; bottom mono caption copyright + stack attribution; include the plugin render-region hook `@hook('footer')`). Keep `</main>` close + `@stack`.
 - [ ] **Step 3:** Convert `partials/banner.blade.php` to use `x-breadcrumb` (mirrors the `BreadcrumbList` JSON-LD).
 - [ ] **Step 4:** Focus-trap + `Esc` for the mobile drawer in `front.js` (reduced-motion safe).
+- [ ] **Step 4b: Public dark/light toggle** — add a toggle control to the header right cluster (icon button, `aria-label`, `aria-pressed`). In `front.js`: toggle `.dark` on `<html>`, persist in `localStorage` (key shared with admin), default to `prefers-color-scheme`. Add a tiny inline `<head>` script in `header.blade.php` that applies the stored/preferred class BEFORE first paint (no FOUC). Verify both modes meet §2 contrast on the public pages.
 - [ ] **Step 5:** Update `tests/Browser/AuthAdminTest.php`/`HomepageTest.php` `data-testid`s + computed-style assertions to the new shell. Run `./vendor/bin/pest 2>&1 | tail -5` (HTTP suite green; browser tests skip locally).
 - [ ] **Step 6: Commit** `design: rebuild public header/footer/breadcrumb to DESIGN_SYSTEM §5 (a11y landmarks, focus-trapped drawer)`.
 
