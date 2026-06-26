@@ -57,7 +57,12 @@ export default {
                 // defined in tokens.css. Dark mode flips automatically via `.dark`.
                 bg: 'var(--bg)',
                 'surface-2': 'var(--surface-2)',
-                text: { DEFAULT: 'var(--text)', muted: 'var(--text-muted)', subtle: 'var(--text-subtle)' },
+                // Foreground text tokens as FLAT keys to avoid the `text-text-*`
+                // stutter: use `text-fg` (primary), `text-muted`, `text-subtle`.
+                // Primary body text is also inherited from the .theme-* base.
+                fg: 'var(--text)',
+                muted: 'var(--text-muted)',
+                subtle: 'var(--text-subtle)',
                 primary: { DEFAULT: 'var(--primary)', hover: 'var(--primary-hover)', contrast: 'var(--primary-contrast)' },
                 accent: 'var(--accent)',
                 border: { DEFAULT: 'var(--border)', strong: 'var(--border-strong)' },
