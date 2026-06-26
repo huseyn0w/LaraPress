@@ -13,8 +13,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 <title>@lang('cpanel/nav/top.header_title')</title>
 <meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-{{-- Font Awesome 4 is still used for the social-profile icons in the user card. --}}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
+{{-- Font Awesome CDN removed (DESIGN_SYSTEM §3/§7 — no font/icon CDN).
+     Social profile icons replaced with inline SVG in cpanel/users/profile.blade.php.
+     Vendor laravel-filemanager views use FA icons internally; those are
+     addressed in Phase 6 when the filemanager is replaced/isolated. --}}
 @stack('extrastyles')
 {{-- Tailwind admin bundle (Vite). Bootstrap + Light Bootstrap Dashboard assets
      are no longer loaded; the admin is fully Tailwind now. --}}

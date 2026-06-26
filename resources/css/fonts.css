@@ -1,0 +1,10 @@
+/* Self-hosted variable fonts — DESIGN_SYSTEM §3/§7.
+ * Imported by both app.css and admin.css, after tokens.css.
+ * font-display: swap is provided by @fontsource-variable automatically.
+ * The variable axis covers the full weight + optical-size range so no
+ * static-weight subsets are needed; Vite bundles the woff2 files into
+ * public/build/assets/ at build time.
+ */
+@import '@fontsource-variable/newsreader';      /* opsz + wght + italic axis */
+@import '@fontsource-variable/inter';            /* wght axis */
+@import '@fontsource-variable/geist-mono';       /* wght axis */

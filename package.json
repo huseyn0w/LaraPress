@@ -6,6 +6,9 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@fontsource-variable/geist-mono": "^5.2.8",
+        "@fontsource-variable/inter": "^5.2.8",
+        "@fontsource-variable/newsreader": "^5.2.10",
         "@tailwindcss/forms": "^0.5.7",
         "@tailwindcss/typography": "^0.5.10",
         "alpinejs": "^3.13.10",

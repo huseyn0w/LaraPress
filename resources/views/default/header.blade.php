@@ -44,11 +44,13 @@ $current_lang = get_current_lang_prefix();
     <link rel="icon" type="image/png" sizes="32x32" href="{{asset('front/'.config('app.template_name').'/img/favicon-32x32.png')}}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{asset('front/'.config('app.template_name').'/img/favicon-16x16.png')}}">
 
-    {{-- Editorial type pairing: Newsreader (optical serif display) + Inter Tight (grotesque UI).
-         preconnect for fast handshake; display=swap to avoid render-blocking FOIT. --}}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+    {{-- Fonts are self-hosted via @fontsource-variable (DESIGN_SYSTEM §3/§7).
+         Newsreader Variable + Inter Variable + Geist Mono Variable are bundled
+         through Vite (resources/css/fonts.css → public/build/assets/*.woff2).
+         No Google Fonts / CDN requests; font-display: swap via fontsource.
+         Preload of critical weights is deferred to Phase 8 (perf pass) — a
+         stable Vite-hashed woff2 URL requires build-manifest lookup not yet
+         wired at template render time. --}}
 
     @stack('extrastyles')
 

@@ -139,9 +139,14 @@ export default {
                 },
             },
             fontFamily: {
-                // Contrast-axis pairing: optical serif display + grotesque sans UI.
-                serif: ['Newsreader', ...defaultTheme.fontFamily.serif],
-                sans: ['"Inter Tight"', ...defaultTheme.fontFamily.sans],
+                // Self-hosted variable fonts (DESIGN_SYSTEM §3/§7).
+                // Family names confirmed from @fontsource-variable package CSS:
+                //   inter/index.css → font-family: 'Inter Variable'
+                //   newsreader/index.css → font-family: 'Newsreader Variable'
+                //   geist-mono/index.css → font-family: 'Geist Mono Variable'
+                serif: ['"Newsreader Variable"', ...defaultTheme.fontFamily.serif],
+                sans: ['"Inter Variable"', ...defaultTheme.fontFamily.sans],
+                mono: ['"Geist Mono Variable"', ...defaultTheme.fontFamily.mono],
             },
             letterSpacing: {
                 tightest: '-0.04em',
