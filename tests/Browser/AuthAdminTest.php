@@ -21,6 +21,16 @@
  *   ->assertSee(text)                 → visible text assertion
  *   ->assertNoSmoke()                 → no console / JS errors
  *   ->assertNoAccessibilityIssues(1)  → WCAG 2.1 AA (level 1 = serious+critical)
+ *
+ * Phase 4 public-shell data-testids referenced from the public site:
+ *   [data-testid="skip-link"]          — skip-to-content link
+ *   [data-testid="public-header"]      — <header> element
+ *   [data-testid="header-wordmark"]    — wordmark anchor
+ *   [data-testid="dark-toggle"]        — dark/light toggle button (desktop)
+ *   [data-testid="mobile-menu-button"] — hamburger button
+ *
+ * Admin-shell data-testids (added in Phase 6):
+ *   [data-testid="admin-sidebar"]      — admin sidebar element
  */
 $browserEnv = (bool) env('BROWSER_TESTS', false);
 
@@ -72,4 +82,14 @@ it('admin panel is usable on a mobile viewport', function () {
 
     $page->assertNoSmoke()
         ->assertNoAccessibilityIssues(1);
+})->skip(! $browserEnv, 'browser env required — set BROWSER_TESTS=1');
+
+it('public site header has skip link and dark toggle after logout', function () {
+    $page = visit('/');
+
+    $page->assertPresent('[data-testid="skip-link"]')
+        ->assertPresent('[data-testid="public-header"]')
+        ->assertPresent('[data-testid="header-wordmark"]')
+        ->assertPresent('[data-testid="dark-toggle"]')
+        ->assertNoSmoke();
 })->skip(! $browserEnv, 'browser env required — set BROWSER_TESTS=1');
