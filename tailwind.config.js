@@ -13,6 +13,15 @@ export default {
 
     /*
      |--------------------------------------------------------------------------
+     | Dark mode — toggled via the `.dark` class on <html>.
+     |--------------------------------------------------------------------------
+     | Tokens flip in `.dark { --bg: … }` (tokens.css). The class is applied
+     | by JS (front.js / admin.js) from localStorage / prefers-color-scheme.
+     */
+    darkMode: 'class',
+
+    /*
+     |--------------------------------------------------------------------------
      | Preflight stays disabled GLOBALLY for this phase.
      |--------------------------------------------------------------------------
      | Tailwind is loaded ALONGSIDE the legacy Bootstrap 4 admin bundle. A
@@ -42,6 +51,19 @@ export default {
         },
         extend: {
             colors: {
+                // ── §2 semantic token bridge (CSS custom property → Tailwind) ──
+                // These map utilities like `bg-bg`, `bg-surface`, `text-muted`,
+                // `border-border`, `bg-primary`, `text-primary`, etc. to the vars
+                // defined in tokens.css. Dark mode flips automatically via `.dark`.
+                bg: 'var(--bg)',
+                'surface-2': 'var(--surface-2)',
+                text: { DEFAULT: 'var(--text)', muted: 'var(--text-muted)', subtle: 'var(--text-subtle)' },
+                primary: { DEFAULT: 'var(--primary)', hover: 'var(--primary-hover)', contrast: 'var(--primary-contrast)' },
+                accent: 'var(--accent)',
+                border: { DEFAULT: 'var(--border)', strong: 'var(--border-strong)' },
+                ring: 'var(--ring)',
+                error: { DEFAULT: 'var(--error)', bg: 'var(--error-bg)' },
+
                 // Single committed accent: a deep editorial garnet. Used for
                 // links, active state, and the "like" action — locked sitewide.
                 brand: {
@@ -73,10 +95,14 @@ export default {
                     950: '#111110',
                 },
                 paper: '#fbfbf9',
-                surface: '#ffffff',
-                // Admin semantic state ramp (product register). Calm, desaturated
-                // hues that read clearly against the neutral ink shell.
+                // `surface` — legacy hardcoded + new semantic token override.
+                surface: { DEFAULT: 'var(--surface)', 2: 'var(--surface-2)' },
+                // Admin semantic state ramps — kept intact for back-compat
+                // (admin.css uses success-50/100/600/700 etc.). The semantic
+                // DEFAULT and bg sub-keys add the token-bridged utilities on top.
                 success: {
+                    DEFAULT: 'var(--success)',
+                    bg: 'var(--success-bg)',
                     50: '#f0f7f1',
                     100: '#d9ecdc',
                     500: '#3f8f54',
@@ -84,6 +110,8 @@ export default {
                     700: '#285d38',
                 },
                 warning: {
+                    DEFAULT: 'var(--warning)',
+                    bg: 'var(--warning-bg)',
                     50: '#fbf4e8',
                     100: '#f6e6c8',
                     500: '#c08a2b',
@@ -117,7 +145,14 @@ export default {
                 prose: '68ch',
             },
             borderRadius: {
-                xl: '0.875rem',
+                // §4 token-bridged radius scale (via CSS custom properties).
+                sm: 'var(--radius-sm)',
+                md: 'var(--radius-md)',
+                lg: 'var(--radius-lg)',
+                xl: 'var(--radius-xl)',
+                full: 'var(--radius-full)',
+                // Legacy hardcoded values kept under distinct keys so any
+                // `rounded-2xl` usage continues to resolve without drift.
                 '2xl': '1.25rem',
             },
             boxShadow: {
@@ -126,7 +161,9 @@ export default {
                 lift: '0 2px 4px rgba(26,26,24,0.05), 0 18px 40px -18px rgba(26,26,24,0.20)',
             },
             transitionTimingFunction: {
-                'out-expo': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                // §6 motion token bridge (CSS custom properties).
+                'out-expo': 'var(--ease-out)',
+                'in-out-expo': 'var(--ease-in-out)',
             },
             zIndex: {
                 // Semantic layer scale for the admin shell.

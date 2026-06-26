@@ -1,3 +1,5 @@
+@import './tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -24,8 +26,8 @@
 
     .theme-admin {
         margin: 0;
-        background-color: theme('colors.ink.50');
-        color: theme('colors.ink.800');
+        background: var(--bg);
+        color: var(--text);
         font-family: theme('fontFamily.sans');
         font-size: 0.9375rem;
         line-height: 1.5;
@@ -55,7 +57,7 @@
         font-family: theme('fontFamily.sans');
         font-weight: 600;
         letter-spacing: -0.011em;
-        color: theme('colors.ink.900');
+        color: var(--text);
         text-wrap: balance;
     }
 
@@ -108,7 +110,7 @@
     }
 
     .theme-admin :focus-visible {
-        outline: 2px solid theme('colors.brand.600');
+        outline: 2px solid var(--ring);
         outline-offset: 2px;
     }
 
