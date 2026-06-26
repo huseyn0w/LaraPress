@@ -1,0 +1,170 @@
+name: CI
+
+on:
+  push:
+    branches: [master, refactor/canon-convergence]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Lint (Pint) -> static analysis (Larastan) -> Pest unit/feature suite with
+  # line coverage measured by PCOV against the force-pinned in-memory SQLite DB.
+  # ---------------------------------------------------------------------------
+  quality:
+    name: Lint · Analyse · Test (coverage)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3 (+ PCOV)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: imagick, pdo_sqlite, mbstring, intl, gd
+          coverage: pcov
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: Prepare environment
+        run: cp .env.example .env
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Lint (Pint)
+        run: composer lint
+
+      - name: Static analysis (Larastan level 5)
+        run: composer analyse
+
+      # The threshold encodes the P10 target (>=80% line on services/repos +
+      # 100% of critical paths). The first runs measure the real baseline; the
+      # Phase 6 gap-filling tests close any shortfall. PCOV reads ./app per the
+      # <source> block in phpunit.xml. SQLite :memory: is force-pinned in
+      # tests/CreatesApplication.php — CI never touches a real DB here.
+      - name: Tests + coverage (Pest, SQLite, PCOV)
+        run: ./vendor/bin/pest --coverage --min=80
+
+  # ---------------------------------------------------------------------------
+  # Build the Vite/Tailwind asset bundle (also produces the manifest the e2e
+  # job needs to render the app).
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build assets (Vite)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload built assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: vite-build
+          path: public/build
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # End-to-end: Pest 4 browser suite (pest-plugin-browser + Playwright Chromium)
+  # against the served app on a real MySQL 8 (parity with the retired Dusk
+  # suite). BROWSER_TESTS=1 flips the ->skip() guards in tests/Browser/*.
+  # ---------------------------------------------------------------------------
+  e2e:
+    name: Browser e2e (Pest + Playwright)
+    runs-on: ubuntu-latest
+    needs: [quality, build]
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: cmstack_laravel_dusk
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      BROWSER_TESTS: 1
+      APP_ENV: local
+      APP_URL: http://127.0.0.1:8000
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: cmstack_laravel_dusk
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: imagick, pdo_mysql, mbstring, intl, gd
+          tools: composer:v2
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install npm dependencies + build
+        run: npm ci && npm run build
+
+      - name: Install Playwright Chromium (+ system deps)
+        run: npx playwright install --with-deps chromium
+
+      - name: Prepare environment
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Migrate + seed (MySQL)
+        run: php artisan migrate --seed --force
+
+      - name: Link storage
+        run: php artisan storage:link
+
+      - name: Serve the app
+        run: php artisan serve --host=127.0.0.1 --port=8000 &
+
+      - name: Wait for the app to answer
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sSf http://127.0.0.1:8000 >/dev/null; then
+              echo "app is up"; exit 0
+            fi
+            sleep 2
+          done
+          echo "app did not start in time"; exit 1
+
+      # tests/Browser is not in a default phpunit testsuite; passing the path
+      # explicitly collects it. BROWSER_TESTS=1 (job env) un-skips the scenarios.
+      - name: Pest browser e2e
+        run: ./vendor/bin/pest tests/Browser
