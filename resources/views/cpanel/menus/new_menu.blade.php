@@ -4,6 +4,16 @@
  * File: new_menu.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 04.09.2019
+ * Redesigned: DESIGN_SYSTEM §5 — x-card / x-field / x-button containers; token-driven.
+ * Preserves:
+ *   - form id="add_menu_form", field names title + slug + content (hidden #menuContent)
+ *   - .menu-box / .menu-list / .sortable / #sortable — hooks for menu.js + jQuery UI sortable
+ *   - .add_menu_item button type="button" — JS hook in menu.js
+ *   - .create_menu on submit button
+ *   - jQuery UI googleapis CDN link/script (sortable rework deferred — see report)
+ *   - @include('cpanel.menus.partials.source-accordion') for the source panel
+ *   - @push('extrascripts') + @push('finalscripts') for sortable + menu.js
+ * NOTE: §5 keyboard-accessible sortable rework is DEFERRED (jQuery UI googleapis stays).
  */
 ?>
 
@@ -21,7 +31,7 @@
 @section('content')
     <div class="mx-auto max-w-6xl">
         <div class="mb-6">
-            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/menus.new_menu_headline')</h1>
+            <h1 class="text-xl font-semibold text-fg">@lang('cpanel/menus.new_menu_headline')</h1>
         </div>
 
         @include('cpanel.core.flash')
@@ -29,43 +39,57 @@
         <form action="{{ $form_action }}" id="add_menu_form" method="POST">
             @csrf
             <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
+
                 {{-- Source panel --}}
                 <div class="lg:col-span-1">
-                    <div class="card">
-                        <div class="card-header"><h2 class="card-title">@lang('cpanel/menus.new_menu_headline')</h2></div>
-                        <div class="card-body">
+                    <x-card>
+                        <x-slot:header>
+                            <h2 class="text-sm font-semibold text-fg">@lang('cpanel/menus.new_menu_headline')</h2>
+                        </x-slot:header>
+
+                        <div class="space-y-4">
                             @include('cpanel.core.translation')
-                            <div class="field">
-                                <label for="menu_title" class="field-label">@lang('cpanel/menus.menu_name')</label>
-                                <input type="text" id="menu_title" required class="form-control" name="title" value="{{ old('title') }}">
-                            </div>
-                            <div class="field">
-                                <label for="cpanel_slug" class="field-label">@lang('cpanel/menus.menu_slug')</label>
-                                <input type="text" required class="form-control" name="slug" value="{{ old('slug') }}">
-                            </div>
+
+                            <x-field label="@lang('cpanel/menus.menu_name')" name="title" :required="true">
+                                <input type="text" id="menu_title" required class="form-control w-full" name="title" value="{{ old('title') }}">
+                            </x-field>
+
+                            <x-field label="@lang('cpanel/menus.menu_slug')" name="slug" :required="true">
+                                <input type="text" id="cpanel_slug" required class="form-control w-full" name="slug" value="{{ old('slug') }}">
+                            </x-field>
 
                             @include('cpanel.menus.partials.source-accordion')
 
-                            <button type="button" class="btn btn-ghost add_menu_item mt-4 w-full">@lang('cpanel/menus.add_to_menu')</button>
+                            <x-button type="button" variant="outline" class="add_menu_item w-full">
+                                @lang('cpanel/menus.add_to_menu')
+                            </x-button>
                         </div>
-                    </div>
+                    </x-card>
                 </div>
 
                 {{-- Builder canvas --}}
                 <div class="lg:col-span-2">
-                    <div class="card">
-                        <div class="card-header"><h2 class="card-title">@lang('cpanel/menus.list_headline')</h2></div>
-                        <div class="card-body">
-                            <div class="menu-box">
-                                <ul class="menu-list sortable" id="sortable"></ul>
+                    <x-card>
+                        <x-slot:header>
+                            <h2 class="text-sm font-semibold text-fg">@lang('cpanel/menus.list_headline')</h2>
+                        </x-slot:header>
+
+                        {{-- .menu-box and #sortable/.menu-list/.sortable preserved for menu.js + jQuery UI --}}
+                        <div class="menu-box min-h-[200px] rounded-md border border-dashed border-border bg-surface-2 p-3">
+                            <ul class="menu-list sortable" id="sortable"></ul>
+                        </div>
+                        <input type="hidden" name="content" id="menuContent">
+
+                        <x-slot:footer>
+                            <div class="flex justify-end">
+                                <x-button type="submit" variant="primary" class="create_menu">
+                                    @lang('cpanel/menus.create_menu')
+                                </x-button>
                             </div>
-                            <input type="hidden" name="content" id="menuContent">
-                        </div>
-                        <div class="flex justify-end border-t border-ink-100 px-5 py-4">
-                            <button type="submit" class="btn btn-info create_menu">@lang('cpanel/menus.create_menu')</button>
-                        </div>
-                    </div>
+                        </x-slot:footer>
+                    </x-card>
                 </div>
+
             </div>
         </form>
     </div>

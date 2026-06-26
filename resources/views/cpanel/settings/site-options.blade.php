@@ -4,6 +4,9 @@
  * File: site-options.blade.php
  * Created by Elman (https://linkedin.com/in/huseyn0w)
  * Date: 21.07.2019
+ * Redesigned: DESIGN_SYSTEM §5 — x-card / x-field / x-button / x-alert
+ * Preserves: logo_url / copyright / linkedin_url / github_url field names,
+ *            the LFM image-picker trigger (#lfm / #thumbnail) + finalscripts.
  */
 ?>
 
@@ -19,56 +22,58 @@
 
     <div class="mx-auto max-w-3xl">
         <div class="mb-6">
-            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/settings.site_options_headline')</h1>
+            <h1 class="text-xl font-semibold text-fg">@lang('cpanel/settings.site_options_headline')</h1>
         </div>
 
         @include('cpanel.core.flash')
         @if (($update_message = Session::get('message')) !== null)
-            <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}">
-                <strong>{{ $update_message ? __('cpanel/settings.site_options_updates_success') : $update_message }}</strong>
-            </div>
+            <x-alert variant="{{ $update_message ? 'success' : 'error' }}" class="mb-4">
+                {{ $update_message ? __('cpanel/settings.site_options_updates_success') : $update_message }}
+            </x-alert>
         @endif
 
         <form action="{{ route('cpanel_update_site_options') }}" method="POST">
             @csrf
-            <div class="card">
-                <div class="card-body space-y-1">
-                    <div class="field">
-                        <label for="custom_input_image" class="field-label">@lang('cpanel/settings.logo')</label>
+            <x-card>
+                <div class="space-y-4">
+                    {{-- Logo: LFM image-picker trigger + text input (field names preserved) --}}
+                    <x-field label="@lang('cpanel/settings.logo')" name="logo_url">
                         <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-                            <span class="input-group-btn">
-                                <a id="lfm" data-input="thumbnail" data-preview="holder" class="choose-image">
-                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m21 16-5-5L5 19"/></svg>
-                                    @lang('cpanel/settings.choose_image')
-                                </a>
-                            </span>
-                            <input id="thumbnail" class="form-control" type="text" name="logo_url" value="{{ old('logo_url', $logo_url) }}">
+                            <a id="lfm" data-input="thumbnail" data-preview="holder"
+                               class="choose-image inline-flex items-center gap-1.5 rounded-md border border-strong bg-surface-2 px-3 py-2 text-sm text-fg transition-colors hover:bg-surface cursor-pointer shrink-0">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m21 16-5-5L5 19"/></svg>
+                                @lang('cpanel/settings.choose_image')
+                            </a>
+                            <input id="thumbnail" class="form-control w-full" type="text" name="logo_url" value="{{ old('logo_url', $logo_url) }}">
                         </div>
-                    </div>
-                    <div class="field">
-                        <label class="field-label">@lang('cpanel/settings.footer_copyright')</label>
-                        <input type="text" required name="copyright" class="form-control" value="{{ old('copyright', $copyright) }}">
-                    </div>
-                    <div class="field">
-                        <label class="field-label">@lang('cpanel/settings.linkedin_url')</label>
-                        <input type="text" required name="linkedin_url" class="form-control" value="{{ old('linkedin_url', $linkedin_url) }}">
-                    </div>
-                    <div class="field">
-                        <label class="field-label">@lang('cpanel/settings.github_url')</label>
-                        <input type="text" required name="github_url" class="form-control" value="{{ old('github_url', $github_url) }}">
-                    </div>
+                    </x-field>
+
+                    <x-field label="@lang('cpanel/settings.footer_copyright')" name="copyright" :required="true">
+                        <input type="text" id="copyright" required name="copyright" class="form-control w-full" value="{{ old('copyright', $copyright) }}">
+                    </x-field>
+
+                    <x-field label="@lang('cpanel/settings.linkedin_url')" name="linkedin_url" :required="true">
+                        <input type="text" id="linkedin_url" required name="linkedin_url" class="form-control w-full" value="{{ old('linkedin_url', $linkedin_url) }}">
+                    </x-field>
+
+                    <x-field label="@lang('cpanel/settings.github_url')" name="github_url" :required="true">
+                        <input type="text" id="github_url" required name="github_url" class="form-control w-full" value="{{ old('github_url', $github_url) }}">
+                    </x-field>
                 </div>
-                <div class="flex justify-end border-t border-ink-100 px-5 py-4">
-                    <button type="submit" class="btn btn-info">@lang('cpanel/settings.update_button_label')</button>
-                </div>
-            </div>
+
+                <x-slot:footer>
+                    <div class="flex justify-end">
+                        <x-button type="submit" variant="primary">@lang('cpanel/settings.update_button_label')</x-button>
+                    </div>
+                </x-slot:footer>
+            </x-card>
         </form>
     </div>
 @endsection
 
 @push('finalscripts')
     <script>
-        var site_url = "<?php echo env('APP_URL'); ?>/";
+        var site_url = "<?php echo config('app.url'); ?>/";
     </script>
     <script src="{{asset('')}}/vendor/laravel-filemanager/js/lfm.js"></script>
     <script src="{{asset('admin')}}/js/custom-fields/custom-image.js"></script>
