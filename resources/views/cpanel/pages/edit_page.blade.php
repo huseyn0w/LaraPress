@@ -21,19 +21,16 @@
     <div class="mx-auto max-w-6xl">
         <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/pages.edit_page_headline')</h1>
-                <p class="mt-1 text-sm text-ink-500">
+                <h1 class="text-xl font-semibold text-fg">@lang('cpanel/pages.edit_page_headline')</h1>
+                <p class="mt-1 text-sm text-muted">
                     @lang('cpanel/pages.url_preview')
-                    <a href="{{env('APP_URL')}}/{{ old('slug',$page_slug) }}" class="font-medium text-brand-700 hover:text-brand-800">{{env('APP_URL')}}/{{ old('slug',$page_slug) }}</a>
+                    <a href="{{env('APP_URL')}}/{{ old('slug',$page_slug) }}" class="font-medium text-primary hover:text-primary-hover">{{env('APP_URL')}}/{{ old('slug',$page_slug) }}</a>
                 </p>
             </div>
-            <a href="{{ route('cpanel_page_revisions', ['id' => $entity->id, 'lang' => get_current_lang()]) }}" class="btn btn-ghost">@lang('cpanel/revisions.revisions_link')</a>
+            <x-button variant="ghost" href="{{ route('cpanel_page_revisions', ['id' => $entity->id, 'lang' => get_current_lang()]) }}">@lang('cpanel/revisions.revisions_link')</x-button>
         </div>
 
         @include('cpanel.core.flash')
-        @if (Session::get('revision_restored'))
-            <div class="alert alert-success"><strong>@lang('cpanel/revisions.restored_success')</strong></div>
-        @endif
         @if (($update_message = Session::get('message')) !== null)
             <div class="alert {{ $update_message ? 'alert-success' : 'alert-danger' }}"><strong>{{ $update_message ? __('cpanel/pages.updated_success') : __('cpanel/pages.updated_error') }}</strong></div>
         @endif
@@ -43,66 +40,57 @@
             @method("PUT")
             <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
                 <div class="lg:col-span-2">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
-                                <div class="field">
-                                    <label for="cpanel_title" class="field-label">@lang('cpanel/pages.title')</label>
-                                    <input type="text" id="cpanel_title" required class="form-control" name="title" value="{{ old('title', $entity->title) }}">
-                                </div>
-                                <div class="field">
-                                    <label for="cpanel_slug" class="field-label">@lang('cpanel/pages.slug')</label>
-                                    <input type="text" id="cpanel_slug" required class="form-control" name="slug" value="{{ old('slug',$entity->slug) }}">
-                                </div>
-                            </div>
-                            <div class="field">
-                                <label class="field-label">@lang('cpanel/pages.content')</label>
-                                <textarea name="content" id="editor" class="my-editor form-control">{{old('content',$entity->content)}}</textarea>
-                            </div>
-                            @include('cpanel.core.seo')
-                            @include('cpanel.core.custom-fields')
+                    <x-card>
+                        <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
+                            <x-field label="@lang('cpanel/pages.title')" name="cpanel_title">
+                                <input type="text" id="cpanel_title" required class="form-control w-full" name="title" value="{{ old('title', $entity->title) }}">
+                            </x-field>
+                            <x-field label="@lang('cpanel/pages.slug')" name="cpanel_slug">
+                                <input type="text" id="cpanel_slug" required class="form-control w-full" name="slug" value="{{ old('slug',$entity->slug) }}">
+                            </x-field>
                         </div>
-                    </div>
+                        <x-field label="@lang('cpanel/pages.content')">
+                            <textarea name="content" id="editor" class="my-editor form-control w-full">{{old('content',$entity->content)}}</textarea>
+                        </x-field>
+                        @include('cpanel.core.seo')
+                        @include('cpanel.core.custom-fields')
+                    </x-card>
                 </div>
 
                 <div class="lg:col-span-1">
-                    <div class="card">
-                        <div class="card-body">
-                            @include('cpanel.core.translation')
-                            <div class="field">
-                                <label class="field-label">@lang('cpanel/pages.author')</label>
-                                <select name="author_id" id="author_id" class="form-control">
-                                    @foreach($users_list as $user)
-                                        <option value="{{$user->id}}" {{$user->id === $entity->author_id ? 'selected' : ''}}>{{$user->username}}</option>
+                    <x-card>
+                        @include('cpanel.core.translation')
+                        <x-field label="@lang('cpanel/pages.author')">
+                            <select name="author_id" id="author_id" class="form-control">
+                                @foreach($users_list as $user)
+                                    <option value="{{$user->id}}" {{$user->id === $entity->author_id ? 'selected' : ''}}>{{$user->username}}</option>
+                                @endforeach
+                            </select>
+                        </x-field>
+                        <x-field label="@lang('cpanel/pages.publish_date')">
+                            <input class="form-control w-full" value="{{old('updated_at', $entity->updated_at)}}" autocomplete="off" name="updated_at" required id="date_time_picker" type="text" />
+                        </x-field>
+                        <x-field label="@lang('cpanel/pages.status')">
+                            <select name="status" id="user_role" class="form-control">
+                                <option value="0" {{$entity->status === 0 ? 'selected' :null}}>@lang('cpanel/pages.status_private')</option>
+                                <option value="1" {{$entity->status === 1 ? 'selected' :null}}>@lang('cpanel/pages.status_published')</option>
+                            </select>
+                        </x-field>
+                        @if(!empty($page_templates) && $page_templates)
+                            <x-field label="@lang('cpanel/pages.page_template')">
+                                <select name="template" class="form-control">
+                                    @foreach($page_templates as $file_name => $template_header)
+                                        <option value="{{$file_name}}" {{$entity->template === $file_name ? 'selected' : null}}>{{$template_header}}</option>
                                     @endforeach
                                 </select>
+                            </x-field>
+                        @endif
+                        <x-slot:footer>
+                            <div class="flex justify-end">
+                                <x-button type="submit" variant="primary">@lang('cpanel/pages.update_button_label')</x-button>
                             </div>
-                            <div class="field">
-                                <label class="field-label">@lang('cpanel/pages.publish_date')</label>
-                                <input class="form-control" value="{{old('updated_at', $entity->updated_at)}}" autocomplete="off" name="updated_at" required id="date_time_picker" type="text" />
-                            </div>
-                            <div class="field">
-                                <label class="field-label">@lang('cpanel/pages.status')</label>
-                                <select name="status" id="user_role" class="form-control">
-                                    <option value="0" {{$entity->status === 0 ? 'selected' :null}}>@lang('cpanel/pages.status_private')</option>
-                                    <option value="1" {{$entity->status === 1 ? 'selected' :null}}>@lang('cpanel/pages.status_published')</option>
-                                </select>
-                            </div>
-                            @if(!empty($page_templates) && $page_templates)
-                                <div class="field">
-                                    <label class="field-label">@lang('cpanel/pages.page_template')</label>
-                                    <select name="template" class="form-control">
-                                        @foreach($page_templates as $file_name => $template_header)
-                                            <option value="{{$file_name}}" {{$entity->template === $file_name ? 'selected' : null}}>{{$template_header}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="flex justify-end border-t border-ink-100 px-5 py-4">
-                            <button type="submit" class="btn btn-info">@lang('cpanel/pages.update_button_label')</button>
-                        </div>
-                    </div>
+                        </x-slot:footer>
+                    </x-card>
                 </div>
             </div>
         </form>

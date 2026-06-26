@@ -21,7 +21,7 @@
 @section('content')
     <div class="mx-auto max-w-6xl">
         <div class="mb-6">
-            <h1 class="text-xl font-semibold text-ink-900">@lang('cpanel/pages.new_page_headline')</h1>
+            <h1 class="text-xl font-semibold text-fg">@lang('cpanel/pages.new_page_headline')</h1>
         </div>
 
         @include('cpanel.core.flash')
@@ -30,66 +30,57 @@
             @csrf
             <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
                 <div class="lg:col-span-2">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
-                                <div class="field">
-                                    <label for="cpanel_title" class="field-label">@lang('cpanel/pages.title')</label>
-                                    <input type="text" id="cpanel_title" required class="form-control" name="title" value="{{ old('title') }}">
-                                </div>
-                                <div class="field">
-                                    <label for="cpanel_slug" class="field-label">@lang('cpanel/pages.slug')</label>
-                                    <input type="text" id="cpanel_slug" required class="form-control" name="slug" value="{{ old('slug') }}">
-                                </div>
-                            </div>
-                            <div class="field">
-                                <label class="field-label">@lang('cpanel/pages.content')</label>
-                                <textarea name="content" id="editor" class="my-editor form-control">{{old('content')}}</textarea>
-                            </div>
-                            @include('cpanel.core.seo')
-                            @include('cpanel.core.custom-fields')
+                    <x-card>
+                        <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
+                            <x-field label="@lang('cpanel/pages.title')" name="cpanel_title">
+                                <input type="text" id="cpanel_title" required class="form-control w-full" name="title" value="{{ old('title') }}">
+                            </x-field>
+                            <x-field label="@lang('cpanel/pages.slug')" name="cpanel_slug">
+                                <input type="text" id="cpanel_slug" required class="form-control w-full" name="slug" value="{{ old('slug') }}">
+                            </x-field>
                         </div>
-                    </div>
+                        <x-field label="@lang('cpanel/pages.content')">
+                            <textarea name="content" id="editor" class="my-editor form-control w-full">{{old('content')}}</textarea>
+                        </x-field>
+                        @include('cpanel.core.seo')
+                        @include('cpanel.core.custom-fields')
+                    </x-card>
                 </div>
 
                 <div class="lg:col-span-1">
-                    <div class="card">
-                        <div class="card-body">
-                            @include('cpanel.core.translation')
-                            <div class="field">
-                                <label class="field-label">@lang('cpanel/pages.author')</label>
-                                <select name="author_id" id="author_id" class="form-control">
-                                    @foreach($users_list as $user)
-                                        <option value="{{$user->id}}" {{$user->username === Auth::user()->username ? 'selected' : ''}}>{{$user->username}}</option>
+                    <x-card>
+                        @include('cpanel.core.translation')
+                        <x-field label="@lang('cpanel/pages.author')">
+                            <select name="author_id" id="author_id" class="form-control">
+                                @foreach($users_list as $user)
+                                    <option value="{{$user->id}}" {{$user->username === Auth::user()->username ? 'selected' : ''}}>{{$user->username}}</option>
+                                @endforeach
+                            </select>
+                        </x-field>
+                        <x-field label="@lang('cpanel/pages.publish_date')">
+                            <input class="form-control w-full" autocomplete="off" name="created_at" value="{{ \Carbon\Carbon::now() }}" required id="date_time_picker" type="text" />
+                        </x-field>
+                        <x-field label="@lang('cpanel/pages.status')">
+                            <select name="status" id="user_role" class="form-control">
+                                <option value="0">@lang('cpanel/pages.status_private')</option>
+                                <option value="1" selected>@lang('cpanel/pages.status_published')</option>
+                            </select>
+                        </x-field>
+                        @if(!empty($page_templates) && $page_templates)
+                            <x-field label="@lang('cpanel/pages.page_template')">
+                                <select name="template" class="form-control">
+                                    @foreach($page_templates as $file_name => $template_header)
+                                        <option value="{{$file_name}}" {{$file_name === 'page' ? 'selected' : null}}>{{$template_header}}</option>
                                     @endforeach
                                 </select>
+                            </x-field>
+                        @endif
+                        <x-slot:footer>
+                            <div class="flex justify-end">
+                                <x-button type="submit" variant="primary">@lang('cpanel/pages.publish_button_label')</x-button>
                             </div>
-                            <div class="field">
-                                <label class="field-label">@lang('cpanel/pages.publish_date')</label>
-                                <input class="form-control" autocomplete="off" name="created_at" value="{{ \Carbon\Carbon::now() }}" required id="date_time_picker" type="text" />
-                            </div>
-                            <div class="field">
-                                <label class="field-label">@lang('cpanel/pages.status')</label>
-                                <select name="status" id="user_role" class="form-control">
-                                    <option value="0">@lang('cpanel/pages.status_private')</option>
-                                    <option value="1" selected>@lang('cpanel/pages.status_published')</option>
-                                </select>
-                            </div>
-                            @if(!empty($page_templates) && $page_templates)
-                                <div class="field">
-                                    <label class="field-label">@lang('cpanel/pages.page_template')</label>
-                                    <select name="template" class="form-control">
-                                        @foreach($page_templates as $file_name => $template_header)
-                                            <option value="{{$file_name}}" {{$file_name === 'page' ? 'selected' : null}}>{{$template_header}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="flex justify-end border-t border-ink-100 px-5 py-4">
-                            <button type="submit" class="btn btn-info">@lang('cpanel/pages.publish_button_label')</button>
-                        </div>
-                    </div>
+                        </x-slot:footer>
+                    </x-card>
                 </div>
             </div>
         </form>
