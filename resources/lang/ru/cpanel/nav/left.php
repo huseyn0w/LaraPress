@@ -9,6 +9,9 @@
 
 return [
 
+    'main' => 'Главное',
+    'content' => 'Контент',
+    'settings_group' => 'Конфигурация',
     'dashboard' => 'Главная страница',
     'edit_profile' => 'Изменить профиль',
     'media' => 'Медиа',

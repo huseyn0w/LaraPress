@@ -1,5 +1,5 @@
 /**
- * Cmstack-Laravel — admin shell runtime (Phase 5).
+ * Cmstack-Laravel — admin shell runtime (Phase 5 / Phase 6 dark-toggle update).
  *
  * Loaded via Vite in the admin <head>. Responsibilities:
  *   1. Alpine for the app shell (sidebar toggle, topbar user/language menus).
@@ -10,6 +10,9 @@
  *      accordion) still target the same selectors / call $('#x').modal('hide').
  *   3. A Tailwind toast system that backs the global showNotification() the
  *      legacy scripts call via $.notify (bootstrap-notify replacement).
+ *   4. Dark-mode toggle (Phase 6): same localStorage key as front.js (`cmstack-theme`).
+ *      No-FOUC inline script in header-styles.blade.php applies .dark before paint;
+ *      this file wires the topbar toggle button at boot time.
  *
  * jQuery itself is still served (admin/js/core/jquery) and loaded in the
  * footer. This file therefore defers all jQuery-dependent wiring until the
@@ -165,11 +168,65 @@ function installJqueryShims($) {
 }
 
 /* -------------------------------------------------------------------------
+ | Dark-mode toggle (DESIGN_SYSTEM §5 / Phase 6).
+ | Shares the same localStorage key `cmstack-theme` as front.js so toggling
+ | in either shell persists across the whole site.
+ | The no-FOUC inline script in header-styles.blade.php applies .dark before
+ | first paint; this wires the topbar toggle button.
+ | ------------------------------------------------------------------------- */
+const THEME_KEY = 'cmstack-theme';
+
+function adminResolveTheme() {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === 'dark' || stored === 'light') return stored;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function adminApplyTheme(theme) {
+    if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    return theme;
+}
+
+function initAdminDarkToggle() {
+    const btn = document.querySelector('[data-dark-toggle]');
+    if (!btn) return;
+
+    function syncBtn(theme) {
+        btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+    }
+
+    // Sync initial state from what the no-FOUC script already applied.
+    syncBtn(adminResolveTheme());
+
+    btn.addEventListener('click', () => {
+        const current = adminResolveTheme();
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(THEME_KEY, next);
+        adminApplyTheme(next);
+        syncBtn(next);
+    });
+
+    // Honour OS-level changes when no explicit preference is stored.
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (!localStorage.getItem(THEME_KEY)) {
+            const theme = adminResolveTheme();
+            adminApplyTheme(theme);
+            syncBtn(theme);
+        }
+    });
+}
+
+/* -------------------------------------------------------------------------
  | Boot
  | ------------------------------------------------------------------------- */
 function boot() {
     wireModals(document);
     wireCollapse(document);
+    initAdminDarkToggle();
 
     // `type` is the colour-name array the legacy showNotification(...) indexes
     // into (type[color]). bootstrap-notify's demo defined it globally; recreate

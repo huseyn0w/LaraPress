@@ -121,6 +121,159 @@
 }
 
 @layer components {
+    /* =====================================================================
+     | Admin shell — sidebar, topbar, nav items (DESIGN_SYSTEM §5 Phase 6)
+     | All colours read CSS custom properties so .dark flips them correctly.
+     | ===================================================================== */
+
+    /* Mobile backdrop */
+    .theme-admin .admin-backdrop {
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(2px);
+    }
+
+    /* Sidebar rail — bg-surface + 1px border-border right */
+    .theme-admin .admin-sidebar {
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+    }
+
+    /* Brand strip at top of sidebar */
+    .theme-admin .admin-sidebar-brand {
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* Topbar — sticky 56px (h-14), bg-surface + 1px border-border bottom */
+    .theme-admin .admin-topbar {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+    }
+
+    /* Topbar icon buttons */
+    .theme-admin .admin-topbar-btn {
+        color: var(--text-muted);
+        transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+    }
+    .theme-admin .admin-topbar-btn:hover {
+        background: var(--surface-2);
+        color: var(--text);
+    }
+    .theme-admin .admin-topbar-btn:focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+    }
+
+    /* Topbar text links (View site) */
+    .theme-admin .admin-topbar-link {
+        color: var(--text-muted);
+        transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+    }
+    .theme-admin .admin-topbar-link:hover {
+        background: var(--surface-2);
+        color: var(--text);
+    }
+
+    /* Topbar vertical divider */
+    .theme-admin .admin-divider {
+        background: var(--border);
+    }
+
+    /* ── Dark-toggle icon visibility ────────────────────────────────────── */
+    /* Light mode: show moon (click → go dark); hide sun */
+    .theme-admin .admin-dark-icon-sun  { display: none; }
+    .theme-admin .admin-dark-icon-moon { display: inline-block; }
+    /* Dark mode: show sun (click → go light); hide moon */
+    .dark .theme-admin .admin-dark-icon-sun  { display: inline-block; }
+    .dark .theme-admin .admin-dark-icon-moon { display: none; }
+
+    /* ── Dropdown panel ─────────────────────────────────────────────────── */
+    .theme-admin .admin-dropdown {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12), 0 1px 4px rgba(0,0,0,0.08);
+        overflow: hidden;
+        min-width: 10rem;
+    }
+    .theme-admin .admin-dropdown-header {
+        border-bottom: 1px solid var(--border);
+    }
+    .theme-admin .admin-dropdown-sep {
+        height: 1px;
+        background: var(--border);
+        margin: 0.25rem 0;
+    }
+    .theme-admin .admin-dropdown-item {
+        color: var(--text-muted);
+        transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+        cursor: pointer;
+    }
+    .theme-admin .admin-dropdown-item:hover {
+        background: var(--surface-2);
+        color: var(--text);
+    }
+    .theme-admin .admin-dropdown-item:focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: -2px;
+    }
+    .theme-admin .admin-dropdown-item--danger {
+        color: var(--error);
+    }
+    .theme-admin .admin-dropdown-item--danger:hover {
+        background: var(--error-bg);
+        color: var(--error);
+    }
+
+    /* ── Sidebar nav items ──────────────────────────────────────────────── */
+    /* Idle state */
+    .theme-admin .admin-nav-item--idle {
+        color: var(--text-muted);
+    }
+    .theme-admin .admin-nav-item--idle:hover {
+        background: var(--surface-2);
+        color: var(--text);
+    }
+
+    /* Active state: surface-2 fill + 2px --primary left bar + text */
+    .theme-admin .admin-nav-item--active {
+        background: var(--surface-2);
+        color: var(--text);
+    }
+    .theme-admin .admin-nav-item--active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 2px;
+        border-radius: 0 2px 2px 0;
+        background: var(--primary);
+    }
+
+    /* Sub-items (inside collapse groups) */
+    .theme-admin .admin-nav-sub--idle {
+        color: var(--text-subtle);
+    }
+    .theme-admin .admin-nav-sub--idle:hover {
+        color: var(--text);
+        background: var(--surface-2);
+    }
+    .theme-admin .admin-nav-sub--active {
+        color: var(--text);
+        font-weight: 500;
+    }
+
+    /* Sub-item left border rail */
+    .theme-admin .admin-nav-sub-rail {
+        border-left: 1px solid var(--border);
+    }
+
+    /* x-eyebrow in sidebar — muted + mono uppercase */
+    .theme-admin .admin-sidebar nav x-eyebrow,
+    .theme-admin [data-testid="admin-sidebar"] span[class*="font-mono"] {
+        color: var(--text-subtle);
+    }
+
     /* ---------------------------------------------------------------------
      | Form controls
      | --------------------------------------------------------------------- */

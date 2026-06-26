@@ -18,5 +18,7 @@ return [
     'user_roles' => 'User Roles',
     'change_language' => 'Change Language',
     'log_out' => 'Log out',
+    'open_nav' => 'Open navigation',
+    'edit_profile' => 'Edit Profile',
 
 ];

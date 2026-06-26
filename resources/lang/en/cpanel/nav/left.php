@@ -9,6 +9,9 @@
 
 return [
 
+    'main' => 'Main',
+    'content' => 'Content',
+    'settings_group' => 'Configuration',
     'dashboard' => 'Dashboard',
     'edit_profile' => 'Edit Profile',
     'media' => 'Media',

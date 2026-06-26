@@ -18,5 +18,7 @@ return [
     'user_roles' => 'Статусы',
     'change_language' => 'Сменить язык',
     'log_out' => 'Выход',
+    'open_nav' => 'Открыть меню',
+    'edit_profile' => 'Редактировать профиль',
 
 ];

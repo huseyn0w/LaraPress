@@ -68,17 +68,17 @@
     "src": "node_modules/@fontsource-variable/newsreader/files/newsreader-vietnamese-wght-normal.woff2"
   },
   "resources/css/admin.css": {
-    "file": "assets/admin-BkMWTxgV.css",
+    "file": "assets/admin-DUlrb7V9.css",
     "src": "resources/css/admin.css",
     "isEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-CwIqbAuY.css",
+    "file": "assets/app-kXnicRtR.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/js/admin.js": {
-    "file": "assets/admin-oo_Res5y.js",
+    "file": "assets/admin-7JLsPMoT.js",
     "name": "admin",
     "src": "resources/js/admin.js",
     "isEntry": true,
@@ -87,7 +87,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-qZjhC1uH.js",
+    "file": "assets/app-CXhrbnzh.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
