@@ -21,11 +21,16 @@ use App\Mcp\Tools\Pages\UpdatePageTool;
 use App\Mcp\Tools\Posts\CreatePostTool;
 use App\Mcp\Tools\Posts\DeletePostTool;
 use App\Mcp\Tools\Posts\GetPostTool;
+use App\Mcp\Tools\Posts\ListPostRevisionsTool;
 use App\Mcp\Tools\Posts\ListPostsTool;
+use App\Mcp\Tools\Posts\PublishPostTool;
+use App\Mcp\Tools\Posts\RestorePostRevisionTool;
 use App\Mcp\Tools\Posts\UpdatePostTool;
 use App\Mcp\Tools\Settings\GetGeneralSettingsTool;
+use App\Mcp\Tools\Settings\GetGeoSettingsTool;
 use App\Mcp\Tools\Settings\GetSeoSettingsTool;
 use App\Mcp\Tools\Settings\UpdateGeneralSettingsTool;
+use App\Mcp\Tools\Settings\UpdateGeoSettingsTool;
 use App\Mcp\Tools\Settings\UpdateSeoSettingsTool;
 use App\Mcp\Tools\Tags\CreateTagTool;
 use App\Mcp\Tools\Tags\DeleteTagTool;
@@ -82,6 +87,9 @@ class CmstackLaravelServer extends Server
         CreatePostTool::class,
         UpdatePostTool::class,
         DeletePostTool::class,
+        PublishPostTool::class,
+        ListPostRevisionsTool::class,
+        RestorePostRevisionTool::class,
         // Pages
         ListPagesTool::class,
         GetPageTool::class,
@@ -117,6 +125,8 @@ class CmstackLaravelServer extends Server
         UpdateGeneralSettingsTool::class,
         GetSeoSettingsTool::class,
         UpdateSeoSettingsTool::class,
+        GetGeoSettingsTool::class,
+        UpdateGeoSettingsTool::class,
         // Theme templates
         ListThemeFilesTool::class,
         ReadThemeFileTool::class,
