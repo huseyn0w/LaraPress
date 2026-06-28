@@ -11,6 +11,8 @@ use App\Mcp\Tools\Comments\DeleteCommentTool;
 use App\Mcp\Tools\Comments\GetCommentTool;
 use App\Mcp\Tools\Comments\ListCommentsTool;
 use App\Mcp\Tools\Comments\ModerateCommentTool;
+use App\Mcp\Tools\Media\GetMediaMetadataTool;
+use App\Mcp\Tools\Media\ListMediaTool;
 use App\Mcp\Tools\Pages\CreatePageTool;
 use App\Mcp\Tools\Pages\DeletePageTool;
 use App\Mcp\Tools\Pages\GetPageTool;
@@ -119,6 +121,9 @@ class CmstackLaravelServer extends Server
         ListThemeFilesTool::class,
         ReadThemeFileTool::class,
         WriteThemeFileTool::class,
+
+        ListMediaTool::class,
+        GetMediaMetadataTool::class,
     ];
 
     protected array $resources = [
