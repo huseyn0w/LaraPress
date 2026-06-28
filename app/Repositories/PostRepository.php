@@ -87,14 +87,23 @@ class PostRepository extends BaseRepository
     }
 
     /**
-     * Hide future-scheduled posts from public single-post reads (post detail).
+     * Restrict public single-post reads to PUBLISHED posts only, while also
+     * hiding future-scheduled drafts (notScheduledForFuture). The two
+     * constraints together mean:
+     *   - status must be PUBLISHED (1) — plain drafts are always hidden.
+     *   - a published post with a lingering future schedule IS still visible
+     *     (the notScheduledForFuture scope's OR-status=1 branch allows it).
+     *
+     * Column is post_translations.status (status lives on the translations table).
      *
      * @param  mixed  $query
      * @return mixed
      */
     protected function applyFrontReadScope($query)
     {
-        return $query->notScheduledForFuture();
+        return $query
+            ->where('post_translations.status', '=', Post::STATUS_PUBLISHED)
+            ->notScheduledForFuture();
     }
 
     public function handleLike(int $post_id, int $user_id)

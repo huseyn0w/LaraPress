@@ -84,10 +84,19 @@ class PostViewServiceTest extends TestCase
     }
 
     /**
-     * A post whose schedule has already passed (or has no schedule) IS returned,
-     * even when status is still draft, because the scope only hides future drafts.
+     * A DRAFT post whose schedule has already PASSED must NOT be visible.
+     *
+     * [CHARACTERIZATION FLIP — bug fix]: Previously this test asserted that a
+     * status=0 post with a past schedule WAS returned, documenting the pre-fix
+     * behaviour. That was a content-disclosure bug (H1): the notScheduledForFuture
+     * scope was the only gate; it only hid future-scheduled drafts, so a draft
+     * whose schedule had already passed slipped through.
+     *
+     * After the fix, applyFrontReadScope also requires status = STATUS_PUBLISHED,
+     * so an unpublished draft (status=0) is never returned on the public path
+     * regardless of its scheduled_at value.
      */
-    public function test_past_scheduled_draft_is_returned(): void
+    public function test_past_scheduled_draft_is_not_returned(): void
     {
         $post = Post::create([]);
         PostTranslation::create([
@@ -96,7 +105,7 @@ class PostViewServiceTest extends TestCase
             'title' => 'Past Scheduled',
             'slug' => 'past-scheduled',
             'author_id' => 1,
-            'status' => 0,
+            'status' => 0,                       // draft — still not published
             'scheduled_at' => now()->subDay(),   // schedule already passed
             'preview' => '',
             'content' => '',
@@ -107,8 +116,9 @@ class PostViewServiceTest extends TestCase
         $service = app(PostViewService::class);
         $result = $service->resolveBySlug('past-scheduled');
 
-        $this->assertNotNull($result, 'A post with a past schedule must be visible.');
-        $this->assertSame('past-scheduled', $result->slug);
+        // A status=0 draft must never be visible on the public front path,
+        // even if its scheduled_at is in the past.
+        $this->assertNull($result, 'A draft with a past schedule must not be visible on the public front path.');
     }
 
     /**

@@ -49,6 +49,22 @@ class PageRepository extends BaseRepository
     }
 
     /**
+     * Restrict public single-page reads to PUBLISHED pages only.
+     *
+     * Column is page_translations.status (status lives on the translations
+     * table, not the pages base table). Value 1 = published, 0 = draft/private.
+     * This mirrors the post equivalent in PostRepository and closes the
+     * content-disclosure bug for the page detail read path.
+     *
+     * @param  mixed  $query
+     * @return mixed
+     */
+    protected function applyFrontReadScope($query)
+    {
+        return $query->where('page_translations.status', '=', 1);
+    }
+
+    /**
      * Sitemap rows for all pages: one row per (page, locale) translation with
      * the slug + updated_at used to build <url>/<lastmod>/<xhtml:link> entries.
      */
