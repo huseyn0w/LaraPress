@@ -21,6 +21,7 @@ class UserPermissionsSeeder extends Seeder
                 ['name' => 'manage_user_roles'],
                 ['name' => 'manage_pages'],
                 ['name' => 'manage_posts'],
+                ['name' => 'manage_services'],
                 ['name' => 'manage_post_categories'],
                 ['name' => 'manage_menus'],
                 ['name' => 'manage_comments'],

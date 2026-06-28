@@ -70,6 +70,11 @@ class UserPolicy
         return $this->has('manage_posts');
     }
 
+    public function manage_services(): bool
+    {
+        return $this->has('manage_services');
+    }
+
     public function manage_menus(): bool
     {
         return $this->has('manage_menus');

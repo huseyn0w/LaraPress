@@ -16,6 +16,7 @@ use App\Http\Middleware\ManageMenu;
 use App\Http\Middleware\ManagePages;
 use App\Http\Middleware\ManagePosts;
 use App\Http\Middleware\ManageRoles;
+use App\Http\Middleware\ManageServices;
 use App\Http\Middleware\ManageUsers;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\TrimStrings;
@@ -86,6 +87,7 @@ class Kernel extends HttpKernel
         'manage_posts' => ManagePosts::class,
         'manage_roles' => ManageRoles::class,
         'manage_pages' => ManagePages::class,
+        'manage_services' => ManageServices::class,
         'manage_menus' => ManageMenu::class,
         'manage_comments' => ManageComments::class,
         'see_admin_panel' => AdminPanelMiddleware::class,
