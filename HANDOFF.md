@@ -118,8 +118,9 @@ REMAINING audit findings (NEW roadmap — matrix-vs-reality, from `../FEATURE_MA
   (+`/services` route + Service/FAQPage JSON-LD); reality = a textarea of strings on the `geo_settings`
   singleton (`CPanelGeoSettings::servicesList()`), no `/services` route, no CRUD. Build the type OR
   flag the matrix overstates it (FEATURE_MATRIX is read-only canon — don't edit; raise with owner).
-- **M2 — public search omits tags + services** (`PageRepository::getFilteredResult` switches
-  page/user/post/category only). Tags-in-search was already an optional leftover; services blocked on M1.
+- **M2 — tags in public search — DONE** (`6f748c8`): `PageRepository::filterByTag()` + `case 'tag'`,
+  `tag` added to `SearchRequest` filter, `<option value="tag">` + `/tag/{slug}` result links in
+  search.blade.php, en/ru `filter_tag` keys, 3 tests (554 green). Services-in-search still blocked on M1.
 - **L1 — CLAUDE.md stale** (REPORT-only, user's file): says e2e=Laravel Dusk (now also Pest browser),
   "no local lint command" (now `composer lint`/`analyse`/`check` + `ci.yml`), StyleCI (superseded). Worth
   the user updating CLAUDE.md §Commands.
