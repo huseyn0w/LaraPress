@@ -61,6 +61,7 @@ $current_lang = get_current_lang_prefix();
                     <option value="page">@lang('default/page.filter_page')</option>
                     <option value="user">@lang('default/page.filter_user')</option>
                     <option value="category">@lang('default/page.filter_category')</option>
+                    <option value="tag">@lang('default/page.filter_tag')</option>
                 </select>
             </x-field>
 
@@ -132,6 +133,9 @@ $current_lang = get_current_lang_prefix();
                         } elseif($searchData['type'] === "user") {
                             $result_url = config('app.url').$current_lang.'users/'.$item->username;
                             $result_label = $item->username;
+                        } elseif($searchData['type'] === "tag") {
+                            $result_url = config('app.url').'/'.$current_lang.'tag/'.$item->slug;
+                            $result_label = $item->name;
                         } else {
                             $result_url = config('app.url').'/'.$current_lang.'category/'.$item->slug;
                             $result_label = $item->title;

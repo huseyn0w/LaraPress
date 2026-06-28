@@ -13,6 +13,7 @@ use App\Http\Models\Category;
 use App\Http\Models\Page;
 use App\Http\Models\PageTranslation;
 use App\Http\Models\Post;
+use App\Http\Models\Tag;
 use App\Http\Models\User;
 
 class PageRepository extends BaseRepository
@@ -111,6 +112,9 @@ class PageRepository extends BaseRepository
             case 'category':
                 $result = $this->filterByCategory($searched_string, $count, $current_page);
                 break;
+            case 'tag':
+                $result = $this->filterByTag($searched_string, $count, $current_page);
+                break;
             default:
                 $result = throwAbort();
                 break;
@@ -152,6 +156,22 @@ class PageRepository extends BaseRepository
             ->paginate($count, ['*'], 'page', $current_page);
 
         return $category;
+    }
+
+    private function filterByTag($key, $count, $current_page)
+    {
+        $this->locale = get_current_lang();
+
+        $tags = Tag::join('tag_translations', 'tags.id', '=', 'tag_translations.tag_id')
+            ->select(['tag_translations.name', 'tag_translations.slug'])
+            ->where('tag_translations.locale', $this->locale)
+            ->where(function ($q) use ($key) {
+                $q->where('tag_translations.name', 'LIKE', '%'.$key.'%')
+                    ->orWhere('tag_translations.slug', 'LIKE', '%'.$key.'%');
+            })
+            ->paginate($count, ['*'], 'page', $current_page);
+
+        return $tags;
     }
 
     private function filterByPost($key, $count, $current_page)

@@ -21,6 +21,7 @@ return [
     'filter_user' => 'Пользователям',
     'filter_page' => 'Страницам',
     'filter_category' => 'Категориям',
+    'filter_tag' => 'Тегам',
     'result' => 'результат',
     'results' => 'результатов',
     'found_for' => 'найдено для',

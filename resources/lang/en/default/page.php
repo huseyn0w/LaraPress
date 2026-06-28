@@ -21,6 +21,7 @@ return [
     'filter_user' => 'User',
     'filter_page' => 'Page',
     'filter_category' => 'Category',
+    'filter_tag' => 'Tag',
     'result' => 'result',
     'results' => 'results',
     'found_for' => 'found for',
