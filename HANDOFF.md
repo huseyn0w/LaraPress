@@ -36,7 +36,8 @@
 `ShouldNotHappen: OutputInterface cannot be resolved` in SOME interactive shells (a Pest-binary
 DI quirk, not a code problem) — **use `php artisan test` (same engine) when that happens**; CI and
 fresh subagent shells run the binary fine.
-**Suite:** **479 passed**, ~39s (in-memory SQLite; browser tests excluded/skipped). 0 risky.
+**Suite:** **554 passed**, ~73s (in-memory SQLite; browser tests excluded/skipped). 0 risky.
+(479 after Task 3 → +H1 draft-leak fix +16 MCP tools +tags-in-search = 554.)
 **Static analysis:** `composer analyse` (PHPStan/Larastan level 5 + baseline) → **green**.
 **Lint:** `composer lint` (Pint, Laravel preset) → clean on all touched files.
 
@@ -394,14 +395,26 @@ Operating rules (summary — the prompt above is authoritative):
   attribution trailer**. When context drops below ~50%, refresh HANDOFF.md (incl. this
   continuation prompt) and tell me in Russian to open a new window.
 
-**P10 (Testing mandate + coverage + CI) implementation is DONE** (Pest 4 canonical runner, `arch()`
-presets, Pest browser suite authored, per-layer table, `ci.yml`; suite 322 green; Opus review READY
-TO MERGE). Its only REMAINING work needs a real CI env (no PCOV/MySQL/browser in this sandbox): push
-the branch, read the first CI coverage run, add gap tests until ≥80%/100%-critical (Phase 6), prove
-the browser e2e green, then retire `laravel/dusk` in one commit. The main remaining LOCAL track is
-**Task 3 — UI redesign to ../DESIGN_SYSTEM.md** (start there if not closing P10's CI items). Already
-DONE this effort: architecture refactor, comment-notification + rate-limiting (§18/§3), Tags (§2),
-Revisions + restore UI (§1), Soft-delete for pages (§1, P3), Category tree admin UI (§2, P4),
-Scheduled publishing (§1, P6), RSS/Atom feeds (P7), Membership + email-verification (P8),
-Plugin/hook registry (P9), and **Pest 4 / arch / CI testing mandate (P10)**.
+**STATE (resume here):** branch pushed to origin (`06a778f`), suite **554 green** (`php artisan test`
+— NOT `./vendor/bin/pest`, which throws a spurious OutputInterface error in some shells). DONE this
+engagement: architecture refactor, P1–P9 features, **P10** (Pest 4 / arch / CI — READY TO MERGE),
+**Task 3** (full UI redesign to ../DESIGN_SYSTEM.md, 8 phases + review fixes, SHIP), README rewrite,
+and a completeness-audit pass that FIXED: H1 (draft-content slug leak, security), M2 (tags in search),
+M3 (env→config in admin views), L2 (untrack public/build), and **H3 — MCP tool parity (28→44 tools:
+Tags/Comments/Media/GEO/Publish/Revisions)**. See the "Completeness audit" subsection above for commits.
+
+**REMAINING — pick up here:**
+1. **CI-gated (needs the pushed branch's CI run):** read the first CI coverage report → add gap tests
+   to ≥80% services/repos + 100% critical paths; prove the Pest browser e2e + Lighthouse jobs green;
+   THEN retire `laravel/dusk` in one commit. (No PCOV/MySQL/Chrome locally — measured in CI only.)
+2. **M1 — Service content type (PRODUCT DECISION):** matrix §1/§9 marks a first-class `Service` model
+   (+`/services` route + Service/FAQPage JSON-LD) ✅, but reality = a textarea list on the `geo_settings`
+   singleton. Either BUILD the content type (model/migration/repo/service/CRUD/view/route/JSON-LD — a
+   large slice) or accept the GEO approach and have the matrix owner downgrade §1/§9. Awaiting the
+   operator's call.
+3. **Deferred polish (bounded, no decision needed):** self-host the menu-builder jQuery-UI + add a
+   keyboard-accessible sortable; wire admin `x-field` `:error`/`aria-describedby`; re-style/replace the
+   `vendor/laravel-filemanager` BS3/FA4 views; ghost-ify the raw `delete_*` list buttons.
+4. **L1 — CLAUDE.md is stale** (operator's file, not edited): e2e=Dusk (now also Pest browser), "no
+   local lint command" (now `composer lint`/`analyse`/`check` + `ci.yml`), StyleCI superseded.
 ```
