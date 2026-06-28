@@ -1,4 +1,5 @@
-<?php // app/Http/Models/ServiceTranslation.php
+<?php
+
 namespace App\Http\Models;
 
 use GeneaLabs\LaravelModelCaching\Traits\Cachable;

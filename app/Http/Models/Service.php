@@ -1,4 +1,5 @@
-<?php // app/Http/Models/Service.php
+<?php
+
 namespace App\Http\Models;
 
 use Astrotomic\Translatable\Contracts\Translatable as TranslatableContract;

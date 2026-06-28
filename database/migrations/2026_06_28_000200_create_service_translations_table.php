@@ -1,9 +1,11 @@
-<?php // database/migrations/2026_06_28_000200_create_service_translations_table.php
+<?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('service_translations', function (Blueprint $table) {
@@ -28,5 +30,9 @@ return new class extends Migration {
             $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
         });
     }
-    public function down(): void { Schema::dropIfExists('service_translations'); }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('service_translations');
+    }
 };
