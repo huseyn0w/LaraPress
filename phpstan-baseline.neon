@@ -217,12 +217,6 @@ parameters:
 			path: app/Repositories/BaseRepositoryInterface.php
 
 		-
-			message: '#^Variable \$result might not be defined\.$#'
-			identifier: variable.undefined
-			count: 2
-			path: app/Repositories/CPanelCommentRepository.php
-
-		-
 			message: '#^Call to method getMessage\(\) on an unknown class Doctrine\\DBAL\\Driver\\PDOException\.$#'
 			identifier: class.notFound
 			count: 1

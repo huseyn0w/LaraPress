@@ -7,6 +7,10 @@ use App\Mcp\Tools\Categories\DeleteCategoryTool;
 use App\Mcp\Tools\Categories\GetCategoryTool;
 use App\Mcp\Tools\Categories\ListCategoriesTool;
 use App\Mcp\Tools\Categories\UpdateCategoryTool;
+use App\Mcp\Tools\Comments\DeleteCommentTool;
+use App\Mcp\Tools\Comments\GetCommentTool;
+use App\Mcp\Tools\Comments\ListCommentsTool;
+use App\Mcp\Tools\Comments\ModerateCommentTool;
 use App\Mcp\Tools\Pages\CreatePageTool;
 use App\Mcp\Tools\Pages\DeletePageTool;
 use App\Mcp\Tools\Pages\GetPageTool;
@@ -49,9 +53,10 @@ pages, categories, tags, users, site settings, and theme (Blade) templates.
 
 Authorization: every tool runs as the OAuth-authenticated user and is gated by
 that user's admin permissions (manage_posts, manage_pages, manage_post_categories,
-manage_users, manage_general_settings). A "Permission denied" result means the
-connected account lacks that capability — it is not retryable without a role change.
-Tag tools require the manage_posts permission (tags are part of the post workflow).
+manage_users, manage_general_settings, manage_comments). A "Permission denied" result
+means the connected account lacks that capability — it is not retryable without a role
+change. Tag tools require the manage_posts permission (tags are part of the post
+workflow). Comment tools require the manage_comments permission.
 
 Multilingual content: posts, pages, categories and tags are translatable. Pass an
 explicit `locale` (e.g. "en") when creating or updating them; omitting it targets
@@ -87,6 +92,11 @@ class CmstackLaravelServer extends Server
         CreateCategoryTool::class,
         UpdateCategoryTool::class,
         DeleteCategoryTool::class,
+        // Comments
+        ListCommentsTool::class,
+        GetCommentTool::class,
+        ModerateCommentTool::class,
+        DeleteCommentTool::class,
         // Tags
         ListTagsTool::class,
         GetTagTool::class,

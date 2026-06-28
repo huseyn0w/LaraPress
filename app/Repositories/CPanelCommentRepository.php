@@ -9,6 +9,7 @@
 namespace App\Repositories;
 
 use App\Http\Models\Comments;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class CPanelCommentRepository extends BaseRepository
 {
@@ -26,31 +27,43 @@ class CPanelCommentRepository extends BaseRepository
         return $this->model->select('comment')->orderBy('id', 'desc')->take($count)->get();
     }
 
-    public function approve(int $id)
+    /**
+     * Paginated list of all comments (newest first), for MCP tooling.
+     *
+     * @return LengthAwarePaginator
+     */
+    public function paginate(int $perPage = 50, int $page = 1)
     {
-        $comment = $this->model::find($id);
-        if (! $comment) {
-            $result = false;
-        }
-        if ($comment->update(['status' => '1'])) {
-            $result = true;
-        }
-
-        return $result;
-
+        return $this->model::orderBy('id', 'desc')->paginate($perPage, ['*'], 'page', $page);
     }
 
-    public function unApprove(int $id)
+    /**
+     * Find a single comment by id; returns null when not found.
+     */
+    public function find(int $id): ?Comments
+    {
+        return $this->model::find($id);
+    }
+
+    public function approve(int $id): bool
     {
         $comment = $this->model::find($id);
+
         if (! $comment) {
-            $result = 'salam';
+            return false;
         }
 
-        if ($comment->update(['status' => '0'])) {
-            $result = true;
+        return (bool) $comment->update(['status' => '1']);
+    }
+
+    public function unApprove(int $id): bool
+    {
+        $comment = $this->model::find($id);
+
+        if (! $comment) {
+            return false;
         }
 
-        return $result;
+        return (bool) $comment->update(['status' => '0']);
     }
 }
