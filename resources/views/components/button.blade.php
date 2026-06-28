@@ -12,7 +12,7 @@ $tag = $href ? 'a' : ($as === 'a' ? 'a' : 'button');
 
 $variantClasses = match($variant) {
     'primary'     => 'bg-primary text-primary-contrast hover:bg-primary-hover',
-    'secondary'   => 'bg-surface-2 text-fg hover:bg-surface-2',
+    'secondary'   => 'bg-surface-2 text-fg hover:bg-border',
     'outline'     => 'border border-strong bg-transparent text-fg hover:bg-surface-2',
     'ghost'       => 'bg-transparent text-fg hover:bg-surface-2',
     'destructive' => 'bg-error text-primary-contrast hover:opacity-90',

@@ -22,7 +22,7 @@ $languages = get_languages();
         @click="sidebarOpen = true"
         class="admin-topbar-btn -ml-1 inline-flex h-9 w-9 items-center justify-center rounded-lg lg:hidden"
         aria-label="@lang('cpanel/nav/top.open_nav')"
-        aria-controls="main navigation"
+        aria-controls="admin-sidebar"
     >
         <x-icon name="menu" width="22" height="22" />
     </button>

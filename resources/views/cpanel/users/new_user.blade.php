@@ -66,17 +66,17 @@
                 <div class="field">
                     <span class="field-label">@lang('cpanel/users.gender')</span>
                     <div class="flex flex-wrap gap-6">
-                        <label class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
+                        <label class="flex cursor-pointer items-center gap-2.5 text-sm text-fg">
                             <input class="form-check-input" type="radio" name="gender" value="male" id="male"> Male
                         </label>
-                        <label class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
+                        <label class="flex cursor-pointer items-center gap-2.5 text-sm text-fg">
                             <input class="form-check-input" type="radio" name="gender" value="female" id="female"> Female
                         </label>
                     </div>
                 </div>
 
                 <fieldset class="mt-2 rounded-lg border border-border p-4">
-                    <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-ink-500">Social profiles</legend>
+                    <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-muted">Social profiles</legend>
                     <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
                         <x-field label="@lang('cpanel/users.facebook')">
                             <input type="text" class="form-control w-full" name="facebook_url" placeholder="https://" value="{{ old('facebook_url') }}">

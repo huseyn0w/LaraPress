@@ -30,7 +30,7 @@
                         <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
                             <div class="field">
                                 <label class="field-label">@lang('cpanel/users.username')</label>
-                                <p class="rounded-lg bg-ink-50 px-3.5 py-2.5 text-sm font-medium text-ink-700">{{$user->username}}</p>
+                                <p class="rounded-lg bg-surface-2 px-3.5 py-2.5 text-sm font-medium text-fg">{{$user->username}}</p>
                             </div>
                             <x-field label="@lang('cpanel/users.email')" name="email">
                                 <input type="email" id="email" class="form-control w-full" name="email" value="{{ old('email', $user->email) }}">
@@ -74,7 +74,7 @@
                         </x-field>
 
                         <fieldset class="mt-2 rounded-lg border border-border p-4">
-                            <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-ink-500">Social profiles</legend>
+                            <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-muted">Social profiles</legend>
                             <div class="grid grid-cols-1 gap-x-5 md:grid-cols-2">
                                 <x-field label="@lang('cpanel/users.facebook')">
                                     <input type="text" class="form-control w-full" name="facebook_url" placeholder="https://" value="{{ old('facebook_url', $user->facebook_url) }}">
@@ -100,10 +100,10 @@
                         <div class="field">
                             <span class="field-label">@lang('cpanel/users.gender')</span>
                             <div class="flex flex-wrap gap-6">
-                                <label class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
+                                <label class="flex cursor-pointer items-center gap-2.5 text-sm text-fg">
                                     <input class="form-check-input" type="radio" name="gender" {{$user->gender === "male" ? 'checked' : null}} value="male" id="male"> Male
                                 </label>
-                                <label class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
+                                <label class="flex cursor-pointer items-center gap-2.5 text-sm text-fg">
                                     <input class="form-check-input" type="radio" name="gender" {{$user->gender === "female" ? 'checked' : null}} value="female" id="female"> Female
                                 </label>
                             </div>
@@ -134,9 +134,9 @@
                                 <input id="file-upload" value="{{old('avatar', $user->avatar)}}" type="hidden" name="avatar" />
                             </span>
                             <h5 class="title mt-4 text-base font-semibold text-fg">{{$user->name}} {{$user->surname}}</h5>
-                            <p class="description text-sm text-ink-500">{{$user->username}}</p>
+                            <p class="description text-sm text-muted">{{$user->username}}</p>
                             @if($user->about_me)
-                                <p class="description mt-3 text-sm leading-relaxed text-ink-600">{{$user->about_me}}</p>
+                                <p class="description mt-3 text-sm leading-relaxed text-muted">{{$user->about_me}}</p>
                             @endif
                         </div>
                         @php

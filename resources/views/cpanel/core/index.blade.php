@@ -25,6 +25,7 @@
     {{-- Sidebar: off-canvas drawer below lg, static rail at lg+.
          Uses .admin-sidebar which is token-driven so .dark flips correctly (§5). --}}
     <aside
+        id="admin-sidebar"
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
         class="admin-sidebar fixed inset-y-0 left-0 z-sidebar w-[260px] transform overflow-y-auto transition-transform duration-300 ease-out-expo lg:static lg:transform-none"
         aria-label="Main navigation"

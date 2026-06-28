@@ -33,11 +33,11 @@
                 </x-field>
 
                 <fieldset class="mt-4 rounded-lg border border-border p-4">
-                    <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-ink-500">@lang('cpanel/roles.table_action')</legend>
+                    <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-muted">@lang('cpanel/roles.table_action')</legend>
                     <div class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach($role_permissions as $permission)
                             @php($permission_name = str_replace('_', " ", $permission->name))
-                            <label for="{{$permission->name}}" class="flex cursor-pointer items-center gap-2.5 text-sm text-ink-700">
+                            <label for="{{$permission->name}}" class="flex cursor-pointer items-center gap-2.5 text-sm text-fg">
                                 <input class="form-check-input" id="{{$permission->name}}" name="permissions[]" value="{{$permission->name}}" type="checkbox" {{ ($user_permissions[$permission->name] ?? 0) === 1 ? 'checked' : '' }}>
                                 <span class="capitalize">{{$permission_name}}</span>
                             </label>
