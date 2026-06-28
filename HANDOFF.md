@@ -40,9 +40,9 @@ fresh subagent shells run the binary fine.
 **Static analysis:** `composer analyse` (PHPStan/Larastan level 5 + baseline) → **green**.
 **Lint:** `composer lint` (Pint, Laravel preset) → clean on all touched files.
 
-### Task 3 — UI redesign to DESIGN_SYSTEM.md (IN PROGRESS — Phases 1–4 of 8 DONE)
+### Task 3 — UI redesign to DESIGN_SYSTEM.md (DONE — all 8 phases + final review fixes; SHIP)
 Plan: `docs/superpowers/plans/2026-06-26-task3-ui-redesign.md` (public+admin dark toggle in scope).
-Ledger: `.git/sdd/progress.md` "Task 3" section. Commits `088419a`..`049f02a`.
+Ledger: `.git/sdd/progress.md` "Task 3" section. Commits `088419a`..`3b381f6`.
 - **P1 tokens DONE** — `resources/css/tokens.css` (`:root` light + `.dark` dark, exact §2 hex + §4
   radius/spacing + §6 motion vars); `tailwind.config.js` bridges utilities to vars + `darkMode:'class'`.
   Utility vocabulary: `bg-bg`/`bg-surface`/`bg-surface-2`, `text-fg`/`text-muted`/`text-subtle`,
@@ -66,11 +66,29 @@ Ledger: `.git/sdd/progress.md` "Task 3" section. Commits `088419a`..`049f02a`.
   `<nav aria-label>`, locale switcher as `<x-dropdown>`, **public dark/light toggle** [localStorage key
   `cmstack-theme` SHARED with admin, no-FOUC inline `<head>` script], focus-trapped mobile drawer in
   `front.js`); all `<head>`/seo-meta/`@vite`/`@yield`/`@stack`/locale wiring preserved; `@hook('footer')`.
-- **REMAINING: P5 public pages** (post/archives/home/pages/profile + port the 4 STILL-Bootstrap-4 auth
-  views: register, passwords/email, passwords/reset, verify), **P6 admin shell** (sidebar/topbar/dark
-  toggle + replace filemanager FA), **P7 admin section views (30)**, **P8 perf+a11y** (subset fonts +
-  preload + responsive images + Lighthouse CI — all CI/served-env measured, NOT this sandbox).
-  Apply the P3 components; keep `php artisan test` green each slice; update `tests/Browser/*` data-testid.
+- **P5 public pages DONE** — post detail + category/tag archives + home/page/contact/search + user
+  pages (profile/edit/change-password) + auth (login/social parity + the 4 Bootstrap-4 ports:
+  register, passwords/email, passwords/reset, verify). All forms/Alpine islands/get_field/captcha/
+  routes preserved; full Auth suite (43) green; no Bootstrap-4 left in `default/`+`auth/`.
+- **P6 admin shell DONE** — sidebar/topbar §5, admin dark toggle (`cmstack-theme`), token-driven
+  `.admin-*` classes in admin.css, flash→`x-alert`; admin.js runtime (collapse/modal/toast/jQuery-shims)
+  + permission-gating + language switcher + logout preserved.
+- **P7 admin section views DONE** — 30 views: lists (token tables + bulk bar + status tabs + badges +
+  row-action dropdowns), content forms (per-locale `x-tabs` + `x-field`, custom-field builder + editor
+  + parent picker hooks preserved), settings/media/dashboard/menus/revisions.
+- **P8 perf+a11y DONE** — font `wght`-subset + Geist latin-only, responsive images (width/height/lazy/
+  fetchpriority), a11y sweep (one-h1 incl archives-via-banner, skip-link, landmarks), token cleanup;
+  `.lighthouserc.json` + Lighthouse CI job (`ci.yml`, §7 budget — **CI-measured, never asserted unrun**).
+- **Final Opus design review: FIX-THEN-SHIP → fixes applied** (commit `3b381f6`): dark-mode token fixes
+  in 6 admin views (ink-*/brand-* → semantic), `aria-controls`, `env('APP_URL')`→`config('app.url')`,
+  button secondary hover delta. **Task 3 = SHIP.** Suite 479 green, Pint+PHPStan clean.
+- **DEFERRED (noted, non-blocking):** (1) §5 keyboard-accessible sortable for the menu builder — still
+  jQuery-UI from googleapis CDN; (2) `vendor/laravel-filemanager/*` BS3+FA4 CDNs (third-party published
+  views — republish to remove); (3) admin `x-field` doesn't pass `:error`/`aria-describedby` (admin
+  relies on flash banners — Medium a11y improvement, per-form wiring); (4) JS-hook list buttons
+  (`delete_post` etc.) are raw `<button>` not `<x-button>` (functional, minor styling); (5) tracked
+  `public/build/*` assets are stale (rebuilt on deploy / in CI). **Visual fidelity + Lighthouse ≥95 +
+  the Pest browser computed-style suite are MEASURED IN CI** (served app + Chrome + MySQL), not here.
 
 ### Architecture map (current)
 
