@@ -107,10 +107,13 @@ FIXED this pass:
 - HANDOFF P7 `x-tabs` claim corrected (above).
 
 REMAINING audit findings (NEW roadmap — matrix-vs-reality, from `../FEATURE_MATRIX.md` canon):
-- **H3 — MCP tool surface below matrix §15.** 28 tools exist; matrix wants 1:1 parity incl. **Tags**,
-  **Comments-moderation**, **Media list/metadata**, **GEO/FAQ services**, and post **publish/revision**
-  tools (no `app/Mcp/Tools/{Tags,Comments,Media,Geo}/`). Delegate to existing `CPanel*Repository`
-  (auth/locale concerns already exist). Most-bounded next big item.
+- **H3 — MCP tool parity — DONE** (commits `caf86fc` Tags, `f90b791` Comments, `7a2871b` Media,
+  `512a641` GEO+publish+revisions). Surface 28→**44 tools**: Tags (5, `manage_posts`), Comments
+  moderation (4, `manage_comments`; fixed an approve/unApprove fatal-on-missing bug), Media list+metadata
+  (2, read-only, path-allowlisted w/ traversal-rejection tests, `manage_general_settings`), GEO settings
+  get/update (2), PublishPost (1), Post revisions list/restore (2) — all `manage_posts`/delegating to
+  existing repos/services. Suite **551 green**, Pint+PHPStan clean. Still out of scope (noted): media
+  upload/delete via MCP, `email_verification`/plugin-toggle MCP parity.
 - **M1 — "Service" GEO content type is a partial.** Matrix §1/§9 wants a first-class `Service` model
   (+`/services` route + Service/FAQPage JSON-LD); reality = a textarea of strings on the `geo_settings`
   singleton (`CPanelGeoSettings::servicesList()`), no `/services` route, no CRUD. Build the type OR
