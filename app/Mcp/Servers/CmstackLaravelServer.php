@@ -21,6 +21,11 @@ use App\Mcp\Tools\Settings\GetGeneralSettingsTool;
 use App\Mcp\Tools\Settings\GetSeoSettingsTool;
 use App\Mcp\Tools\Settings\UpdateGeneralSettingsTool;
 use App\Mcp\Tools\Settings\UpdateSeoSettingsTool;
+use App\Mcp\Tools\Tags\CreateTagTool;
+use App\Mcp\Tools\Tags\DeleteTagTool;
+use App\Mcp\Tools\Tags\GetTagTool;
+use App\Mcp\Tools\Tags\ListTagsTool;
+use App\Mcp\Tools\Tags\UpdateTagTool;
 use App\Mcp\Tools\Theme\ListThemeFilesTool;
 use App\Mcp\Tools\Theme\ReadThemeFileTool;
 use App\Mcp\Tools\Theme\WriteThemeFileTool;
@@ -40,14 +45,15 @@ use Laravel\Mcp\Server\Tool;
 #[Version('1.0.0')]
 #[Instructions(<<<'TXT'
 This server lets an AI assistant manage a Cmstack-Laravel installation: posts,
-pages, categories, users, site settings, and theme (Blade) templates.
+pages, categories, tags, users, site settings, and theme (Blade) templates.
 
 Authorization: every tool runs as the OAuth-authenticated user and is gated by
 that user's admin permissions (manage_posts, manage_pages, manage_post_categories,
 manage_users, manage_general_settings). A "Permission denied" result means the
 connected account lacks that capability — it is not retryable without a role change.
+Tag tools require the manage_posts permission (tags are part of the post workflow).
 
-Multilingual content: posts, pages and categories are translatable. Pass an
+Multilingual content: posts, pages, categories and tags are translatable. Pass an
 explicit `locale` (e.g. "en") when creating or updating them; omitting it targets
 the site's default language. Use list/get tools to discover existing slugs and ids
 before updating or deleting.
@@ -81,6 +87,12 @@ class CmstackLaravelServer extends Server
         CreateCategoryTool::class,
         UpdateCategoryTool::class,
         DeleteCategoryTool::class,
+        // Tags
+        ListTagsTool::class,
+        GetTagTool::class,
+        CreateTagTool::class,
+        UpdateTagTool::class,
+        DeleteTagTool::class,
         // Users
         ListUsersTool::class,
         GetUserTool::class,
