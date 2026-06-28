@@ -33,6 +33,11 @@ abstract class BaseRepository implements BaseRepositoryInterface
 
     protected $translated_model;
 
+    // Front-family repositories (PostRepository, PageRepository, CategoryRepository,
+    // ServiceRepository) assign their translation model here. Declared so the
+    // assignment is a real, typed property rather than a dynamic one.
+    protected $translated_table_model;
+
     protected $translated_table_join_column;
 
     protected $select_fields_ready_array;

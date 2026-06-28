@@ -265,12 +265,6 @@ parameters:
 			path: app/Repositories/CPanelUserRolesRepository.php
 
 		-
-			message: '#^Access to an undefined property App\\Repositories\\CategoryRepository\:\:\$translated_table_model\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/CategoryRepository.php
-
-		-
 			message: '#^Caught class Doctrine\\DBAL\\Driver\\PDOException not found\.$#'
 			identifier: class.notFound
 			count: 1
@@ -295,12 +289,6 @@ parameters:
 			path: app/Repositories/CategoryRepository.php
 
 		-
-			message: '#^Access to an undefined property App\\Repositories\\PageRepository\:\:\$translated_table_model\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/PageRepository.php
-
-		-
 			message: '#^Call to method getMessage\(\) on an unknown class Doctrine\\DBAL\\Driver\\PDOException\.$#'
 			identifier: class.notFound
 			count: 1
@@ -311,12 +299,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: app/Repositories/PostCommentsRepository.php
-
-		-
-			message: '#^Access to an undefined property App\\Repositories\\PostRepository\:\:\$translated_table_model\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Repositories/PostRepository.php
 
 		-
 			message: '#^Relation ''author'' is not found in App\\Http\\Models\\Post model\.$#'
