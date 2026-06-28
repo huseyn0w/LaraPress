@@ -168,3 +168,81 @@ jobs:
       # explicitly collects it. BROWSER_TESTS=1 (job env) un-skips the scenarios.
       - name: Pest browser e2e
         run: ./vendor/bin/pest tests/Browser
+
+  # ---------------------------------------------------------------------------
+  # Performance gate — Lighthouse CI against the served public site (mobile).
+  # Enforces the DESIGN_SYSTEM §7 budget (Perf/SEO/A11y/Best-Practices >= 95,
+  # LCP < 2.0s, CLS < 0.05). The SCORES come from THIS run — never asserted
+  # unrun. Config: .lighthouserc.json.
+  # ---------------------------------------------------------------------------
+  lighthouse:
+    name: Lighthouse perf gate (mobile)
+    runs-on: ubuntu-latest
+    needs: [quality, build]
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_DATABASE: cmstack_laravel_lh
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    env:
+      APP_ENV: local
+      APP_URL: http://127.0.0.1:8000
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: cmstack_laravel_lh
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: imagick, pdo_mysql, mbstring, intl, gd
+          tools: composer:v2
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies + build
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          npm ci && npm run build
+
+      - name: Prepare environment
+        run: cp .env.example .env && php artisan key:generate
+
+      - name: Migrate + seed (MySQL)
+        run: php artisan migrate --seed --force
+
+      - name: Link storage
+        run: php artisan storage:link
+
+      - name: Serve the app
+        run: php artisan serve --host=127.0.0.1 --port=8000 &
+
+      - name: Wait for the app to answer
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sSf http://127.0.0.1:8000 >/dev/null; then
+              echo "app is up"; exit 0
+            fi
+            sleep 2
+          done
+          echo "app did not start in time"; exit 1
+
+      # Scores are produced HERE by Lighthouse against the live served site.
+      # Thresholds live in .lighthouserc.json (§7 budget). Never assert unrun.
+      - name: Lighthouse CI (mobile, §7 budget)
+        run: npx --yes @lhci/cli@0.14.x autorun
