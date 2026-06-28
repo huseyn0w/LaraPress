@@ -89,8 +89,11 @@ Ledger: `.git/sdd/progress.md` "Task 3" section. Commits `088419a`..`3b381f6`.
 - **DEFERRED (noted, non-blocking):** (1) §5 keyboard-accessible sortable for the menu builder — still
   jQuery-UI from googleapis CDN; (2) `vendor/laravel-filemanager/*` BS3+FA4 CDNs (third-party published
   views — republish to remove); (3) admin `x-field` doesn't pass `:error`/`aria-describedby` (admin
-  relies on flash banners — Medium a11y improvement, per-form wiring); (4) JS-hook list buttons
-  (`delete_post` etc.) are raw `<button>` not `<x-button>` (functional, minor styling); (5) tracked
+  relies on flash banners — Medium a11y improvement, per-form wiring); (4) ~~JS-hook list buttons raw~~
+  **RESOLVED/non-issue**: the `delete_*`/`destroy_*`/`restore_*` row actions are intentionally styled as
+  inline text-actions via the scoped `.theme-admin .user_actions` CSS (admin.css ~L432, danger hover on
+  delete variants) — NOT raw/unstyled; converting them to `<x-button>` would regress that pattern and the
+  jQuery hooks in `public/admin/js/*.js` depend on the classes; (5) tracked
   `public/build/*` assets are stale (rebuilt on deploy / in CI). **Visual fidelity + Lighthouse ≥95 +
   the Pest browser computed-style suite are MEASURED IN CI** (served app + Chrome + MySQL), not here.
 
@@ -122,11 +125,12 @@ REMAINING audit findings (NEW roadmap — matrix-vs-reality, from `../FEATURE_MA
 - **M2 — tags in public search — DONE** (`6f748c8`): `PageRepository::filterByTag()` + `case 'tag'`,
   `tag` added to `SearchRequest` filter, `<option value="tag">` + `/tag/{slug}` result links in
   search.blade.php, en/ru `filter_tag` keys, 3 tests (554 green). Services-in-search still blocked on M1.
-- **L1 — CLAUDE.md stale** (REPORT-only, user's file): says e2e=Laravel Dusk (now also Pest browser),
-  "no local lint command" (now `composer lint`/`analyse`/`check` + `ci.yml`), StyleCI (superseded). Worth
-  the user updating CLAUDE.md §Commands.
+- **L1 — CLAUDE.md — DONE** (819b3f0 + doc batch): lint line now Pint/`composer lint` (not StyleCI),
+  Pest-browser CI e2e noted alongside Dusk, asset-pipeline note corrected (legacy `public/admin/js/*.js`
+  still loaded in admin list views for delete/destroy AJAX). Dusk left in until the CI-gated retirement.
 - Still-deferred (unchanged): jQuery-UI keyboard-sortable (menu builder); filemanager vendor BS3/FA4 CDN;
-  admin `x-field` `:error`/`aria-describedby` wiring; JS-hook list buttons as raw `<button>`.
+  admin `x-field` `:error`/`aria-describedby` wiring. (Dropped: "JS-hook list buttons as raw `<button>`"
+  — they're intentionally inline-styled via `.theme-admin .user_actions`, not raw.)
 
 ### Architecture map (current)
 
@@ -413,8 +417,11 @@ Tags/Comments/Media/GEO/Publish/Revisions)**. See the "Completeness audit" subse
    large slice) or accept the GEO approach and have the matrix owner downgrade §1/§9. Awaiting the
    operator's call.
 3. **Deferred polish (bounded, no decision needed):** self-host the menu-builder jQuery-UI + add a
-   keyboard-accessible sortable; wire admin `x-field` `:error`/`aria-describedby`; re-style/replace the
-   `vendor/laravel-filemanager` BS3/FA4 views; ghost-ify the raw `delete_*` list buttons.
-4. **L1 — CLAUDE.md is stale** (operator's file, not edited): e2e=Dusk (now also Pest browser), "no
-   local lint command" (now `composer lint`/`analyse`/`check` + `ci.yml`), StyleCI superseded.
+   keyboard-accessible sortable; wire admin `x-field` `:error`/`aria-describedby` (~17 forms — needs a
+   slot aria-describedby contract, not just the component); re-style/replace the
+   `vendor/laravel-filemanager` BS3/FA4 views. (The `delete_*` list-button item is dropped — see DEFERRED
+   note (4): they're intentionally inline-styled via `.theme-admin .user_actions`, not raw.)
+4. **L1 — CLAUDE.md — DONE (819b3f0 + this batch):** corrected the lint line (Pint/`composer lint`
+   canonical, not StyleCI), added the Pest-browser CI e2e note alongside Dusk, and fixed the asset
+   note (legacy `public/admin/js/*.js` are still loaded in admin list views for delete/destroy AJAX).
 ```
