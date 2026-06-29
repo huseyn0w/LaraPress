@@ -15,6 +15,14 @@ class ServiceRepository extends BaseRepository
 
     protected $translated_table_join_column = 'service_id';
 
+    /**
+     * Services have no author relation — disable eager-loading inherited from
+     * BaseRepository so getTranslatedBy() does not throw RelationNotFoundException.
+     *
+     * @var array<int, string>
+     */
+    protected $eager_relations = [];
+
     protected $select_fields = [
         'id',
         'sort_order',

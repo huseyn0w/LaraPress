@@ -208,6 +208,18 @@ Route::group([], function () {
 
     });
 
+    // Service content type — public listing + detail.
+    // The non-prefixed /services routes MUST come before the optional-locale
+    // variants so the router does not fall through to the catch-all
+    // {locale?}/{slug?} (known Laravel optional-segment routing quirk).
+    // Names live on the non-locale variants so route() helpers work without params.
+    Route::prefix('/services')->group(function () {
+        Route::get('/{slug}', 'ServiceController@show')->name('services_show');
+        Route::get('/', 'ServiceController@listing')->name('services_index');
+    });
+    Route::get('/{locale}/services/{slug}', 'ServiceController@show');
+    Route::get('/{locale}/services', 'ServiceController@listing');
+
     Route::post('/contact/sendform', 'PageController@sendMail')->name('sendform');
 
     Route::get('/{locale?}/category/{slug}', 'CategoryController@languageIndex')->name('categories_localized');
