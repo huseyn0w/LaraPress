@@ -5,6 +5,7 @@ namespace App\Services\Front;
 use App\Repositories\CategoryRepository;
 use App\Repositories\PageRepository;
 use App\Repositories\PostRepository;
+use App\Repositories\ServiceRepository;
 
 /**
  * Phase 7 (SEO/GEO): composes the public SEO feeds — sitemap.xml, robots.txt and
@@ -19,6 +20,7 @@ class SeoFeedService
         private PageRepository $pages,
         private PostRepository $posts,
         private CategoryRepository $categories,
+        private ServiceRepository $services,
     ) {}
 
     /**
@@ -42,6 +44,10 @@ class SeoFeedService
         // --- Categories (category_translations has no timestamps) ---
         $categories = $this->categories->sitemapEntries();
         $urls = array_merge($urls, $this->groupBy($categories, 'category_id', 'category/', $base, $default));
+
+        // --- Services ---
+        $services = $this->services->sitemapEntries();
+        $urls = array_merge($urls, $this->groupBy($services, 'service_id', 'services/', $base, $default));
 
         return $this->renderSitemap($urls);
     }
@@ -162,6 +168,11 @@ class SeoFeedService
         $geo = get_geo_settings();
         $emitGeo = $geo && $geo->include_in_llms;
 
+        // Real Service content-type records take precedence over the GEO
+        // settings' free-text services list — when present they are emitted as
+        // proper links to /services/{slug} (the GEO textarea is the fallback).
+        $serviceRecords = $this->services->llmsEntries();
+
         $lines = [];
         $lines[] = '# '.(($emitGeo && ! empty($geo->business_name)) ? $geo->business_name : $name);
         $lines[] = '';
@@ -179,8 +190,10 @@ class SeoFeedService
                 $lines[] = '';
             }
 
+            // GEO free-text services are a fallback only when there are no
+            // real Service records (those are emitted as links further down).
             $services = $geo->servicesList();
-            if (! empty($services)) {
+            if (! empty($services) && $serviceRecords->isEmpty()) {
                 $lines[] = '## Services';
                 $lines[] = '';
                 foreach ($services as $service) {
@@ -203,6 +216,16 @@ class SeoFeedService
                     $lines[] = '';
                 }
             }
+        }
+
+        // Real Service content-type records — linked, locale-aware.
+        if ($serviceRecords->isNotEmpty()) {
+            $lines[] = '## Services';
+            $lines[] = '';
+            foreach ($serviceRecords as $svc) {
+                $lines[] = '- ['.$svc->title.']('.$base.'/services/'.$svc->slug.')';
+            }
+            $lines[] = '';
         }
 
         $lines[] = '## Key links';

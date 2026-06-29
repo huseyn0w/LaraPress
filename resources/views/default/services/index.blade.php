@@ -23,6 +23,29 @@
 
 @section('content')
 
+@php
+    // schema.org ItemList of Service nodes, built from the real published
+    // records (closes the M1 gap — services are first-class structured data,
+    // not just the geo_settings free-text list).
+    $serviceLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'ItemList',
+        'itemListElement' => $services->values()->map(fn ($s, $i) => [
+            '@type' => 'ListItem',
+            'position' => $i + 1,
+            'item' => array_filter([
+                '@type' => 'Service',
+                'name' => $s->title,
+                'description' => $s->excerpt,
+                'url' => route('services_show', ['slug' => $s->slug]),
+            ]),
+        ])->all(),
+    ];
+@endphp
+@if($services->isNotEmpty())
+    <script type="application/ld+json">{!! json_encode($serviceLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+@endif
+
 @include(config('app.template_name').'.partials.banner', [
     'title' => __('services.index_heading'),
 ])

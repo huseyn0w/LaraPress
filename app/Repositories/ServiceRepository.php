@@ -99,7 +99,30 @@ class ServiceRepository extends BaseRepository
             ->join('services', 'services.id', '=', 'service_translations.service_id')
             ->whereNull('services.deleted_at')
             ->where('service_translations.status', Service::STATUS_PUBLISHED)
-            ->select('service_translations.slug', 'service_translations.locale', 'service_translations.updated_at')
+            ->select(
+                'service_translations.service_id',
+                'service_translations.slug',
+                'service_translations.locale',
+                'service_translations.updated_at',
+            )
+            ->get();
+    }
+
+    /**
+     * Published services (title + slug) for the default locale, ordered, for the
+     * llms.txt "Services" section. Mirrors CategoryRepository::llmsEntries.
+     */
+    public function llmsEntries(): Collection
+    {
+        return DB::table('service_translations')
+            ->join('services', 'services.id', '=', 'service_translations.service_id')
+            ->whereNull('services.deleted_at')
+            ->where('service_translations.status', Service::STATUS_PUBLISHED)
+            ->where('service_translations.locale', config('app.locale'))
+            ->orderBy('services.sort_order')
+            ->orderBy('services.id')
+            ->select('service_translations.title', 'service_translations.slug')
+            ->limit(50)
             ->get();
     }
 }
