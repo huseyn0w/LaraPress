@@ -36,6 +36,16 @@ it('links published services in llms.txt', function () {
         ->assertSee('/services/managed-hosting', false);
 });
 
+it('excludes draft services from llms.txt', function () {
+    seoService('managed-hosting', 1);
+    seoService('secret-service', 0);
+
+    $body = $this->get('/llms.txt')->assertOk()->getContent();
+
+    expect($body)->toContain('/services/managed-hosting')
+        ->and($body)->not->toContain('/services/secret-service');
+});
+
 it('emits Service JSON-LD on the services index', function () {
     seoService('managed-hosting', 1);
 
