@@ -26,6 +26,11 @@ use App\Mcp\Tools\Posts\ListPostsTool;
 use App\Mcp\Tools\Posts\PublishPostTool;
 use App\Mcp\Tools\Posts\RestorePostRevisionTool;
 use App\Mcp\Tools\Posts\UpdatePostTool;
+use App\Mcp\Tools\Services\CreateServiceTool;
+use App\Mcp\Tools\Services\DeleteServiceTool;
+use App\Mcp\Tools\Services\GetServiceTool;
+use App\Mcp\Tools\Services\ListServicesTool;
+use App\Mcp\Tools\Services\UpdateServiceTool;
 use App\Mcp\Tools\Settings\GetGeneralSettingsTool;
 use App\Mcp\Tools\Settings\GetGeoSettingsTool;
 use App\Mcp\Tools\Settings\GetSeoSettingsTool;
@@ -59,13 +64,17 @@ This server lets an AI assistant manage a Cmstack-Laravel installation: posts,
 pages, categories, tags, users, site settings, and theme (Blade) templates.
 
 Authorization: every tool runs as the OAuth-authenticated user and is gated by
-that user's admin permissions (manage_posts, manage_pages, manage_post_categories,
-manage_users, manage_general_settings, manage_comments). A "Permission denied" result
+that user's admin permissions (manage_posts, manage_pages, manage_services,
+manage_post_categories, manage_users, manage_general_settings, manage_comments).
+A "Permission denied" result
 means the connected account lacks that capability — it is not retryable without a role
 change. Tag tools require the manage_posts permission (tags are part of the post
 workflow). Comment tools require the manage_comments permission.
 
-Multilingual content: posts, pages, categories and tags are translatable. Pass an
+Service tools require the manage_services permission. Services are a translatable
+content type (title, slug, excerpt, content, SEO) with a public /services listing.
+
+Multilingual content: posts, pages, services, categories and tags are translatable. Pass an
 explicit `locale` (e.g. "en") when creating or updating them; omitting it targets
 the site's default language. Use list/get tools to discover existing slugs and ids
 before updating or deleting.
@@ -96,6 +105,12 @@ class CmstackLaravelServer extends Server
         CreatePageTool::class,
         UpdatePageTool::class,
         DeletePageTool::class,
+        // Services
+        ListServicesTool::class,
+        GetServiceTool::class,
+        CreateServiceTool::class,
+        UpdateServiceTool::class,
+        DeleteServiceTool::class,
         // Categories
         ListCategoriesTool::class,
         GetCategoryTool::class,
