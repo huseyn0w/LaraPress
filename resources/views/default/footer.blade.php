@@ -8,12 +8,11 @@
  *   columns layout (wordmark+tagline, nav groups, locale switcher),
  *   bottom row mono caption copyright + stack attribution.
  */
-
 $site_options = get_site_options();
 
-$copyright = $site_options->copyright;
-$linkedin_url = $site_options->linkedin_url;
-$github_url = $site_options->github_url;
+$copyright = $site_options?->copyright;
+$linkedin_url = $site_options?->linkedin_url;
+$github_url = $site_options?->github_url;
 
 $languages = get_translation_links();
 

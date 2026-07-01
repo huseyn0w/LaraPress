@@ -518,6 +518,10 @@ function get_menu_data($menu_slug, $data)
         return false;
     }
 
+    if (is_null($menu)) {
+        return false;
+    }
+
     $html = render_menu(json_decode($menu->content), $data);
 
     return $html;
@@ -597,8 +601,8 @@ function get_site_options($key = null)
     if (is_null($key)) {
         $data = CPanelSiteOptions::first();
     } else {
-        $collection = CPanelSiteOptions::all($key);
-        $data = $collection[0]->$key;
+        $row = CPanelSiteOptions::select($key)->first();
+        $data = $row?->$key;
     }
 
     return $data;
@@ -611,9 +615,9 @@ function get_general_settings($key = null)
     if (is_null($key)) {
         $data = CPanelGeneralSettings::first();
     } else {
-        $collection = CPanelGeneralSettings::select($key)->first();
+        $row = CPanelGeneralSettings::select($key)->first();
 
-        $data = $collection->$key;
+        $data = $row?->$key;
     }
 
     return $data;
@@ -998,6 +1002,12 @@ function get_translation_links()
         }
 
         $entity_id = $model->select($field_name)->where('slug', $slug)->first();
+
+        if (is_null($entity_id)) {
+            $result[$key]['url'] = '/'.$key;
+
+            continue;
+        }
 
         $new_slug = $model->select('slug')->where('locale', $key)->where($field_name, $entity_id->$field_name)->first();
 
