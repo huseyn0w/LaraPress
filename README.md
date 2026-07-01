@@ -5,7 +5,7 @@
 # Cmstack-Laravel
 
 **Cmstack-Laravel — a modern, open-source CMS built on Laravel.** A multilingual, SEO/GEO-ready
-content management system built on **Laravel 11 / PHP 8.3**, with a Tailwind + Vite
+content management system built on **Laravel 12 / PHP 8.3**, with a Tailwind + Vite
 front-end and a first-class admin panel. It plays the same role as a traditional content
 management system, but on a clean, testable Laravel codebase that developers actually enjoy extending.
 
@@ -61,7 +61,7 @@ Built and maintained by **[Elman Group](https://elman.group)**.
 
 ## Tech stack
 
-- **Laravel 11** (PHP 8.3)
+- **Laravel 12** (PHP 8.3)
 - **Tailwind CSS 3** + **Alpine.js**, bundled with **Vite** — lightweight front-end, no jQuery/plugin bloat
 - **MySQL 8** with `astrotomic/laravel-translatable` for multilingual content
 - Repository pattern + service layer, custom role/permission middleware, model caching
